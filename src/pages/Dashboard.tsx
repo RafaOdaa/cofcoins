@@ -1,12 +1,47 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Award, Gift, Send, Settings, User, Users } from 'lucide-react';
+import { Award, Coins, Gift, LogOut, Send, Settings, User, Users } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useToast } from "@/hooks/use-toast";
+import NewRecognitionDialog from '@/components/NewRecognitionDialog';
+
+// Mock data for demonstration
+const myRecognitions = [
+  { id: 1, reporter: "Ana Silva", amount: 100, category: "Fora da Caixa", description: "Implementação de nova solução de automação" },
+  { id: 2, reporter: "Carlos Mendes", amount: 50, category: "O Quebra Galho", description: "Auxílio na resolução de problemas técnicos" },
+  { id: 3, reporter: "Maria Oliveira", amount: 100, category: "Segurador de Rojão", description: "Gestão de crise no projeto XYZ" },
+];
+
+const sentRecognitions = [
+  { id: 1, recipient: "Pedro Santos", amount: 50, category: "O Vidente", description: "Antecipação de problema no servidor" },
+  { id: 2, recipient: "Juliana Costa", amount: 100, category: "Mestre do Improviso", description: "Apresentação excelente sem preparação" },
+];
+
+const categories = [
+  { id: 1, name: "Fora da Caixa", description: "Ideias inovadoras que mudam o jogo" },
+  { id: 2, name: "O Quebra Galho", description: "Resolve tudo com agilidade" },
+  { id: 3, name: "Aqui é MedCof!", description: "Age com sentimento de dono" },
+  { id: 4, name: "Mestre do Improviso", description: "Brilha sem planejamento" },
+  { id: 5, name: "Segurador de Rojão", description: "Traz calma e resolve crises" },
+  { id: 6, name: "O Vidente", description: "Antecipação de problemas" },
+];
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const handleLogout = () => {
+    toast({
+      title: "Logout realizado",
+      description: "Você saiu da plataforma com sucesso.",
+    });
+    navigate('/');
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -28,11 +63,34 @@ const Dashboard = () => {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => navigate('/')}
+                onClick={() => navigate('/rewards')}
+                className="text-gray-600 hover:text-cofcoin-purple mr-2"
+              >
+                <Gift className="h-5 w-5 mr-1" />
+                <span className="hidden sm:inline">Recompensas</span>
+              </Button>
+              
+              {/* Admin links would be conditionally shown based on user role */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/admin/approvals')}
+                className="text-gray-600 hover:text-cofcoin-purple mr-2"
+              >
+                <Settings className="h-5 w-5 mr-1" />
+                <span className="hidden sm:inline">Admin</span>
+              </Button>
+              
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleLogout}
                 className="text-gray-600 hover:text-cofcoin-purple"
               >
-                Sair
+                <LogOut className="h-5 w-5 mr-1" />
+                <span className="hidden sm:inline">Sair</span>
               </Button>
+              
               <div className="ml-3 relative">
                 <div className="h-8 w-8 rounded-full bg-cofcoin-purple/20 flex items-center justify-center">
                   <User className="h-5 w-5 text-cofcoin-purple" />
@@ -47,103 +105,123 @@ const Dashboard = () => {
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Bem-vindo ao CofCoinf</h1>
-            <p className="text-gray-600">Seu painel de reconhecimento e recompensas</p>
+            <h1 className="text-2xl font-bold text-gray-900">Painel do Colaborador</h1>
+            <p className="text-gray-600">Gerencie seus reconhecimentos e recompensas</p>
           </div>
           <div className="flex items-center bg-white rounded-lg shadow-sm px-4 py-2 border border-gray-100">
             <div className="flex items-center text-cofcoin-orange font-medium">
-              <Award className="mr-2 h-5 w-5" />
+              <Coins className="mr-2 h-5 w-5" />
               <span>Saldo: 500 CofCoins</span>
             </div>
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Button
-            className="h-auto py-4 bg-white hover:bg-gray-50 text-gray-800 shadow-sm border border-gray-100 flex flex-col items-center"
-            variant="outline"
+        {/* New Recognition Button - Always visible */}
+        <div className="mb-6">
+          <Button 
+            onClick={() => setIsDialogOpen(true)}
+            className="bg-cofcoin-purple hover:bg-cofcoin-purple-dark text-white"
           >
-            <Send className="h-6 w-6 text-cofcoin-purple mb-2" />
-            <span>Novo Reconhecimento</span>
-          </Button>
-          
-          <Button
-            className="h-auto py-4 bg-white hover:bg-gray-50 text-gray-800 shadow-sm border border-gray-100 flex flex-col items-center"
-            variant="outline"
-          >
-            <Gift className="h-6 w-6 text-cofcoin-orange mb-2" />
-            <span>Ver Recompensas</span>
-          </Button>
-          
-          <Button
-            className="h-auto py-4 bg-white hover:bg-gray-50 text-gray-800 shadow-sm border border-gray-100 flex flex-col items-center"
-            variant="outline"
-          >
-            <Users className="h-6 w-6 text-blue-500 mb-2" />
-            <span>Explorar Categorias</span>
+            <Send className="mr-2 h-5 w-5" />
+            Novo Reconhecimento
           </Button>
         </div>
 
-        {/* Dashboard Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Meus Reconhecimentos</CardTitle>
-              <CardDescription>Reconhecimentos recebidos recentemente</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {[1, 2, 3].map((item) => (
-                  <div key={item} className="flex items-center justify-between border-b border-gray-100 pb-3">
-                    <div className="flex items-center">
-                      <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center mr-3">
-                        <Award className="h-5 w-5 text-green-600" />
-                      </div>
-                      <div>
-                        <div className="font-medium">Fora da Caixa</div>
-                        <div className="text-sm text-gray-500">De: Carlos Silva</div>
-                      </div>
-                    </div>
-                    <div className="text-cofcoin-orange font-medium">+100</div>
-                  </div>
-                ))}
-              </div>
-              <Button variant="ghost" className="w-full mt-4 text-cofcoin-purple" size="sm">
-                Ver Todos
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Reconhecimentos Enviados</CardTitle>
-              <CardDescription>Seus reconhecimentos recentes</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {[1, 2].map((item) => (
-                  <div key={item} className="flex items-center justify-between border-b border-gray-100 pb-3">
-                    <div className="flex items-center">
-                      <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
-                        <Send className="h-5 w-5 text-blue-600" />
-                      </div>
-                      <div>
-                        <div className="font-medium">Quebra Galho</div>
-                        <div className="text-sm text-gray-500">Para: Ana Pereira</div>
-                      </div>
-                    </div>
-                    <div className="text-cofcoin-orange font-medium">50</div>
-                  </div>
-                ))}
-              </div>
-              <Button variant="ghost" className="w-full mt-4 text-cofcoin-purple" size="sm">
-                Ver Todos
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
+        {/* Main Dashboard Tabs */}
+        <Tabs defaultValue="received" className="w-full">
+          <TabsList className="grid w-full max-w-md grid-cols-2 mb-4">
+            <TabsTrigger value="received">Meus Reconhecimentos</TabsTrigger>
+            <TabsTrigger value="sent">Reconhecimentos Enviados</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="received">
+            <Card>
+              <CardHeader>
+                <CardTitle>Meus Reconhecimentos</CardTitle>
+                <CardDescription>Reconhecimentos recebidos dos colegas</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Relator</TableHead>
+                        <TableHead>Quantidade</TableHead>
+                        <TableHead className="hidden md:table-cell">Categoria</TableHead>
+                        <TableHead className="hidden lg:table-cell">Descrição</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {myRecognitions.map((recognition) => (
+                        <TableRow key={recognition.id}>
+                          <TableCell className="font-medium">{recognition.reporter}</TableCell>
+                          <TableCell className="text-cofcoin-orange font-medium">{recognition.amount}</TableCell>
+                          <TableCell className="hidden md:table-cell">{recognition.category}</TableCell>
+                          <TableCell className="hidden lg:table-cell">{recognition.description}</TableCell>
+                        </TableRow>
+                      ))}
+                      {myRecognitions.length === 0 && (
+                        <TableRow>
+                          <TableCell colSpan={4} className="text-center py-6 text-gray-500">
+                            Você ainda não recebeu reconhecimentos.
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="sent">
+            <Card>
+              <CardHeader>
+                <CardTitle>Reconhecimentos Enviados</CardTitle>
+                <CardDescription>Reconhecimentos que você enviou para seus colegas</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Destinatário</TableHead>
+                        <TableHead>Quantidade</TableHead>
+                        <TableHead className="hidden md:table-cell">Categoria</TableHead>
+                        <TableHead className="hidden lg:table-cell">Descrição</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {sentRecognitions.map((recognition) => (
+                        <TableRow key={recognition.id}>
+                          <TableCell className="font-medium">{recognition.recipient}</TableCell>
+                          <TableCell className="text-cofcoin-orange font-medium">{recognition.amount}</TableCell>
+                          <TableCell className="hidden md:table-cell">{recognition.category}</TableCell>
+                          <TableCell className="hidden lg:table-cell">{recognition.description}</TableCell>
+                        </TableRow>
+                      ))}
+                      {sentRecognitions.length === 0 && (
+                        <TableRow>
+                          <TableCell colSpan={4} className="text-center py-6 text-gray-500">
+                            Você ainda não enviou reconhecimentos.
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </main>
+
+      {/* New Recognition Dialog */}
+      <NewRecognitionDialog 
+        open={isDialogOpen} 
+        onOpenChange={setIsDialogOpen} 
+        categories={categories}
+      />
     </div>
   );
 };
