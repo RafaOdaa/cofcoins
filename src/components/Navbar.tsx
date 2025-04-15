@@ -45,6 +45,7 @@ const Navbar = () => {
               size="sm"
               className="ml-4 bg-cofcoin-purple hover:bg-cofcoin-purple-dark text-white"
               variant="default"
+              onClick={() => window.location.href = '/login'}
             >
               Acessar Plataforma
             </Button>
@@ -102,6 +103,7 @@ const Navbar = () => {
               size="sm"
               className="w-full bg-cofcoin-purple hover:bg-cofcoin-purple-dark text-white"
               variant="default"
+              onClick={() => window.location.href = '/login'}
             >
               Acessar Plataforma
             </Button>
