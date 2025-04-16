@@ -3,14 +3,17 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Award, Coins, Gift, Send, Users } from 'lucide-react';
+import { Award, Coins, Gift, Send, Trash2, Users } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import NewRecognitionDialog from '@/components/NewRecognitionDialog';
 import UserMenu from '@/components/UserMenu';
 import RecognitionDetailDialog from '@/components/RecognitionDetailDialog';
 import AnimatedCoinBalance from '@/components/AnimatedCoinBalance';
+import ConfirmationDialog from '@/components/ConfirmationDialog';
 
 // Mock data for demonstration
 const myRecognitions = [
@@ -84,6 +87,13 @@ const Dashboard = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedRecognition, setSelectedRecognition] = useState<null | any>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [mySentRecognitions, setMySentRecognitions] = useState(sentRecognitions);
+  
+  // State for delete confirmation dialog
+  const [confirmDeleteDialog, setConfirmDeleteDialog] = useState({
+    open: false,
+    recognitionId: 0,
+  });
 
   const handleRowClick = (recognition: any, isSent: boolean) => {
     const formattedRecognition = isSent 
@@ -92,6 +102,44 @@ const Dashboard = () => {
       
     setSelectedRecognition(formattedRecognition);
     setIsDetailModalOpen(true);
+  };
+  
+  // Add a function to handle the delete confirmation
+  const handleDeleteClick = (id: number, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent row click event
+    setConfirmDeleteDialog({
+      open: true,
+      recognitionId: id,
+    });
+  };
+  
+  // Function to actually delete the recognition
+  const handleConfirmDelete = () => {
+    const updatedSentRecognitions = mySentRecognitions.filter(
+      (recognition) => recognition.id !== confirmDeleteDialog.recognitionId
+    );
+    
+    setMySentRecognitions(updatedSentRecognitions);
+    
+    toast({
+      title: "Reconhecimento excluído",
+      description: "O reconhecimento foi excluído com sucesso.",
+    });
+    
+    setConfirmDeleteDialog({
+      open: false,
+      recognitionId: 0,
+    });
+  };
+  
+  // Helper function to get status color
+  const getStatusColor = (status: "pendente" | "concluída" | "cancelada") => {
+    switch(status) {
+      case "pendente": return "bg-yellow-100 text-yellow-800";
+      case "concluída": return "bg-green-100 text-green-800";
+      case "cancelada": return "bg-red-100 text-red-800";
+      default: return "bg-gray-100 text-gray-800";
+    }
   };
 
   return (
@@ -115,7 +163,7 @@ const Dashboard = () => {
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate('/rewards')}
-                className="text-gray-600 hover:text-cofcoin-purple mr-2"
+                className="text-gray-600 hover:text-cofcoin-purple mr-2 transition-colors duration-300"
               >
                 <Gift className="h-5 w-5 mr-1" />
                 <span className="hidden sm:inline">Recompensas</span>
@@ -173,6 +221,7 @@ const Dashboard = () => {
                         <TableHead>Quantidade</TableHead>
                         <TableHead className="hidden md:table-cell">Categoria</TableHead>
                         <TableHead className="hidden lg:table-cell">Descrição</TableHead>
+                        <TableHead>Status</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -186,15 +235,31 @@ const Dashboard = () => {
                           <TableCell className="text-cofcoin-orange font-medium">{recognition.amount}</TableCell>
                           <TableCell className="hidden md:table-cell">{recognition.category}</TableCell>
                           <TableCell className="hidden lg:table-cell">
-                            {recognition.description.length > 40
-                              ? `${recognition.description.substring(0, 40)}...`
-                              : recognition.description}
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span>
+                                    {recognition.description.length > 40
+                                      ? `${recognition.description.substring(0, 40)}...`
+                                      : recognition.description}
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p className="max-w-xs">{recognition.description}</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className={getStatusColor(recognition.status)}>
+                              {recognition.status}
+                            </Badge>
                           </TableCell>
                         </TableRow>
                       ))}
                       {myRecognitions.length === 0 && (
                         <TableRow>
-                          <TableCell colSpan={4} className="text-center py-6 text-gray-500">
+                          <TableCell colSpan={5} className="text-center py-6 text-gray-500">
                             Você ainda não recebeu reconhecimentos.
                           </TableCell>
                         </TableRow>
@@ -221,10 +286,12 @@ const Dashboard = () => {
                         <TableHead>Quantidade</TableHead>
                         <TableHead className="hidden md:table-cell">Categoria</TableHead>
                         <TableHead className="hidden lg:table-cell">Descrição</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="text-right">Ações</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {sentRecognitions.map((recognition) => (
+                      {mySentRecognitions.map((recognition) => (
                         <TableRow 
                           key={recognition.id} 
                           className="cursor-pointer hover:bg-gray-50"
@@ -234,15 +301,43 @@ const Dashboard = () => {
                           <TableCell className="text-cofcoin-orange font-medium">{recognition.amount}</TableCell>
                           <TableCell className="hidden md:table-cell">{recognition.category}</TableCell>
                           <TableCell className="hidden lg:table-cell">
-                            {recognition.description.length > 40
-                              ? `${recognition.description.substring(0, 40)}...`
-                              : recognition.description}
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span>
+                                    {recognition.description.length > 40
+                                      ? `${recognition.description.substring(0, 40)}...`
+                                      : recognition.description}
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p className="max-w-xs">{recognition.description}</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className={getStatusColor(recognition.status)}>
+                              {recognition.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+                            {recognition.status !== "pendente" && (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={(e) => handleDeleteClick(recognition.id, e)}
+                                className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            )}
                           </TableCell>
                         </TableRow>
                       ))}
-                      {sentRecognitions.length === 0 && (
+                      {mySentRecognitions.length === 0 && (
                         <TableRow>
-                          <TableCell colSpan={4} className="text-center py-6 text-gray-500">
+                          <TableCell colSpan={6} className="text-center py-6 text-gray-500">
                             Você ainda não enviou reconhecimentos.
                           </TableCell>
                         </TableRow>
@@ -268,6 +363,17 @@ const Dashboard = () => {
         open={isDetailModalOpen}
         onOpenChange={setIsDetailModalOpen}
         recognition={selectedRecognition}
+      />
+      
+      {/* Delete Confirmation Dialog */}
+      <ConfirmationDialog
+        open={confirmDeleteDialog.open}
+        onOpenChange={(open) => setConfirmDeleteDialog({ ...confirmDeleteDialog, open })}
+        onConfirm={handleConfirmDelete}
+        title="Confirmar Exclusão"
+        description="Tem certeza que deseja excluir este reconhecimento? Esta ação não pode ser desfeita."
+        confirmText="Excluir"
+        variant="destructive"
       />
     </div>
   );

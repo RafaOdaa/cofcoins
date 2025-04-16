@@ -1,28 +1,22 @@
 
-import React from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import React from "react";
 import { Button } from "@/components/ui/button";
-import { Award, Calendar, Coins, User } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Award, CheckCircle, Coins, Calendar, UserRound, XCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { format } from 'date-fns';
+import { format } from "date-fns";
 
 export interface Recognition {
   id: number;
   reporter?: string;
-  recipient: string;
+  recipient?: string;
   amount: number;
   category: string;
-  description?: string;
+  description: string;
   status: "pendente" | "concluída" | "cancelada";
   date: Date;
-  icon?: React.ReactNode;
+  icon: React.ReactNode;
+  approver?: string | null;
 }
 
 interface RecognitionDetailDialogProps {
@@ -34,18 +28,18 @@ interface RecognitionDetailDialogProps {
   onReject?: (id: number) => void;
 }
 
-const RecognitionDetailDialog: React.FC<RecognitionDetailDialogProps> = ({
+const RecognitionDetailDialog = ({
   open,
   onOpenChange,
   recognition,
   showActions = false,
   onApprove,
-  onReject
-}) => {
+  onReject,
+}: RecognitionDetailDialogProps) => {
   if (!recognition) return null;
 
   const getStatusColor = (status: "pendente" | "concluída" | "cancelada") => {
-    switch (status) {
+    switch(status) {
       case "pendente": return "bg-yellow-100 text-yellow-800";
       case "concluída": return "bg-green-100 text-green-800";
       case "cancelada": return "bg-red-100 text-red-800";
@@ -55,118 +49,115 @@ const RecognitionDetailDialog: React.FC<RecognitionDetailDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[550px]">
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle className="flex items-center text-xl">
-            <Award className="h-5 w-5 mr-2 text-cofcoin-purple" />
-            Detalhes do Reconhecimento
+          <DialogTitle className="text-xl flex items-center">
+            {recognition.icon || <Award className="mr-2 h-5 w-5 text-cofcoin-purple" />}
+            <span className="ml-2">Detalhes do Reconhecimento</span>
           </DialogTitle>
           <DialogDescription>
             Informações completas sobre este reconhecimento
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 gap-4">
-            {/* Status Badge */}
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-gray-500">Status</span>
+        <div className="grid gap-6 py-4">
+          <div className="flex justify-between items-center">
+            <div>
+              <p className="text-sm font-medium text-gray-500">Status</p>
               <Badge variant="outline" className={getStatusColor(recognition.status)}>
-                {recognition.status.charAt(0).toUpperCase() + recognition.status.slice(1)}
+                {recognition.status}
               </Badge>
             </div>
-
-            {/* Date */}
-            <div className="flex justify-between items-center border-t pt-2">
-              <span className="text-sm font-medium text-gray-500">Data</span>
-              <div className="flex items-center space-x-2">
-                <Calendar className="h-4 w-4 text-gray-500" />
-                <span className="text-sm">{format(recognition.date, 'dd/MM/yyyy HH:mm')}</span>
-              </div>
-            </div>
-
-            {/* Reporter - only show if available */}
-            {recognition.reporter && (
-              <div className="flex justify-between items-center border-t pt-2">
-                <span className="text-sm font-medium text-gray-500">Relator</span>
-                <div className="flex items-center space-x-2">
-                  <User className="h-4 w-4 text-cofcoin-purple" />
-                  <span className="font-medium">{recognition.reporter}</span>
-                </div>
-              </div>
-            )}
-
-            {/* Recipient */}
-            <div className="flex justify-between items-center border-t pt-2">
-              <span className="text-sm font-medium text-gray-500">Destinatário</span>
-              <div className="flex items-center space-x-2">
-                <User className="h-4 w-4 text-cofcoin-orange" />
-                <span className="font-medium">{recognition.recipient}</span>
-              </div>
-            </div>
-
-            {/* Category */}
-            <div className="flex justify-between items-center border-t pt-2">
-              <span className="text-sm font-medium text-gray-500">Categoria</span>
-              <div className="flex items-center space-x-2">
-                {recognition.icon}
-                <span>{recognition.category}</span>
-              </div>
-            </div>
-
-            {/* Amount */}
-            <div className="flex justify-between items-center border-t pt-2">
-              <span className="text-sm font-medium text-gray-500">Quantidade</span>
-              <div className="flex items-center space-x-2">
-                <Coins className="h-4 w-4 text-cofcoin-orange" />
-                <span className="font-bold text-cofcoin-orange">{recognition.amount}</span>
+            
+            <div className="text-right">
+              <p className="text-sm font-medium text-gray-500">Valor</p>
+              <div className="flex items-center text-cofcoin-orange font-bold text-2xl">
+                <Coins className="mr-1 h-5 w-5" />
+                {recognition.amount}
               </div>
             </div>
           </div>
 
-          {/* Description */}
-          {recognition.description && (
-            <div className="border-t pt-4">
-              <span className="text-sm font-medium text-gray-500 block mb-2">Descrição</span>
-              <div className="bg-gray-50 p-3 rounded-md text-gray-700 text-sm">
-                {recognition.description}
+          <div>
+            <p className="text-sm font-medium text-gray-500">Categoria</p>
+            <p className="text-lg font-medium">{recognition.category}</p>
+          </div>
+
+          {recognition.reporter && (
+            <div>
+              <p className="text-sm font-medium text-gray-500">De</p>
+              <div className="flex items-center">
+                <UserRound className="mr-2 h-4 w-4 text-gray-600" />
+                <p className="text-lg">{recognition.reporter}</p>
               </div>
             </div>
           )}
+
+          {recognition.recipient && (
+            <div>
+              <p className="text-sm font-medium text-gray-500">Para</p>
+              <div className="flex items-center">
+                <UserRound className="mr-2 h-4 w-4 text-gray-600" />
+                <p className="text-lg">{recognition.recipient}</p>
+              </div>
+            </div>
+          )}
+
+          {recognition.approver && (
+            <div>
+              <p className="text-sm font-medium text-gray-500">Aprovado por</p>
+              <div className="flex items-center">
+                <UserRound className="mr-2 h-4 w-4 text-gray-600" />
+                <p className="text-lg">{recognition.approver}</p>
+              </div>
+            </div>
+          )}
+
+          <div>
+            <p className="text-sm font-medium text-gray-500">Data</p>
+            <div className="flex items-center">
+              <Calendar className="mr-2 h-4 w-4 text-gray-600" />
+              <p>{format(recognition.date, "dd/MM/yyyy 'às' HH:mm")}</p>
+            </div>
+          </div>
+
+          <div>
+            <p className="text-sm font-medium text-gray-500">Descrição</p>
+            <p className="mt-1 whitespace-pre-line">{recognition.description}</p>
+          </div>
         </div>
 
-        <DialogFooter className="flex justify-end gap-2 pt-4">
-          {showActions && recognition.status === "pendente" ? (
-            <>
-              <Button 
-                variant="outline" 
-                className="border-red-200 text-red-600 hover:bg-red-50"
-                onClick={() => {
-                  if (onReject) onReject(recognition.id);
-                  onOpenChange(false);
-                }}
-              >
-                Rejeitar
-              </Button>
-              <Button 
-                className="bg-green-600 hover:bg-green-700 text-white"
-                onClick={() => {
-                  if (onApprove) onApprove(recognition.id);
-                  onOpenChange(false);
-                }}
-              >
-                Aprovar
-              </Button>
-            </>
-          ) : (
-            <Button 
-              onClick={() => onOpenChange(false)}
+        {showActions && onApprove && onReject && (
+          <DialogFooter className="flex justify-between sm:justify-end gap-2">
+            <Button
               variant="outline"
+              className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+              onClick={() => {
+                onReject(recognition.id);
+                onOpenChange(false);
+              }}
             >
-              Fechar
+              <XCircle className="mr-2 h-4 w-4" />
+              Rejeitar
             </Button>
-          )}
-        </DialogFooter>
+            <Button
+              className="bg-green-600 hover:bg-green-700 text-white"
+              onClick={() => {
+                onApprove(recognition.id);
+                onOpenChange(false);
+              }}
+            >
+              <CheckCircle className="mr-2 h-4 w-4" />
+              Aprovar
+            </Button>
+          </DialogFooter>
+        )}
+
+        {!showActions && (
+          <DialogFooter>
+            <Button onClick={() => onOpenChange(false)}>Fechar</Button>
+          </DialogFooter>
+        )}
       </DialogContent>
     </Dialog>
   );
