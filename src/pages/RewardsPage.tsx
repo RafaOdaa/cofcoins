@@ -1,9 +1,8 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Coffee, Coins, Gift, History, Home, ShoppingBag, Ticket, Zap } from 'lucide-react';
+import { ArrowLeft, Coffee, Coins, Gift, History, Home, ShoppingBag, Ticket, Zap, Calendar } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -13,14 +12,28 @@ import ConfirmationDialog from '@/components/ConfirmationDialog';
 import { TooltipProvider, Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import UserMenu from '@/components/UserMenu';
 
-// Mock rewards data
+// Modified rewards data
 const rewardsData = [
+  {
+    id: 7,
+    title: "Pratão Honesto no Saj",
+    description: "Se delicie com a culinária árabe",
+    icon: Coffee,
+    value: 400
+  },
   {
     id: 1,
     title: "Vale Café",
     description: "Um café especial na cafeteria parceira",
     icon: Coffee,
     value: 150
+  },
+  {
+    id: 8,
+    title: "1 semana de férias",
+    description: "Ninguém é de ferro",
+    icon: Calendar,
+    value: 2000
   },
   {
     id: 2,
@@ -58,11 +71,11 @@ const rewardsData = [
     value: 800
   },
   {
-    id: 7,
-    title: "Pratão Honesto no Saj",
-    description: "Se delicie com a culinária árabe",
-    icon: Coffee,
-    value: 400
+    id: 9,
+    title: "1:1 com Augusto",
+    description: "Aquela consultoria ao vivo, troque aquela ideia com o big boss",
+    icon: Calendar,
+    value: 9999
   }
 ];
 
@@ -244,14 +257,33 @@ const RewardsPage = () => {
             <h1 className="text-2xl font-bold text-gray-900">Recompensas</h1>
             <p className="text-gray-600">Use seus CofCoins para resgatar prêmios incríveis</p>
           </div>
-          <div className="relative group">
-            <div className="absolute -inset-1 bg-gradient-to-r from-[#8E2DE2] to-[#4A00E0] rounded-lg blur-sm opacity-75 group-hover:opacity-100 transition duration-300 ease-in-out animate-pulse"></div>
-            <div className="relative bg-white rounded-lg shadow-sm px-4 py-2 border border-gray-100 transition-all duration-300 ease-in-out group-hover:scale-105">
-              <div className="flex items-center text-transparent bg-clip-text bg-gradient-to-r from-[#8E2DE2] to-[#4A00E0] font-bold">
-                <Coins className="mr-2 h-5 w-5 text-[#8E2DE2]" />
-                <span>Saldo: 500 CofCoins</span>
-              </div>
+          <div className="relative">
+            <div className="absolute inset-0 animate-neon-glow z-0 rounded-lg" />
+            <div className="relative z-10 bg-black bg-opacity-80 backdrop-blur-md rounded-lg p-4 text-white flex items-center">
+              <Coins className="mr-2 h-5 w-5 text-purple-300" />
+              <span>Saldo: <span className="font-semibold text-purple-300">500</span> CofCoins</span>
             </div>
+            
+            <style jsx>{`
+              @keyframes neon-glow {
+                0% {
+                  box-shadow: 0 0 15px #4A00E0, 0 0 30px #8E2DE2, 0 0 45px #4A00E0;
+                }
+                50% {
+                  box-shadow: 0 0 25px #8E2DE2, 0 0 50px #4A00E0, 0 0 70px #8E2DE2;
+                }
+                100% {
+                  box-shadow: 0 0 15px #4A00E0, 0 0 30px #8E2DE2, 0 0 45px #4A00E0;
+                }
+              }
+
+              .animate-neon-glow {
+                background: linear-gradient(135deg, #4A00E0, #8E2DE2);
+                filter: blur(8px);
+                animation: neon-glow 6s ease-in-out infinite;
+                transition: all 0.5s ease-in;
+              }
+            `}</style>
           </div>
         </div>
 
@@ -317,7 +349,6 @@ const RewardsPage = () => {
                         <TableHead>Valor</TableHead>
                         <TableHead>Data</TableHead>
                         <TableHead>Status</TableHead>
-                        <TableHead>Detalhes</TableHead>
                         <TableHead className="text-right">Ações</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -338,22 +369,6 @@ const RewardsPage = () => {
                                 {request.status}
                               </Badge>
                             </TableCell>
-                            <TableCell>
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Button variant="ghost" size="sm" className="p-0">
-                                      <span className="text-gray-500 hover:text-cofcoin-purple transition-colors duration-200">
-                                        <History className="h-4 w-4" />
-                                      </span>
-                                    </Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>{request.description}</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            </TableCell>
                             <TableCell className="text-right">
                               {request.status === "pendente" && (
                                 <Button
@@ -370,7 +385,7 @@ const RewardsPage = () => {
                         ))
                       ) : (
                         <TableRow>
-                          <TableCell colSpan={6} className="text-center py-6 text-gray-500">
+                          <TableCell colSpan={5} className="text-center py-6 text-gray-500">
                             Você ainda não solicitou nenhuma recompensa.
                           </TableCell>
                         </TableRow>
