@@ -31,9 +31,9 @@ const Login = () => {
       if (email && password) {
         toast({
           title: "Login bem-sucedido",
-          description: "Bem-vindo à plataforma CofCoinf!",
+          description: "Bem-vindo à plataforma CofCoins!",
         });
-        navigate('/dashboard');
+        navigate('/home'); // Changed from '/dashboard' to '/home'
       } else {
         toast({
           title: "Erro no login",
