@@ -1,55 +1,55 @@
 
 import React from 'react';
 import CategoryCard from './CategoryCard';
-import { Lightbulb, Wrench, Heart, Sparkles, Shield, Eye, GraduationCap } from "lucide-react";
+import { Award, Eye, Gift, Heart, Lightbulb, Shield, Sparkles, Wrench } from "lucide-react";
 
 const categoriesData = [
   {
     title: "Fora da Caixa",
-    description: "Ideias inovadoras que mudam o jogo",
+    description: "Pra quem sempre surpreende com soluções e ideias que ninguém tinha pensado, mudando o jogo e dando aquele toque criativo que faz toda a diferença.",
     icon: <Lightbulb className="h-8 w-8 text-blue-600" />,
     color: "bg-blue-100"
   },
   {
     title: "O Quebra Galho",
-    description: "Resolve tudo com agilidade",
-    icon: <Wrench className="h-8 w-8 text-gray-700" />,
-    color: "bg-gray-100"
+    description: "Praquele parceiro que aparece rapidinho e resolve o problema sem enrolação. Quando você precisa, ele tá lá para fazer tudo se ajeitar.",
+    icon: <Wrench className="h-8 w-8 text-green-600" />,
+    color: "bg-green-100"
   },
   {
     title: "Aqui é MedCof!",
-    description: "Age com sentimento de dono",
+    description: "Pra quem age como se a empresa fosse sua casa: cuida, propõe melhorias e não deixa nada no 'deixa pra depois'. É aquele sentimento de 'se eu não fizer, ninguém faz'.",
     icon: <Heart className="h-8 w-8 text-red-600" />,
     color: "bg-red-100"
   },
   {
     title: "Mestre do Improviso",
-    description: "Brilha sem planejamento",
+    description: "Pra aquele que, mesmo sem planejar, sempre acha um jeito de resolver a situação e sair da enrascada.",
     icon: <Sparkles className="h-8 w-8 text-amber-600" />,
     color: "bg-amber-100"
   },
   {
     title: "Segurador de Rojão",
-    description: "Traz calma e resolve crises",
-    icon: <Shield className="h-8 w-8 text-green-600" />,
-    color: "bg-green-100"
+    description: "Para aquele(a) colega que chega na hora certa para domar situações explosivas e manter a paz com muita habilidade e leveza.",
+    icon: <Shield className="h-8 w-8 text-purple-600" />,
+    color: "bg-purple-100"
   },
   {
     title: "O Vidente",
-    description: "Antecipação de problemas",
-    icon: <Eye className="h-8 w-8 text-purple-600" />,
-    color: "bg-purple-100"
+    description: "Praquele que, com uma visão quase sobrenatural, identifica e resolve perrengues antes mesmo de acontecerem.",
+    icon: <Eye className="h-8 w-8 text-indigo-600" />,
+    color: "bg-indigo-100"
   },
   {
     title: "Participou de Live",
     description: "30 CofCoins",
-    icon: <Sparkles className="h-8 w-8 text-cofcoin-orange" />,
+    icon: <Award className="h-8 w-8 text-cofcoin-orange" />,
     color: "bg-cofcoin-orange/20"
   },
   {
     title: "Conclusão de curso",
     description: "50-100 CofCoins",
-    icon: <GraduationCap className="h-8 w-8 text-cofcoin-purple" />,
+    icon: <Gift className="h-8 w-8 text-cofcoin-purple" />,
     color: "bg-cofcoin-purple/20"
   }
 ];

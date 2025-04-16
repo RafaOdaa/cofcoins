@@ -13,12 +13,13 @@ import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Award, Search } from 'lucide-react';
+import { Award, Eye, Gift, Search, Shield, User, Wrench } from 'lucide-react';
 
 interface Category {
   id: number;
   name: string;
   description: string;
+  icon?: React.ReactNode;
 }
 
 interface NewRecognitionDialogProps {
@@ -76,6 +77,25 @@ const NewRecognitionDialog: React.FC<NewRecognitionDialogProps> = ({
       });
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const getCategoryIcon = (name: string) => {
+    switch (name) {
+      case 'Fora da Caixa':
+        return <Award className="h-5 w-5 text-blue-600" />;
+      case 'O Quebra Galho':
+        return <Wrench className="h-5 w-5 text-green-600" />;
+      case 'Aqui é MedCof!':
+        return <User className="h-5 w-5 text-red-600" />;
+      case 'Mestre do Improviso':
+        return <Gift className="h-5 w-5 text-amber-600" />;
+      case 'Segurador de Rojão':
+        return <Shield className="h-5 w-5 text-purple-600" />;
+      case 'O Vidente':
+        return <Eye className="h-5 w-5 text-indigo-600" />;
+      default:
+        return <Award className="h-5 w-5 text-gray-600" />;
     }
   };
 
@@ -155,7 +175,10 @@ const NewRecognitionDialog: React.FC<NewRecognitionDialogProps> = ({
                       : "border-gray-200 hover:border-cofcoin-purple/50"
                   }`}
                 >
-                  <h4 className="font-medium">{category.name}</h4>
+                  <div className="flex items-center gap-2 mb-1">
+                    {category.icon || getCategoryIcon(category.name)}
+                    <h4 className="font-medium">{category.name}</h4>
+                  </div>
                   <p className="text-sm text-gray-600">{category.description}</p>
                 </div>
               ))}
