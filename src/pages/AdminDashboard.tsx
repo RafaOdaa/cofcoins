@@ -32,6 +32,7 @@ import {
   Filter,
   Gift,
   Home,
+  PenSquare,
   Plus,
   Search,
   Shield,
@@ -53,55 +54,23 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { format } from 'date-fns';
 import ConfirmationDialog from '@/components/ConfirmationDialog';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Textarea } from "@/components/ui/textarea";
+import RecognitionDetailDialog, { Recognition } from '@/components/RecognitionDetailDialog';
+import EditUserBalanceDialog from '@/components/EditUserBalanceDialog';
+import UserMenu from '@/components/UserMenu';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
-// Mock reward requests data
-const rewardRequestsData = [
-  { 
-    id: 1, 
-    user: "Ana Oliveira",
-    title: "Vale Café", 
-    value: 150, 
-    status: "pendente",
-    requestDate: new Date('2025-04-15T14:25:00')
-  },
-  { 
-    id: 2, 
-    user: "Carlos Mendes",
-    title: "Gift Card R$50", 
-    value: 500, 
-    status: "pendente",
-    requestDate: new Date('2025-04-14T09:30:00') 
-  },
-  { 
-    id: 3, 
-    user: "Juliana Lima",
-    title: "Vale Cinema", 
-    value: 300, 
-    status: "concluída",
-    requestDate: new Date('2025-04-12T16:45:00')
-  },
-  { 
-    id: 4, 
-    user: "Rodrigo Almeida",
-    title: "Vale Café", 
-    value: 150, 
-    status: "cancelada",
-    requestDate: new Date('2025-04-10T11:20:00')
-  },
-  { 
-    id: 5, 
-    user: "Amanda Sousa",
-    title: "Gift Card R$50", 
-    value: 500, 
-    status: "concluída",
-    requestDate: new Date('2025-04-08T13:15:00')
-  },
-];
-
-// Mock approval requests
+// Enhanced mock recognition data with more entries
 const approvalRequests = [
   {
     id: 1,
@@ -110,7 +79,8 @@ const approvalRequests = [
     amount: 100,
     category: "Fora da Caixa",
     status: "pendente",
-    date: new Date('2025-04-15T10:15:00')
+    date: new Date('2025-04-15T10:15:00'),
+    description: "Maria trouxe uma ideia inovadora para melhorar nosso processo de atendimento ao cliente, resultando em uma redução de 30% no tempo de resposta."
   },
   {
     id: 2,
@@ -119,7 +89,8 @@ const approvalRequests = [
     amount: 50,
     category: "O Quebra Galho",
     status: "pendente",
-    date: new Date('2025-04-14T16:30:00')
+    date: new Date('2025-04-14T16:30:00'),
+    description: "Pedro resolveu um problema crítico no servidor durante o final de semana, evitando uma paralisação dos serviços na segunda-feira."
   },
   {
     id: 3,
@@ -128,7 +99,8 @@ const approvalRequests = [
     amount: 100,
     category: "Segurador de Rojão",
     status: "concluída",
-    date: new Date('2025-04-12T14:45:00')
+    date: new Date('2025-04-12T14:45:00'),
+    description: "Juliana lidou com maestria com um cliente insatisfeito, revertendo completamente a situação e mantendo o contrato que estávamos prestes a perder."
   },
   {
     id: 4,
@@ -137,8 +109,156 @@ const approvalRequests = [
     amount: 50,
     category: "O Vidente",
     status: "cancelada",
-    date: new Date('2025-04-10T09:20:00')
+    date: new Date('2025-04-10T09:20:00'),
+    description: "Rafael previu uma falha iminente no sistema e implementou medidas preventivas antes que causasse problemas maiores."
+  },
+  {
+    id: 5,
+    reporter: "Paulo Silveira",
+    recipient: "Amanda Costa",
+    amount: 100,
+    category: "Mestre do Improviso",
+    status: "pendente",
+    date: new Date('2025-04-16T09:20:00'),
+    description: "Amanda conseguiu criar uma apresentação incrível para um cliente importante com apenas duas horas de antecedência após a versão original ter sido perdida."
+  },
+  {
+    id: 6,
+    reporter: "Marcelo Ferreira",
+    recipient: "Patrícia Santos",
+    amount: 50,
+    category: "Aqui é MedCof!",
+    status: "pendente",
+    date: new Date('2025-04-16T11:35:00'),
+    description: "Patrícia ficou até tarde para garantir que a entrega do projeto fosse feita no prazo, mesmo não sendo sua responsabilidade direta."
+  },
+  {
+    id: 7,
+    reporter: "Roberta Lopes",
+    recipient: "Gustavo Martins",
+    amount: 100,
+    category: "Fora da Caixa",
+    status: "pendente",
+    date: new Date('2025-04-15T15:20:00'),
+    description: "Gustavo desenvolveu uma solução criativa para um problema que estávamos enfrentando há meses, economizando recursos significativos para a empresa."
+  },
+  {
+    id: 8,
+    reporter: "Carolina Alves",
+    recipient: "Fernando Gomes",
+    amount: 50,
+    category: "O Quebra Galho",
+    status: "concluída",
+    date: new Date('2025-04-11T13:40:00'),
+    description: "Fernando ajudou a resolver um bug crítico mesmo estando de férias, acessando remotamente e orientando a equipe."
+  },
+  {
+    id: 9,
+    reporter: "Eduarda Souza",
+    recipient: "Alexandre Rocha",
+    amount: 100,
+    category: "Segurador de Rojão",
+    status: "pendente",
+    date: new Date('2025-04-15T09:15:00'),
+    description: "Alexandre conseguiu gerenciar uma crise de comunicação com a imprensa de forma exemplar, protegendo a imagem da empresa."
+  },
+  {
+    id: 10,
+    reporter: "Ricardo Ferreira",
+    recipient: "Bianca Lima",
+    amount: 50,
+    category: "O Vidente",
+    status: "pendente",
+    date: new Date('2025-04-14T10:30:00'),
+    description: "Bianca identificou uma vulnerabilidade no sistema antes que pudesse ser explorada, evitando um possível vazamento de dados."
+  },
+  {
+    id: 11,
+    reporter: "Gabriela Nunes",
+    recipient: "Leonardo Santos",
+    amount: 100,
+    category: "Mestre do Improviso",
+    status: "cancelada",
+    date: new Date('2025-04-09T16:45:00'),
+    description: "Leonardo conseguiu entregar uma solução alternativa para um cliente quando o produto principal apresentou problemas, salvando a relação comercial."
+  },
+  {
+    id: 12,
+    reporter: "Camila Ferreira",
+    recipient: "Henrique Oliveira",
+    amount: 50,
+    category: "Aqui é MedCof!",
+    status: "concluída",
+    date: new Date('2025-04-05T11:20:00'),
+    description: "Henrique frequentemente faz sugestões para melhorar o ambiente de trabalho e participa ativamente de todas as iniciativas da empresa."
   }
+];
+
+// Mock reward requests data with more entries
+const rewardRequestsData = [
+  { 
+    id: 1, 
+    user: "Ana Oliveira",
+    title: "Vale Café", 
+    value: 150, 
+    status: "pendente",
+    requestDate: new Date('2025-04-15T14:25:00'),
+    description: "Gostaria de trocar meus CofCoins por um vale café para utilizar na cafeteria do prédio."
+  },
+  { 
+    id: 2, 
+    user: "Carlos Mendes",
+    title: "Gift Card R$50", 
+    value: 500, 
+    status: "pendente",
+    requestDate: new Date('2025-04-14T09:30:00'),
+    description: "Quero utilizar meus CofCoins acumulados para um gift card da Amazon."
+  },
+  { 
+    id: 3, 
+    user: "Juliana Lima",
+    title: "Vale Cinema", 
+    value: 300, 
+    status: "concluída",
+    requestDate: new Date('2025-04-12T16:45:00'),
+    description: "Vou ao cinema com minha família e gostaria de usar meus CofCoins para isso."
+  },
+  { 
+    id: 4, 
+    user: "Rodrigo Almeida",
+    title: "Vale Café", 
+    value: 150, 
+    status: "cancelada",
+    requestDate: new Date('2025-04-10T11:20:00'),
+    description: "Preciso de um café para me manter produtivo durante a tarde."
+  },
+  { 
+    id: 5, 
+    user: "Amanda Sousa",
+    title: "Gift Card R$50", 
+    value: 500, 
+    status: "concluída",
+    requestDate: new Date('2025-04-08T13:15:00'),
+    description: "Pretendo comprar um livro com este gift card da Amazon."
+  },
+  { 
+    id: 6, 
+    user: "Fernando Gomes",
+    title: "Vale Restaurante", 
+    value: 450, 
+    status: "pendente",
+    requestDate: new Date('2025-04-16T10:05:00'),
+    description: "Gostaria de usar meus CofCoins para um almoço especial no restaurante próximo ao escritório."
+  },
+  { 
+    id: 7, 
+    user: "Mariana Costa",
+    title: "Assinatura Streaming", 
+    value: 350, 
+    status: "pendente",
+    requestDate: new Date('2025-04-16T08:15:00'),
+    description: "Quero trocar meus CofCoins por um mês de assinatura do serviço de streaming."
+  },
 ];
 
 // Mock user rankings
@@ -204,11 +324,19 @@ const categories = [
 
 type Status = "pendente" | "concluída" | "cancelada";
 
+const ITEMS_PER_PAGE = 5;
+
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedTab, setSelectedTab] = useState("approvals");
+  
+  // Recognition states
+  const [selectedRecognition, setSelectedRecognition] = useState<Recognition | null>(null);
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState<{
     open: boolean;
     requestId: number;
@@ -216,28 +344,28 @@ const AdminDashboard = () => {
     action: 'approve' | 'reject';
   }>({ open: false, requestId: 0, type: 'recognition', action: 'approve' });
   
+  // User balance states
+  const [selectedUser, setSelectedUser] = useState<any | null>(null);
+  const [editBalanceDialogOpen, setEditBalanceDialogOpen] = useState(false);
+  
   // Admin recognition state
   const [isRecognitionDialogOpen, setIsRecognitionDialogOpen] = useState(false);
   const [recipient, setRecipient] = useState('');
   const [coinAmount, setCoinAmount] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+  const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // Filtered reward requests
-  const filteredRewards = rewardRequestsData.filter(request => {
-    // Text search filter
-    const searchMatch = 
-      request.user.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      request.title.toLowerCase().includes(searchQuery.toLowerCase());
-      
-    // Status filter
-    const statusMatch = 
-      statusFilter === 'all' || request.status === statusFilter;
-    
-    return searchMatch && statusMatch;
-  });
+  // Statistics
+  const pendingRecognitions = approvalRequests.filter(r => r.status === 'pendente').length;
+  const approvedRecognitions = approvalRequests.filter(r => r.status === 'concluída').length;
+  const rejectedRecognitions = approvalRequests.filter(r => r.status === 'cancelada').length;
   
-  // Filtered approvals
+  const pendingRewards = rewardRequestsData.filter(r => r.status === 'pendente').length;
+  const approvedRewards = rewardRequestsData.filter(r => r.status === 'concluída').length;
+  const rejectedRewards = rewardRequestsData.filter(r => r.status === 'cancelada').length;
+  
+  // Filtered recognition requests
   const filteredApprovals = approvalRequests.filter(request => {
     // Text search filter
     const searchMatch = 
@@ -251,6 +379,72 @@ const AdminDashboard = () => {
     
     return searchMatch && statusMatch;
   });
+  
+  // Pagination
+  const totalApprovalPages = Math.ceil(filteredApprovals.length / ITEMS_PER_PAGE);
+  const paginatedApprovals = filteredApprovals.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+  
+  // Filtered rewards
+  const filteredRewards = rewardRequestsData.filter(request => {
+    // Text search filter
+    const searchMatch = 
+      request.user.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      request.title.toLowerCase().includes(searchQuery.toLowerCase());
+      
+    // Status filter
+    const statusMatch = 
+      statusFilter === 'all' || request.status === statusFilter;
+    
+    return searchMatch && statusMatch;
+  });
+  
+  const totalRewardPages = Math.ceil(filteredRewards.length / ITEMS_PER_PAGE);
+  const paginatedRewards = filteredRewards.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  const handleTabChange = (value: string) => {
+    setSelectedTab(value);
+    setCurrentPage(1); // Reset pagination on tab change
+    setSearchQuery(''); // Reset search on tab change
+    setStatusFilter('all'); // Reset filter on tab change
+  };
+
+  const handleRecognitionRowClick = (recognition: any) => {
+    // Convert to our recognition format
+    const formattedRecognition: Recognition = {
+      id: recognition.id,
+      reporter: recognition.reporter,
+      recipient: recognition.recipient,
+      amount: recognition.amount,
+      category: recognition.category,
+      description: recognition.description,
+      status: recognition.status as "pendente" | "concluída" | "cancelada",
+      date: recognition.date,
+      icon: getCategoryIcon(recognition.category),
+    };
+    
+    setSelectedRecognition(formattedRecognition);
+    setDetailModalOpen(true);
+  };
+
+  const handleRewardRowClick = (reward: any) => {
+    setSelectedRecognition({
+      id: reward.id,
+      recipient: reward.user,
+      amount: reward.value,
+      category: reward.title,
+      description: reward.description,
+      status: reward.status as "pendente" | "concluída" | "cancelada",
+      date: reward.requestDate,
+      icon: <Gift className="h-5 w-5 text-cofcoin-orange" />,
+    });
+    setDetailModalOpen(true);
+  };
 
   const handleConfirmDialog = (requestId: number, type: 'recognition' | 'reward', action: 'approve' | 'reject') => {
     setConfirmDialog({
@@ -288,10 +482,15 @@ const AdminDashboard = () => {
     }
   };
   
+  const handleEditUserBalance = (user: any) => {
+    setSelectedUser(user);
+    setEditBalanceDialogOpen(true);
+  };
+  
   const handleAdminRecognition = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!recipient || !coinAmount || !selectedCategory) {
+    if (!recipient || !coinAmount || !selectedCategory || !description) {
       toast({
         title: "Campos obrigatórios",
         description: "Preencha todos os campos para continuar.",
@@ -315,6 +514,7 @@ const AdminDashboard = () => {
       setRecipient('');
       setCoinAmount('');
       setSelectedCategory(null);
+      setDescription('');
       
       // Close dialog
       setIsRecognitionDialogOpen(false);
@@ -336,6 +536,11 @@ const AdminDashboard = () => {
       case "cancelada": return "bg-red-100 text-red-800";
       default: return "bg-gray-100 text-gray-800";
     }
+  };
+  
+  const getCategoryIcon = (categoryName: string) => {
+    const category = categories.find(cat => cat.name === categoryName);
+    return category?.icon || <Award className="h-5 w-5 text-gray-600" />;
   };
 
   return (
@@ -372,15 +577,7 @@ const AdminDashboard = () => {
                 <Gift className="h-5 w-5 mr-1" />
                 <span className="hidden sm:inline">Recompensas</span>
               </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate(-1)}
-                className="text-gray-600 hover:text-cofcoin-purple"
-              >
-                <ArrowLeft className="h-5 w-5 mr-1" />
-                <span className="hidden sm:inline">Voltar</span>
-              </Button>
+              <UserMenu userName="Admin" isAdmin={true} />
             </div>
           </div>
         </div>
@@ -397,6 +594,75 @@ const AdminDashboard = () => {
             <Plus className="mr-2 h-4 w-4" />
             Enviar Reconhecimento Especial
           </Button>
+        </div>
+        
+        {/* Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+          {/* Pending Approvals Card */}
+          <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border-yellow-200">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center text-yellow-800">
+                <CheckCircle className="h-5 w-5 mr-2 text-yellow-600" />
+                Aprovações Pendentes
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col">
+                  <span className="text-2xl font-bold text-yellow-800">{pendingRecognitions}</span>
+                  <span className="text-sm text-yellow-700">Reconhecimentos</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-2xl font-bold text-yellow-800">{pendingRewards}</span>
+                  <span className="text-sm text-yellow-700">Recompensas</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          {/* Approved Card */}
+          <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center text-green-800">
+                <CheckCircle className="h-5 w-5 mr-2 text-green-600" />
+                Aprovados
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col">
+                  <span className="text-2xl font-bold text-green-800">{approvedRecognitions}</span>
+                  <span className="text-sm text-green-700">Reconhecimentos</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-2xl font-bold text-green-800">{approvedRewards}</span>
+                  <span className="text-sm text-green-700">Recompensas</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          {/* Rejected Card */}
+          <Card className="bg-gradient-to-br from-red-50 to-rose-50 border-red-200">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center text-red-800">
+                <XCircle className="h-5 w-5 mr-2 text-red-600" />
+                Rejeitados
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col">
+                  <span className="text-2xl font-bold text-red-800">{rejectedRecognitions}</span>
+                  <span className="text-sm text-red-700">Reconhecimentos</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-2xl font-bold text-red-800">{rejectedRewards}</span>
+                  <span className="text-sm text-red-700">Recompensas</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
         
         <Card className="mb-8">
@@ -434,7 +700,7 @@ const AdminDashboard = () => {
           </CardContent>
         </Card>
         
-        <Tabs defaultValue="approvals" className="w-full">
+        <Tabs value={selectedTab} onValueChange={handleTabChange} className="w-full">
           <TabsList className="grid w-full max-w-lg grid-cols-4 mb-4">
             <TabsTrigger value="approvals">Aprovações</TabsTrigger>
             <TabsTrigger value="rewards">Recompensas</TabsTrigger>
@@ -464,9 +730,13 @@ const AdminDashboard = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredApprovals.length > 0 ? (
-                        filteredApprovals.map((request) => (
-                          <TableRow key={request.id}>
+                      {paginatedApprovals.length > 0 ? (
+                        paginatedApprovals.map((request) => (
+                          <TableRow 
+                            key={request.id}
+                            className="cursor-pointer hover:bg-gray-50"
+                            onClick={() => handleRecognitionRowClick(request)}
+                          >
                             <TableCell>{request.reporter}</TableCell>
                             <TableCell>{request.recipient}</TableCell>
                             <TableCell>
@@ -482,14 +752,17 @@ const AdminDashboard = () => {
                                 {request.status}
                               </Badge>
                             </TableCell>
-                            <TableCell className="text-right">
+                            <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                               {request.status === "pendente" ? (
                                 <div className="flex justify-end gap-2">
                                   <Button
                                     size="sm"
                                     variant="outline"
                                     className="flex items-center text-green-600 border-green-200 hover:bg-green-50"
-                                    onClick={() => handleConfirmDialog(request.id, 'recognition', 'approve')}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleConfirmDialog(request.id, 'recognition', 'approve');
+                                    }}
                                   >
                                     <CheckCircle className="h-4 w-4 mr-1" />
                                     <span className="hidden sm:inline">Aprovar</span>
@@ -498,7 +771,10 @@ const AdminDashboard = () => {
                                     size="sm"
                                     variant="outline"
                                     className="flex items-center text-red-600 border-red-200 hover:bg-red-50"
-                                    onClick={() => handleConfirmDialog(request.id, 'recognition', 'reject')}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleConfirmDialog(request.id, 'recognition', 'reject');
+                                    }}
                                   >
                                     <XCircle className="h-4 w-4 mr-1" />
                                     <span className="hidden sm:inline">Rejeitar</span>
@@ -522,6 +798,40 @@ const AdminDashboard = () => {
                     </TableBody>
                   </Table>
                 </div>
+                
+                {/* Pagination */}
+                {totalApprovalPages > 1 && (
+                  <div className="mt-4">
+                    <Pagination>
+                      <PaginationContent>
+                        <PaginationItem>
+                          <PaginationPrevious 
+                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                            className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                          />
+                        </PaginationItem>
+                        
+                        {Array.from({length: totalApprovalPages}, (_, i) => i + 1).map(page => (
+                          <PaginationItem key={page}>
+                            <PaginationLink 
+                              onClick={() => setCurrentPage(page)}
+                              isActive={currentPage === page}
+                            >
+                              {page}
+                            </PaginationLink>
+                          </PaginationItem>
+                        ))}
+                        
+                        <PaginationItem>
+                          <PaginationNext 
+                            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalApprovalPages))}
+                            className={currentPage === totalApprovalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                          />
+                        </PaginationItem>
+                      </PaginationContent>
+                    </Pagination>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -547,9 +857,13 @@ const AdminDashboard = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredRewards.length > 0 ? (
-                        filteredRewards.map((request) => (
-                          <TableRow key={request.id}>
+                      {paginatedRewards.length > 0 ? (
+                        paginatedRewards.map((request) => (
+                          <TableRow 
+                            key={request.id}
+                            className="cursor-pointer hover:bg-gray-50"
+                            onClick={() => handleRewardRowClick(request)}
+                          >
                             <TableCell>{request.user}</TableCell>
                             <TableCell className="font-medium">{request.title}</TableCell>
                             <TableCell>
@@ -566,14 +880,17 @@ const AdminDashboard = () => {
                                 {request.status}
                               </Badge>
                             </TableCell>
-                            <TableCell className="text-right">
+                            <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                               {request.status === "pendente" ? (
                                 <div className="flex justify-end gap-2">
                                   <Button
                                     size="sm"
                                     variant="outline"
                                     className="flex items-center text-green-600 border-green-200 hover:bg-green-50"
-                                    onClick={() => handleConfirmDialog(request.id, 'reward', 'approve')}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleConfirmDialog(request.id, 'reward', 'approve');
+                                    }}
                                   >
                                     <CheckCircle className="h-4 w-4 mr-1" />
                                     <span className="hidden sm:inline">Aprovar</span>
@@ -582,7 +899,10 @@ const AdminDashboard = () => {
                                     size="sm"
                                     variant="outline"
                                     className="flex items-center text-red-600 border-red-200 hover:bg-red-50"
-                                    onClick={() => handleConfirmDialog(request.id, 'reward', 'reject')}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleConfirmDialog(request.id, 'reward', 'reject');
+                                    }}
                                   >
                                     <XCircle className="h-4 w-4 mr-1" />
                                     <span className="hidden sm:inline">Rejeitar</span>
@@ -606,6 +926,40 @@ const AdminDashboard = () => {
                     </TableBody>
                   </Table>
                 </div>
+                
+                {/* Pagination */}
+                {totalRewardPages > 1 && (
+                  <div className="mt-4">
+                    <Pagination>
+                      <PaginationContent>
+                        <PaginationItem>
+                          <PaginationPrevious 
+                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                            className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                          />
+                        </PaginationItem>
+                        
+                        {Array.from({length: totalRewardPages}, (_, i) => i + 1).map(page => (
+                          <PaginationItem key={page}>
+                            <PaginationLink 
+                              onClick={() => setCurrentPage(page)}
+                              isActive={currentPage === page}
+                            >
+                              {page}
+                            </PaginationLink>
+                          </PaginationItem>
+                        ))}
+                        
+                        <PaginationItem>
+                          <PaginationNext 
+                            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalRewardPages))}
+                            className={currentPage === totalRewardPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                          />
+                        </PaginationItem>
+                      </PaginationContent>
+                    </Pagination>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -661,7 +1015,7 @@ const AdminDashboard = () => {
             <Card>
               <CardHeader>
                 <CardTitle>Saldos dos Usuários</CardTitle>
-                <CardDescription>Saldos atuais de CofCoins de todos os colaboradores</CardDescription>
+                <CardDescription>Gerencie os saldos de CofCoins de todos os colaboradores</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="rounded-md border">
@@ -672,6 +1026,7 @@ const AdminDashboard = () => {
                         <TableHead>Saldo Atual</TableHead>
                         <TableHead>Já Utilizado</TableHead>
                         <TableHead>Total</TableHead>
+                        <TableHead className="text-right">Ações</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -696,6 +1051,17 @@ const AdminDashboard = () => {
                               {user.balance + user.spent}
                             </div>
                           </TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-cofcoin-purple border-cofcoin-purple/30 hover:bg-cofcoin-purple/10"
+                              onClick={() => handleEditUserBalance(user)}
+                            >
+                              <PenSquare className="h-4 w-4 mr-1" />
+                              <span>Editar</span>
+                            </Button>
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -707,7 +1073,7 @@ const AdminDashboard = () => {
         </Tabs>
       </main>
 
-      {/* Confirmation Dialog for Approvals */}
+      {/* Confirmation Dialog */}
       <ConfirmationDialog
         open={confirmDialog.open}
         onOpenChange={(open) => setConfirmDialog({ ...confirmDialog, open })}
@@ -716,6 +1082,16 @@ const AdminDashboard = () => {
         description={`Tem certeza que deseja ${confirmDialog.action === 'approve' ? 'aprovar' : 'rejeitar'} ${confirmDialog.type === 'recognition' ? 'este reconhecimento' : 'esta solicitação de recompensa'}?`}
         confirmText={confirmDialog.action === 'approve' ? 'Aprovar' : 'Rejeitar'}
         variant={confirmDialog.action === 'reject' ? 'destructive' : 'default'}
+      />
+
+      {/* Recognition Detail Dialog */}
+      <RecognitionDetailDialog
+        open={detailModalOpen}
+        onOpenChange={setDetailModalOpen}
+        recognition={selectedRecognition}
+        showActions={selectedRecognition?.status === "pendente"}
+        onApprove={(id) => handleConfirmDialog(id, selectedTab === "approvals" ? 'recognition' : 'reward', 'approve')}
+        onReject={(id) => handleConfirmDialog(id, selectedTab === "approvals" ? 'recognition' : 'reward', 'reject')}
       />
 
       {/* Admin Special Recognition Dialog */}
@@ -786,6 +1162,21 @@ const AdminDashboard = () => {
                 ))}
               </div>
             </div>
+            
+            {/* Description Field - New addition */}
+            <div className="space-y-2">
+              <Label htmlFor="description">Descrição</Label>
+              <Textarea
+                id="description"
+                placeholder="Descreva por que você está reconhecendo essa pessoa..."
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="min-h-[100px]"
+              />
+              <p className="text-sm text-gray-500">
+                Explique o motivo do reconhecimento e como isso ajudou a equipe ou empresa
+              </p>
+            </div>
 
             <DialogFooter>
               <Button
@@ -814,6 +1205,13 @@ const AdminDashboard = () => {
           </form>
         </DialogContent>
       </Dialog>
+      
+      {/* Edit User Balance Dialog */}
+      <EditUserBalanceDialog
+        open={editBalanceDialogOpen}
+        onOpenChange={setEditBalanceDialogOpen}
+        user={selectedUser}
+      />
     </div>
   );
 };

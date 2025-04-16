@@ -14,6 +14,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Award, Eye, Gift, Search, Shield, User, Wrench } from 'lucide-react';
+import { Textarea } from "@/components/ui/textarea";
 
 interface Category {
   id: number;
@@ -36,13 +37,14 @@ const NewRecognitionDialog: React.FC<NewRecognitionDialogProps> = ({
   const [recipient, setRecipient] = useState('');
   const [amount, setAmount] = useState<'50' | '100'>('50');
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+  const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!recipient || !selectedCategory) {
+    if (!recipient || !selectedCategory || !description) {
       toast({
         title: "Campos obrigatórios",
         description: "Preencha todos os campos para continuar.",
@@ -66,6 +68,7 @@ const NewRecognitionDialog: React.FC<NewRecognitionDialogProps> = ({
       setRecipient('');
       setAmount('50');
       setSelectedCategory(null);
+      setDescription('');
       
       // Close dialog
       onOpenChange(false);
@@ -183,6 +186,21 @@ const NewRecognitionDialog: React.FC<NewRecognitionDialogProps> = ({
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* Description Field - New addition */}
+          <div className="space-y-2">
+            <Label htmlFor="description">Descrição</Label>
+            <Textarea
+              id="description"
+              placeholder="Descreva por que você está reconhecendo essa pessoa..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="min-h-[100px]"
+            />
+            <p className="text-sm text-gray-500">
+              Explique o motivo do reconhecimento e como isso ajudou a equipe ou empresa
+            </p>
           </div>
 
           <DialogFooter>
