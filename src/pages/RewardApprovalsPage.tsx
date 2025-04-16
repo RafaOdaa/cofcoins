@@ -12,6 +12,7 @@ import {
   Gift,
   Home,
   Search,
+  User,
   XCircle
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -33,6 +34,14 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 // Mock reward requests data with more entries
 const rewardRequestsData = [

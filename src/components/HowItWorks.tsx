@@ -2,6 +2,7 @@
 import React from 'react';
 import { Award, Coins, CheckSquare } from "lucide-react";
 
+// Updated steps with points 2 and 3 swapped as requested
 const steps = [
   {
     id: 1,
@@ -12,17 +13,17 @@ const steps = [
   },
   {
     id: 2,
-    title: "Aprovação de Líderes",
-    description: "Reconhecimentos são avaliados e aprovados por líderes na plataforma.",
-    icon: CheckSquare,
-    color: "bg-green-100 text-green-600",
-  },
-  {
-    id: 3,
     title: "Troque por Recompensas",
     description: "As moedas são trocadas por recompensas exclusivas na plataforma.",
     icon: Coins,
     color: "bg-cofcoin-orange/20 text-cofcoin-orange",
+  },
+  {
+    id: 3,
+    title: "Aprovação de Líderes",
+    description: "Reconhecimentos são avaliados e aprovados por líderes na plataforma.",
+    icon: CheckSquare,
+    color: "bg-green-100 text-green-600",
   }
 ];
 

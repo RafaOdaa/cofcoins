@@ -3,22 +3,70 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Award, Coins, Gift, LogOut, Send, Settings, User, Users } from 'lucide-react';
+import { Award, Coins, Gift, Send, Users } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import NewRecognitionDialog from '@/components/NewRecognitionDialog';
+import UserMenu from '@/components/UserMenu';
+import RecognitionDetailDialog from '@/components/RecognitionDetailDialog';
+import AnimatedCoinBalance from '@/components/AnimatedCoinBalance';
 
 // Mock data for demonstration
 const myRecognitions = [
-  { id: 1, reporter: "Ana Silva", amount: 100, category: "Fora da Caixa", description: "Implementação de nova solução de automação" },
-  { id: 2, reporter: "Carlos Mendes", amount: 50, category: "O Quebra Galho", description: "Auxílio na resolução de problemas técnicos" },
-  { id: 3, reporter: "Maria Oliveira", amount: 100, category: "Segurador de Rojão", description: "Gestão de crise no projeto XYZ" },
+  { 
+    id: 1, 
+    reporter: "Ana Silva", 
+    amount: 100, 
+    category: "Fora da Caixa", 
+    description: "Implementação de nova solução de automação",
+    status: "concluída" as const,
+    date: new Date("2025-04-10T14:30:00"),
+    icon: <Award className="h-4 w-4 text-blue-600" /> 
+  },
+  { 
+    id: 2, 
+    reporter: "Carlos Mendes", 
+    amount: 50, 
+    category: "O Quebra Galho", 
+    description: "Auxílio na resolução de problemas técnicos",
+    status: "concluída" as const,
+    date: new Date("2025-04-08T09:15:00"),
+    icon: <Award className="h-4 w-4 text-green-600" /> 
+  },
+  { 
+    id: 3, 
+    reporter: "Maria Oliveira", 
+    amount: 100, 
+    category: "Segurador de Rojão", 
+    description: "Gestão de crise no projeto XYZ",
+    status: "concluída" as const,
+    date: new Date("2025-04-05T16:45:00"),
+    icon: <Award className="h-4 w-4 text-purple-600" /> 
+  },
 ];
 
 const sentRecognitions = [
-  { id: 1, recipient: "Pedro Santos", amount: 50, category: "O Vidente", description: "Antecipação de problema no servidor" },
-  { id: 2, recipient: "Juliana Costa", amount: 100, category: "Mestre do Improviso", description: "Apresentação excelente sem preparação" },
+  { 
+    id: 1, 
+    recipient: "Pedro Santos", 
+    amount: 50, 
+    category: "O Vidente", 
+    description: "Antecipação de problema no servidor",
+    status: "pendente" as const,
+    date: new Date("2025-04-15T10:30:00"),
+    icon: <Award className="h-4 w-4 text-indigo-600" /> 
+  },
+  { 
+    id: 2, 
+    recipient: "Juliana Costa", 
+    amount: 100, 
+    category: "Mestre do Improviso", 
+    description: "Apresentação excelente sem preparação",
+    status: "concluída" as const,
+    date: new Date("2025-04-12T13:20:00"),
+    icon: <Award className="h-4 w-4 text-amber-600" /> 
+  },
 ];
 
 const categories = [
@@ -34,13 +82,16 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedRecognition, setSelectedRecognition] = useState<null | any>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
-  const handleLogout = () => {
-    toast({
-      title: "Logout realizado",
-      description: "Você saiu da plataforma com sucesso.",
-    });
-    navigate('/');
+  const handleRowClick = (recognition: any, isSent: boolean) => {
+    const formattedRecognition = isSent 
+      ? { ...recognition, reporter: "Você", recipient: recognition.recipient } 
+      : { ...recognition, reporter: recognition.reporter, recipient: "Você" };
+      
+    setSelectedRecognition(formattedRecognition);
+    setIsDetailModalOpen(true);
   };
 
   return (
@@ -56,7 +107,7 @@ const Dashboard = () => {
                   <span className="text-white font-bold text-sm">C</span>
                 </div>
               </div>
-              <span className="text-xl font-bold text-gray-900">CofCoinf</span>
+              <span className="text-xl font-bold text-gray-900">CofCoin</span>
             </div>
             
             <div className="flex items-center">
@@ -70,32 +121,8 @@ const Dashboard = () => {
                 <span className="hidden sm:inline">Recompensas</span>
               </Button>
               
-              {/* Admin links would be conditionally shown based on user role */}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate('/admin/approvals')}
-                className="text-gray-600 hover:text-cofcoin-purple mr-2"
-              >
-                <Settings className="h-5 w-5 mr-1" />
-                <span className="hidden sm:inline">Admin</span>
-              </Button>
-              
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleLogout}
-                className="text-gray-600 hover:text-cofcoin-purple"
-              >
-                <LogOut className="h-5 w-5 mr-1" />
-                <span className="hidden sm:inline">Sair</span>
-              </Button>
-              
-              <div className="ml-3 relative">
-                <div className="h-8 w-8 rounded-full bg-cofcoin-purple/20 flex items-center justify-center">
-                  <User className="h-5 w-5 text-cofcoin-purple" />
-                </div>
-              </div>
+              {/* Added user menu component */}
+              <UserMenu userName="João Silva" isAdmin={true} />
             </div>
           </div>
         </div>
@@ -103,17 +130,14 @@ const Dashboard = () => {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Painel do Colaborador</h1>
             <p className="text-gray-600">Gerencie seus reconhecimentos e recompensas</p>
           </div>
-          <div className="flex items-center bg-white rounded-lg shadow-sm px-4 py-2 border border-gray-100">
-            <div className="flex items-center text-cofcoin-orange font-medium">
-              <Coins className="mr-2 h-5 w-5" />
-              <span>Saldo: 500 CofCoins</span>
-            </div>
-          </div>
+          
+          {/* Updated with AnimatedCoinBalance component */}
+          <AnimatedCoinBalance balance={500} />
         </div>
 
         {/* New Recognition Button - Always visible */}
@@ -153,11 +177,19 @@ const Dashboard = () => {
                     </TableHeader>
                     <TableBody>
                       {myRecognitions.map((recognition) => (
-                        <TableRow key={recognition.id}>
+                        <TableRow 
+                          key={recognition.id} 
+                          className="cursor-pointer hover:bg-gray-50"
+                          onClick={() => handleRowClick(recognition, false)}
+                        >
                           <TableCell className="font-medium">{recognition.reporter}</TableCell>
                           <TableCell className="text-cofcoin-orange font-medium">{recognition.amount}</TableCell>
                           <TableCell className="hidden md:table-cell">{recognition.category}</TableCell>
-                          <TableCell className="hidden lg:table-cell">{recognition.description}</TableCell>
+                          <TableCell className="hidden lg:table-cell">
+                            {recognition.description.length > 40
+                              ? `${recognition.description.substring(0, 40)}...`
+                              : recognition.description}
+                          </TableCell>
                         </TableRow>
                       ))}
                       {myRecognitions.length === 0 && (
@@ -193,11 +225,19 @@ const Dashboard = () => {
                     </TableHeader>
                     <TableBody>
                       {sentRecognitions.map((recognition) => (
-                        <TableRow key={recognition.id}>
+                        <TableRow 
+                          key={recognition.id} 
+                          className="cursor-pointer hover:bg-gray-50"
+                          onClick={() => handleRowClick(recognition, true)}
+                        >
                           <TableCell className="font-medium">{recognition.recipient}</TableCell>
                           <TableCell className="text-cofcoin-orange font-medium">{recognition.amount}</TableCell>
                           <TableCell className="hidden md:table-cell">{recognition.category}</TableCell>
-                          <TableCell className="hidden lg:table-cell">{recognition.description}</TableCell>
+                          <TableCell className="hidden lg:table-cell">
+                            {recognition.description.length > 40
+                              ? `${recognition.description.substring(0, 40)}...`
+                              : recognition.description}
+                          </TableCell>
                         </TableRow>
                       ))}
                       {sentRecognitions.length === 0 && (
@@ -221,6 +261,13 @@ const Dashboard = () => {
         open={isDialogOpen} 
         onOpenChange={setIsDialogOpen} 
         categories={categories}
+      />
+
+      {/* Recognition Details Dialog */}
+      <RecognitionDetailDialog
+        open={isDetailModalOpen}
+        onOpenChange={setIsDetailModalOpen}
+        recognition={selectedRecognition}
       />
     </div>
   );
