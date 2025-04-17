@@ -1,9 +1,10 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Award, Coins, UserRound, Lightbulb, Users, BookOpen } from "lucide-react";
+import { Award, Coins, UserRound, Lightbulb, Users, BookOpen, Send, User, Gift, Shield, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -25,18 +26,46 @@ interface NewRecognitionDialogProps {
 const defaultCategories: Category[] = [
   { 
     id: 1, 
-    name: "Inovação", 
-    description: "Ideias criativas que trouxeram melhorias",
+    name: "Fora da Caixa", 
+    description: "Pra quem sempre surpreende com soluções e ideias que ninguém tinha pensado",
     icon: Lightbulb
   },
   { 
     id: 2, 
-    name: "Colaboração", 
-    description: "Trabalho em equipe excepcional",
-    icon: Users
+    name: "O Quebra Galho", 
+    description: "Praquele parceiro que aparece rapidinho e resolve o problema sem enrolação",
+    icon: Send
   },
   { 
     id: 3, 
+    name: "Aqui é MedCof!", 
+    description: "Pra quem age como se a empresa fosse sua casa",
+    icon: User
+  },
+  { 
+    id: 4, 
+    name: "Mestre do Improviso", 
+    description: "Pra aquele que, mesmo sem planejar, sempre acha um jeito de resolver",
+    icon: Gift
+  },
+  { 
+    id: 5, 
+    name: "Segurador de Rojão", 
+    description: "Para aquele colega que chega na hora certa para domar situações explosivas",
+    icon: Shield
+  },
+  { 
+    id: 6, 
+    name: "O Vidente", 
+    description: "Praquele que identifica e resolve perrengues antes mesmo de acontecerem",
+    icon: Eye
+  }
+];
+
+// Special categories that are only shown in special recognitions
+const specialCategories: Category[] = [
+  { 
+    id: 7, 
     name: "Aprendeu por si, falou por todos", 
     description: "Leu, refletiu, conectou com a realidade e compartilhou algo que virou aprendizado coletivo.",
     icon: BookOpen
@@ -50,7 +79,10 @@ const NewRecognitionDialog = ({ open, onOpenChange, categories = defaultCategori
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSpecialRecognition, setIsSpecialRecognition] = useState(false);
 
+  // Determine which categories to show based on the recognition type
+  const displayCategories = isSpecialRecognition ? specialCategories : defaultCategories;
   const coinOptions = isAdmin ? [50, 100, 150, 200] : [50, 100, 150];
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -98,6 +130,7 @@ const NewRecognitionDialog = ({ open, onOpenChange, categories = defaultCategori
     setAmount('50');
     setSelectedCategory(null);
     setDescription('');
+    setIsSpecialRecognition(false);
   };
 
   const handleDialogClose = (open: boolean) => {
@@ -121,6 +154,34 @@ const NewRecognitionDialog = ({ open, onOpenChange, categories = defaultCategori
             Reconheça um colega pelo trabalho excepcional
           </DialogDescription>
         </DialogHeader>
+
+        {/* Toggle between regular and special recognition */}
+        <div className="flex justify-center mb-4">
+          <div className="inline-flex rounded-md shadow-sm" role="group">
+            <button
+              type="button"
+              className={`px-4 py-2 text-sm font-medium rounded-l-lg ${
+                !isSpecialRecognition
+                  ? "bg-cofcoin-purple text-white"
+                  : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-100"
+              }`}
+              onClick={() => setIsSpecialRecognition(false)}
+            >
+              Reconhecimento Normal
+            </button>
+            <button
+              type="button"
+              className={`px-4 py-2 text-sm font-medium rounded-r-lg ${
+                isSpecialRecognition
+                  ? "bg-cofcoin-purple text-white"
+                  : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-100"
+              }`}
+              onClick={() => setIsSpecialRecognition(true)}
+            >
+              Reconhecimento Especial
+            </button>
+          </div>
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-4">
@@ -163,7 +224,7 @@ const NewRecognitionDialog = ({ open, onOpenChange, categories = defaultCategori
               <Label>Motivo do Reconhecimento</Label>
               <RadioGroup value={selectedCategory?.toString()} onValueChange={(value) => setSelectedCategory(parseInt(value))}>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {categories.map(category => {
+                  {displayCategories.map(category => {
                     const Icon = category.icon;
                     return (
                       <div

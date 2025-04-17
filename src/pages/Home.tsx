@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -99,14 +100,8 @@ const categories = [
   },
   {
     id: 7,
-    name: "Toque de Midas",
-    description: "Uma dica de leitura, uma reflexão de curso ou uma simples conversa que muda o dia de alguém. Está sempre lapidando o que toca.",
-    icon: Sparkles
-  },
-  {
-    id: 8,
-    name: "Resenha de Livro ou Curso",
-    description: "Transforma capítulos em insights e ideias em ação. A mente curiosa que lê por todos nós. A leitura é individual, mas o impacto é coletivo.",
+    name: "Aprendeu por si, falou por todos",
+    description: "Leu, refletiu, conectou com a realidade e compartilhou algo que virou aprendizado coletivo.",
     icon: BookOpen
   }
 ];
@@ -117,6 +112,14 @@ const Home = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedRecognition, setSelectedRecognition] = useState<typeof myRecognitions[0] | null>(null);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
+
+  // Calculate total received coins and count
+  const totalReceivedCoins = myRecognitions.reduce((sum, item) => sum + item.amount, 0);
+  const totalReceivedCount = myRecognitions.length;
+
+  // Calculate total sent coins and count
+  const totalSentCoins = sentRecognitions.reduce((sum, item) => sum + item.amount, 0);
+  const totalSentCount = sentRecognitions.length;
 
   const handleLogout = () => {
     toast({
@@ -168,17 +171,13 @@ const Home = () => {
                 variant="ghost"
                 size="sm"
                 onClick={handleLogout}
-                className="text-gray-600 hover:text-cofcoin-purple"
+                className="text-gray-600 hover:text-cofcoin-purple mr-2"
               >
                 <LogOut className="h-5 w-5 mr-1" />
                 <span className="hidden sm:inline">Sair</span>
               </Button>
               
-              <div className="ml-3 relative">
-                <div className="h-8 w-8 rounded-full bg-cofcoin-purple/20 flex items-center justify-center">
-                  <User className="h-5 w-5 text-cofcoin-purple" />
-                </div>
-              </div>
+              <UserMenu />
             </div>
           </div>
         </div>
@@ -218,7 +217,18 @@ const Home = () => {
             <Card>
               <CardHeader>
                 <CardTitle>Meus Reconhecimentos</CardTitle>
-                <CardDescription>Reconhecimentos recebidos dos colegas</CardDescription>
+                <CardDescription className="flex justify-between items-center">
+                  <span>Reconhecimentos recebidos dos colegas</span>
+                  <div className="flex items-center gap-4">
+                    <div className="text-sm bg-gray-100 px-3 py-1 rounded-full">
+                      <span className="font-semibold">{totalReceivedCount}</span> reconhecimento(s)
+                    </div>
+                    <div className="text-sm bg-cofcoin-orange/20 text-cofcoin-orange px-3 py-1 rounded-full flex items-center">
+                      <Coins className="h-4 w-4 mr-1" />
+                      <span className="font-semibold">{totalReceivedCoins}</span> CofCoins
+                    </div>
+                  </div>
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="rounded-md border">
@@ -267,7 +277,18 @@ const Home = () => {
             <Card>
               <CardHeader>
                 <CardTitle>Reconhecimentos Enviados</CardTitle>
-                <CardDescription>Reconhecimentos que você enviou para seus colegas</CardDescription>
+                <CardDescription className="flex justify-between items-center">
+                  <span>Reconhecimentos que você enviou para seus colegas</span>
+                  <div className="flex items-center gap-4">
+                    <div className="text-sm bg-gray-100 px-3 py-1 rounded-full">
+                      <span className="font-semibold">{totalSentCount}</span> reconhecimento(s)
+                    </div>
+                    <div className="text-sm bg-cofcoin-orange/20 text-cofcoin-orange px-3 py-1 rounded-full flex items-center">
+                      <Coins className="h-4 w-4 mr-1" />
+                      <span className="font-semibold">{totalSentCoins}</span> CofCoins
+                    </div>
+                  </div>
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="rounded-md border">
@@ -283,7 +304,24 @@ const Home = () => {
                     </TableHeader>
                     <TableBody>
                       {sentRecognitions.map((recognition) => (
-                        <TableRow key={recognition.id}>
+                        <TableRow 
+                          key={recognition.id}
+                          className="cursor-pointer hover:bg-gray-50"
+                          onClick={() => {
+                            // Convert to the format expected by the dialog
+                            const dialogRecognition = {
+                              id: recognition.id,
+                              reporter: "Você",
+                              recipient: recognition.recipient,
+                              amount: recognition.amount,
+                              category: recognition.category,
+                              description: recognition.description,
+                              date: recognition.date
+                            };
+                            setSelectedRecognition(dialogRecognition);
+                            setDetailDialogOpen(true);
+                          }}
+                        >
                           <TableCell className="font-medium">{recognition.recipient}</TableCell>
                           <TableCell className="text-cofcoin-orange font-medium">{recognition.amount}</TableCell>
                           <TableCell className="hidden md:table-cell">{recognition.category}</TableCell>
@@ -314,7 +352,7 @@ const Home = () => {
         categories={categories}
       />
       
-      {/* Add Recognition Detail Dialog */}
+      {/* Recognition Detail Dialog */}
       <RecognitionDetailDialog 
         recognition={selectedRecognition}
         open={detailDialogOpen}
