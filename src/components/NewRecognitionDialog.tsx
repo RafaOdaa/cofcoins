@@ -1,10 +1,10 @@
 
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Award, Coins, UserRound } from "lucide-react";
+import { Award, Coins, UserRound, Lightbulb, Users, Sparkles, BookOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -13,45 +13,53 @@ interface Category {
   id: number;
   name: string;
   description: string;
+  icon: React.ElementType;
 }
 
 interface NewRecognitionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   categories: Category[];
+  isAdmin?: boolean;
 }
 
-// Add the new categories
+// Add the new categories with icons
 const defaultCategories: Category[] = [
   { 
     id: 1, 
     name: "Inovação", 
-    description: "Ideias criativas que trouxeram melhorias" 
+    description: "Ideias criativas que trouxeram melhorias",
+    icon: Lightbulb
   },
   { 
     id: 2, 
     name: "Colaboração", 
-    description: "Trabalho em equipe excepcional" 
+    description: "Trabalho em equipe excepcional",
+    icon: Users
   },
   { 
     id: 3, 
     name: "Toque de Midas", 
-    description: "Uma dica de leitura, uma reflexão de curso ou uma simples conversa que muda o dia de alguém. Está sempre lapidando o que toca." 
+    description: "Uma dica de leitura, uma reflexão de curso ou uma simples conversa que muda o dia de alguém. Está sempre lapidando o que toca.",
+    icon: Sparkles
   },
   { 
     id: 4, 
     name: "Resenha de Livro ou Curso", 
-    description: "Transforma capítulos em insights e ideias em ação. A mente curiosa que lê por todos nós. A leitura é individual, mas o impacto é coletivo." 
+    description: "Transforma capítulos em insights e ideias em ação. A mente curiosa que lê por todos nós. A leitura é individual, mas o impacto é coletivo.",
+    icon: BookOpen
   },
 ];
 
-const NewRecognitionDialog = ({ open, onOpenChange, categories = defaultCategories }: NewRecognitionDialogProps) => {
+const NewRecognitionDialog = ({ open, onOpenChange, categories = defaultCategories, isAdmin = false }: NewRecognitionDialogProps) => {
   const { toast } = useToast();
   const [recipient, setRecipient] = useState('');
   const [amount, setAmount] = useState('50');
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const coinOptions = isAdmin ? [50, 100, 150, 200] : [50, 100, 150];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -109,6 +117,7 @@ const NewRecognitionDialog = ({ open, onOpenChange, categories = defaultCategori
   return (
     <Dialog open={open} onOpenChange={handleDialogClose}>
       <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
+        <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground" />
         <DialogHeader>
           <DialogTitle className="text-xl flex items-center">
             <Award className="mr-2 h-5 w-5 text-cofcoin-purple" />
@@ -139,21 +148,20 @@ const NewRecognitionDialog = ({ open, onOpenChange, categories = defaultCategori
             {/* Amount field */}
             <div className="space-y-2">
               <Label htmlFor="amount">Quantidade de CofCoins</Label>
-              <div className="relative">
-                <Coins className="absolute left-2.5 top-2.5 h-4 w-4 text-cofcoin-orange" />
-                <Input
-                  id="amount"
-                  type="number"
-                  min="1"
-                  max="100"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  className="pl-9"
-                />
+              <div className="flex gap-2">
+                {coinOptions.map((value) => (
+                  <Button
+                    key={value}
+                    type="button"
+                    variant={amount === String(value) ? "default" : "outline"}
+                    className={`flex-1 ${amount === String(value) ? "bg-cofcoin-purple hover:bg-cofcoin-purple-dark" : ""}`}
+                    onClick={() => setAmount(String(value))}
+                  >
+                    <Coins className="h-4 w-4 mr-1" />
+                    {value}
+                  </Button>
+                ))}
               </div>
-              <p className="text-xs text-gray-500">
-                Escolha quantos CofCoins você gostaria de enviar (máximo: 100)
-              </p>
             </div>
 
             {/* Category selection */}
@@ -176,13 +184,16 @@ const NewRecognitionDialog = ({ open, onOpenChange, categories = defaultCategori
                           id={`category-${category.id}`}
                           className="mt-1"
                         />
-                        <div>
-                          <Label 
-                            htmlFor={`category-${category.id}`} 
-                            className="font-medium cursor-pointer"
-                          >
-                            {category.name}
-                          </Label>
+                        <div className="flex-1">
+                          <div className="flex items-center">
+                            <category.icon className="h-4 w-4 mr-2 text-cofcoin-purple" />
+                            <Label 
+                              htmlFor={`category-${category.id}`} 
+                              className="font-medium cursor-pointer"
+                            >
+                              {category.name}
+                            </Label>
+                          </div>
                           <p className="text-sm text-gray-600 mt-1">{category.description}</p>
                         </div>
                       </div>

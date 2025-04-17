@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -281,7 +280,7 @@ const RewardsPage = () => {
                   <CardFooter className="bg-gray-50 border-t">
                     <Button 
                       onClick={(e) => handleRedeemReward(reward, e)} 
-                      className={`w-full ${reward.value > 500 ? 'bg-gray-400 hover:bg-gray-400 cursor-not-allowed opacity-70' : 'bg-cofcoin-purple hover:bg-cofcoin-purple-dark'} text-white transition duration-300 ease-in-out`}
+                      className={`w-full ${reward.value > 500 ? 'bg-gray-300 hover:bg-gray-300 cursor-not-allowed' : 'bg-cofcoin-purple hover:bg-cofcoin-purple-dark'} text-white transition duration-300 ease-in-out`}
                       disabled={reward.value > 500}
                     >
                       {reward.value > 500 ? (
@@ -352,7 +351,7 @@ const RewardsPage = () => {
                                   variant="ghost"
                                   size="sm"
                                   onClick={(e) => handleDeleteRequest(request.id, e)}
-                                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                  className="w-full justify-end text-red-600 hover:text-red-700 hover:bg-red-50"
                                 >
                                   Cancelar
                                 </Button>
