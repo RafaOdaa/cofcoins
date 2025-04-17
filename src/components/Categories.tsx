@@ -1,3 +1,4 @@
+
 import React from 'react';
 import CategoryCard from './CategoryCard';
 import { Award, Eye, Gift, Heart, Lightbulb, Shield, Wrench, BookOpen } from "lucide-react";
@@ -41,7 +42,7 @@ const categoriesData = [
   },
   {
     title: "Aprendeu por si, falou por todos",
-    description: "Com uma mente inquieta e coração generoso, compartilhou um insight de leitura que virou semente em todo mundo. Uma mente curiosa que lê com propósito e compartilha com paixão.",
+    description: "Leu, refletiu, conectou com a realidade e compartilhou algo que virou aprendizado coletivo.",
     icon: <BookOpen className="h-8 w-8 text-cofcoin-purple" />,
     color: "bg-cofcoin-purple/20"
   },

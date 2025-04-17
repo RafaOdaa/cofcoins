@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { format } from 'date-fns';
 import { Award, Coins } from 'lucide-react';
 
-interface Recognition {
+export interface Recognition {
   id: number;
   reporter: string;
   amount: number;

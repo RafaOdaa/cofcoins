@@ -1,10 +1,9 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Award, Coins, UserRound, Lightbulb, Users, Sparkles, BookOpen } from "lucide-react";
+import { Award, Coins, UserRound, Lightbulb, Users, BookOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -23,7 +22,6 @@ interface NewRecognitionDialogProps {
   isAdmin?: boolean;
 }
 
-// Add the new categories with icons
 const defaultCategories: Category[] = [
   { 
     id: 1, 
@@ -39,16 +37,10 @@ const defaultCategories: Category[] = [
   },
   { 
     id: 3, 
-    name: "Toque de Midas", 
-    description: "Uma dica de leitura, uma reflexão de curso ou uma simples conversa que muda o dia de alguém. Está sempre lapidando o que toca.",
-    icon: Sparkles
-  },
-  { 
-    id: 4, 
-    name: "Resenha de Livro ou Curso", 
-    description: "Transforma capítulos em insights e ideias em ação. A mente curiosa que lê por todos nós. A leitura é individual, mas o impacto é coletivo.",
+    name: "Aprendeu por si, falou por todos", 
+    description: "Leu, refletiu, conectou com a realidade e compartilhou algo que virou aprendizado coletivo.",
     icon: BookOpen
-  },
+  }
 ];
 
 const NewRecognitionDialog = ({ open, onOpenChange, categories = defaultCategories, isAdmin = false }: NewRecognitionDialogProps) => {
@@ -118,7 +110,8 @@ const NewRecognitionDialog = ({ open, onOpenChange, categories = defaultCategori
 
   return (
     <Dialog open={open} onOpenChange={handleDialogClose}>
-      <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[600px]">
+        <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground" />
         <DialogHeader>
           <DialogTitle className="text-xl flex items-center">
             <Award className="mr-2 h-5 w-5 text-cofcoin-purple" />
@@ -128,11 +121,8 @@ const NewRecognitionDialog = ({ open, onOpenChange, categories = defaultCategori
             Reconheça um colega pelo trabalho excepcional
           </DialogDescription>
         </DialogHeader>
-        
-        {/* Fixed close button positioned at the top-right corner */}
-        <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground" />
 
-        <form onSubmit={handleSubmit} className="space-y-6 py-2">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-4">
             {/* Recipient field */}
             <div className="space-y-2">
@@ -178,13 +168,13 @@ const NewRecognitionDialog = ({ open, onOpenChange, categories = defaultCategori
                     return (
                       <div
                         key={category.id}
-                        className={`border rounded-md p-3 cursor-pointer transition-colors ${
+                        className={`border rounded-md p-4 cursor-pointer transition-colors ${
                           selectedCategory === category.id 
                             ? "border-cofcoin-purple bg-cofcoin-purple/10" 
                             : "border-gray-200 hover:border-cofcoin-purple/50"
                         }`}
                       >
-                        <div className="flex items-start space-x-2">
+                        <div className="flex items-start space-x-3">
                           <RadioGroupItem
                             value={category.id.toString()}
                             id={`category-${category.id}`}
@@ -200,7 +190,7 @@ const NewRecognitionDialog = ({ open, onOpenChange, categories = defaultCategori
                                 {category.name}
                               </Label>
                             </div>
-                            <p className="text-sm text-gray-600 mt-1">{category.description}</p>
+                            <p className="text-sm text-gray-600 mt-1 line-clamp-3">{category.description}</p>
                           </div>
                         </div>
                       </div>
@@ -218,7 +208,7 @@ const NewRecognitionDialog = ({ open, onOpenChange, categories = defaultCategori
                 placeholder="Descreva por que você está reconhecendo essa pessoa..."
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="min-h-[100px]"
+                className="min-h-[100px] resize-none"
               />
               <p className="text-xs text-gray-500">
                 Explique o motivo do reconhecimento e como isso ajudou a equipe ou empresa
@@ -229,7 +219,7 @@ const NewRecognitionDialog = ({ open, onOpenChange, categories = defaultCategori
           <DialogFooter>
             <Button 
               type="submit"
-              className="bg-cofcoin-purple hover:bg-cofcoin-purple-dark text-white"
+              className="bg-cofcoin-purple hover:bg-cofcoin-purple-dark text-white w-full sm:w-auto"
               disabled={isSubmitting}
             >
               {isSubmitting ? (

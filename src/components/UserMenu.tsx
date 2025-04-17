@@ -21,9 +21,10 @@ import {
 interface UserMenuProps {
   userName: string;
   isAdmin?: boolean;
+  className?: string;
 }
 
-const UserMenu: React.FC<UserMenuProps> = ({ userName, isAdmin = false }) => {
+const UserMenu: React.FC<UserMenuProps> = ({ userName, isAdmin = false, className }) => {
   const navigate = useNavigate();
   
   const handleLogout = () => {
@@ -54,17 +55,17 @@ const UserMenu: React.FC<UserMenuProps> = ({ userName, isAdmin = false }) => {
         
         <DropdownMenuSeparator />
         
-        <DropdownMenuItem onClick={() => navigate('/profile')} className="cursor-pointer">
+        <DropdownMenuItem className="flex items-center cursor-pointer" onClick={() => navigate('/profile')}>
           <UserIcon className="mr-2 h-4 w-4" />
           <span>Perfil</span>
         </DropdownMenuItem>
         
-        <DropdownMenuItem onClick={() => navigate('/settings')} className="cursor-pointer">
+        <DropdownMenuItem className="flex items-center cursor-pointer" onClick={() => navigate('/settings')}>
           <Settings className="mr-2 h-4 w-4" />
           <span>Configurações</span>
         </DropdownMenuItem>
         
-        <DropdownMenuItem onClick={() => navigate('/notifications')} className="cursor-pointer">
+        <DropdownMenuItem className="flex items-center cursor-pointer" onClick={() => navigate('/notifications')}>
           <Bell className="mr-2 h-4 w-4" />
           <span>Notificações</span>
           <span className="ml-auto bg-cofcoin-purple text-white w-5 h-5 rounded-full flex items-center justify-center text-xs">
@@ -75,7 +76,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ userName, isAdmin = false }) => {
         {isAdmin && (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => navigate('/admin')} className="cursor-pointer">
+            <DropdownMenuItem className="flex items-center cursor-pointer" onClick={() => navigate('/admin')}>
               <Settings className="mr-2 h-4 w-4" />
               <span>Painel Admin</span>
             </DropdownMenuItem>
@@ -84,7 +85,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ userName, isAdmin = false }) => {
         
         <DropdownMenuSeparator />
         
-        <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600">
+        <DropdownMenuItem className="flex items-center cursor-pointer text-red-600" onClick={handleLogout}>
           <LogOut className="mr-2 h-4 w-4" />
           <span>Sair</span>
         </DropdownMenuItem>
