@@ -1,7 +1,7 @@
 
 import React from 'react';
 import CategoryCard from './CategoryCard';
-import { Award, Eye, Gift, Heart, Lightbulb, Shield, Sparkles, Wrench } from "lucide-react";
+import { Award, Eye, Gift, Heart, Lightbulb, Shield, Sparkles, Wrench, BookOpen } from "lucide-react";
 
 const categoriesData = [
   {
@@ -41,16 +41,22 @@ const categoriesData = [
     color: "bg-indigo-100"
   },
   {
+    title: "Toque de Midas",
+    description: "Uma dica de leitura, uma reflexão de curso ou uma simples conversa que muda o dia de alguém. Está sempre lapidando o que toca.",
+    icon: <Sparkles className="h-8 w-8 text-yellow-600" />,
+    color: "bg-yellow-100"
+  },
+  {
+    title: "Resenha de Livro ou Curso",
+    description: "Transforma capítulos em insights e ideias em ação. A mente curiosa que lê por todos nós. A leitura é individual, mas o impacto é coletivo.",
+    icon: <BookOpen className="h-8 w-8 text-cofcoin-purple" />,
+    color: "bg-cofcoin-purple/20"
+  },
+  {
     title: "Participou de Live",
     description: "30 CofCoins",
     icon: <Award className="h-8 w-8 text-cofcoin-orange" />,
     color: "bg-cofcoin-orange/20"
-  },
-  {
-    title: "Conclusão de curso",
-    description: "50-100 CofCoins",
-    icon: <Gift className="h-8 w-8 text-cofcoin-purple" />,
-    color: "bg-cofcoin-purple/20"
   }
 ];
 

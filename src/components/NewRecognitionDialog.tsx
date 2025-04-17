@@ -64,7 +64,9 @@ const NewRecognitionDialog = ({ open, onOpenChange, categories = defaultCategori
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Only validate fields when the form is actually submitted
+    // Validate fields only on actual submission attempt
+    if (isSubmitting) return;
+    
     if (!recipient || !amount || !selectedCategory || !description) {
       toast({
         title: "Campos obrigatórios",
@@ -117,7 +119,6 @@ const NewRecognitionDialog = ({ open, onOpenChange, categories = defaultCategori
   return (
     <Dialog open={open} onOpenChange={handleDialogClose}>
       <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
-        <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground" />
         <DialogHeader>
           <DialogTitle className="text-xl flex items-center">
             <Award className="mr-2 h-5 w-5 text-cofcoin-purple" />
@@ -127,6 +128,9 @@ const NewRecognitionDialog = ({ open, onOpenChange, categories = defaultCategori
             Reconheça um colega pelo trabalho excepcional
           </DialogDescription>
         </DialogHeader>
+        
+        {/* Fixed close button positioned at the top-right corner */}
+        <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground" />
 
         <form onSubmit={handleSubmit} className="space-y-6 py-2">
           <div className="space-y-4">
@@ -169,36 +173,39 @@ const NewRecognitionDialog = ({ open, onOpenChange, categories = defaultCategori
               <Label>Motivo do Reconhecimento</Label>
               <RadioGroup value={selectedCategory?.toString()} onValueChange={(value) => setSelectedCategory(parseInt(value))}>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {categories.map(category => (
-                    <div
-                      key={category.id}
-                      className={`border rounded-md p-3 cursor-pointer transition-colors ${
-                        selectedCategory === category.id 
-                          ? "border-cofcoin-purple bg-cofcoin-purple/10" 
-                          : "border-gray-200 hover:border-cofcoin-purple/50"
-                      }`}
-                    >
-                      <div className="flex items-start space-x-2">
-                        <RadioGroupItem
-                          value={category.id.toString()}
-                          id={`category-${category.id}`}
-                          className="mt-1"
-                        />
-                        <div className="flex-1">
-                          <div className="flex items-center">
-                            <category.icon className="h-4 w-4 mr-2 text-cofcoin-purple" />
-                            <Label 
-                              htmlFor={`category-${category.id}`} 
-                              className="font-medium cursor-pointer"
-                            >
-                              {category.name}
-                            </Label>
+                  {categories.map(category => {
+                    const Icon = category.icon;
+                    return (
+                      <div
+                        key={category.id}
+                        className={`border rounded-md p-3 cursor-pointer transition-colors ${
+                          selectedCategory === category.id 
+                            ? "border-cofcoin-purple bg-cofcoin-purple/10" 
+                            : "border-gray-200 hover:border-cofcoin-purple/50"
+                        }`}
+                      >
+                        <div className="flex items-start space-x-2">
+                          <RadioGroupItem
+                            value={category.id.toString()}
+                            id={`category-${category.id}`}
+                            className="mt-1"
+                          />
+                          <div className="flex-1">
+                            <div className="flex items-center">
+                              <Icon className="h-4 w-4 mr-2 text-cofcoin-purple" />
+                              <Label 
+                                htmlFor={`category-${category.id}`} 
+                                className="font-medium cursor-pointer"
+                              >
+                                {category.name}
+                              </Label>
+                            </div>
+                            <p className="text-sm text-gray-600 mt-1">{category.description}</p>
                           </div>
-                          <p className="text-sm text-gray-600 mt-1">{category.description}</p>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </RadioGroup>
             </div>

@@ -1,13 +1,13 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Award, Coins, Gift, LogOut, Send, Settings, User, Users, Shield, Eye } from 'lucide-react';
+import { Award, Coins, Gift, LogOut, Send, Settings, User, Users, Shield, Eye, Lightbulb, Sparkles, BookOpen } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import NewRecognitionDialog from '@/components/NewRecognitionDialog';
+import AnimatedCoinBalance from '@/components/AnimatedCoinBalance';
 import { format } from 'date-fns';
 
 // Mock data for demonstration with added dates
@@ -57,51 +57,62 @@ const sentRecognitions = [
   },
 ];
 
-// Updated category descriptions
+// Updated category definitions with the correct icon type
 const categories = [
   { 
     id: 1, 
     name: "Fora da Caixa", 
     description: "Pra quem sempre surpreende com soluções e ideias que ninguém tinha pensado, mudando o jogo e dando aquele toque criativo que faz toda a diferença.",
-    icon: <Award className="h-5 w-5 text-blue-600" />
+    icon: Lightbulb
   },
   { 
     id: 2, 
     name: "O Quebra Galho", 
     description: "Praquele parceiro que aparece rapidinho e resolve o problema sem enrolação. Quando você precisa, ele tá lá para fazer tudo se ajeitar.",
-    icon: <Send className="h-5 w-5 text-green-600" />
+    icon: Send
   },
   { 
     id: 3, 
     name: "Aqui é MedCof!", 
     description: "Pra quem age como se a empresa fosse sua casa: cuida, propõe melhorias e não deixa nada no 'deixa pra depois'. É aquele sentimento de 'se eu não fizer, ninguém faz'.",
-    icon: <User className="h-5 w-5 text-red-600" />
+    icon: User
   },
   { 
     id: 4, 
     name: "Mestre do Improviso", 
     description: "Pra aquele que, mesmo sem planejar, sempre acha um jeito de resolver a situação e sair da enrascada.",
-    icon: <Gift className="h-5 w-5 text-amber-600" />
+    icon: Gift
   },
   { 
     id: 5, 
     name: "Segurador de Rojão", 
     description: "Para aquele(a) colega que chega na hora certa para domar situações explosivas e manter a paz com muita habilidade e leveza.",
-    icon: <Shield className="h-5 w-5 text-purple-600" />
+    icon: Shield
   },
   { 
     id: 6, 
     name: "O Vidente", 
     description: "Praquele que, com uma visão quase sobrenatural, identifica e resolve perrengues antes mesmo de acontecerem.",
-    icon: <Eye className="h-5 w-5 text-indigo-600" />
+    icon: Eye
   },
+  {
+    id: 7,
+    name: "Toque de Midas",
+    description: "Uma dica de leitura, uma reflexão de curso ou uma simples conversa que muda o dia de alguém. Está sempre lapidando o que toca.",
+    icon: Sparkles
+  },
+  {
+    id: 8,
+    name: "Resenha de Livro ou Curso",
+    description: "Transforma capítulos em insights e ideias em ação. A mente curiosa que lê por todos nós. A leitura é individual, mas o impacto é coletivo.",
+    icon: BookOpen
+  }
 ];
 
 const Home = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
 
   const handleLogout = () => {
     toast({
@@ -177,27 +188,8 @@ const Home = () => {
             <p className="text-gray-600">Gerencie seus reconhecimentos e recompensas</p>
           </div>
           
-          {/* Enhanced coin balance display */}
-          <div 
-            className="relative overflow-hidden rounded-lg shadow-lg p-4 transition-all duration-300"
-            style={{
-              background: isHovered 
-                ? 'linear-gradient(135deg, #f97316 0%, #9b87f5 100%)' 
-                : 'linear-gradient(135deg, #9b87f5 0%, #f97316 100%)'
-            }}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-          >
-            <div className="relative z-10 flex items-center text-white font-medium">
-              <Coins className="mr-2 h-6 w-6" />
-              <div>
-                <span className="text-xs uppercase tracking-wide">Seu saldo</span>
-                <div className="text-xl font-bold">500 CofCoins</div>
-              </div>
-            </div>
-            <div className="absolute inset-0 bg-white opacity-10 rotate-12 scale-110 transform-gpu rounded-full blur-lg"></div>
-            <div className="absolute -bottom-4 -right-4 h-16 w-16 bg-white/20 rounded-full blur-lg"></div>
-          </div>
+          {/* Updated coin balance display */}
+          <AnimatedCoinBalance balance={500} />
         </div>
 
         {/* New Recognition Button - Always visible */}

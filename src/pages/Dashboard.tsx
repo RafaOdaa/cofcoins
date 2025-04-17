@@ -1,9 +1,8 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Award, Coins, Gift, Send, Trash2, Users } from 'lucide-react';
+import { Award, Coins, Gift, Send, Trash2, Users, Lightbulb, Eye, Shield, Sparkles, BookOpen } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
@@ -72,13 +71,16 @@ const sentRecognitions = [
   },
 ];
 
+// Updated categories with proper icon type
 const categories = [
-  { id: 1, name: "Fora da Caixa", description: "Ideias inovadoras que mudam o jogo" },
-  { id: 2, name: "O Quebra Galho", description: "Resolve tudo com agilidade" },
-  { id: 3, name: "Aqui é MedCof!", description: "Age com sentimento de dono" },
-  { id: 4, name: "Mestre do Improviso", description: "Brilha sem planejamento" },
-  { id: 5, name: "Segurador de Rojão", description: "Traz calma e resolve crises" },
-  { id: 6, name: "O Vidente", description: "Antecipação de problemas" },
+  { id: 1, name: "Fora da Caixa", description: "Ideias inovadoras que mudam o jogo", icon: Lightbulb },
+  { id: 2, name: "O Quebra Galho", description: "Resolve tudo com agilidade", icon: Send },
+  { id: 3, name: "Aqui é MedCof!", description: "Age com sentimento de dono", icon: Users },
+  { id: 4, name: "Mestre do Improviso", description: "Brilha sem planejamento", icon: Gift },
+  { id: 5, name: "Segurador de Rojão", description: "Traz calma e resolve crises", icon: Shield },
+  { id: 6, name: "O Vidente", description: "Antecipação de problemas", icon: Eye },
+  { id: 7, name: "Toque de Midas", description: "Uma dica de leitura, uma reflexão de curso ou uma simples conversa que muda o dia de alguém. Está sempre lapidando o que toca.", icon: Sparkles },
+  { id: 8, name: "Resenha de Livro ou Curso", description: "Transforma capítulos em insights e ideias em ação. A mente curiosa que lê por todos nós. A leitura é individual, mas o impacto é coletivo.", icon: BookOpen },
 ];
 
 const Dashboard = () => {
