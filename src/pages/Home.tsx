@@ -9,6 +9,8 @@ import { useToast } from "@/hooks/use-toast";
 import NewRecognitionDialog from '@/components/NewRecognitionDialog';
 import AnimatedCoinBalance from '@/components/AnimatedCoinBalance';
 import { format } from 'date-fns';
+import UserMenu from '@/components/UserMenu';
+import RecognitionDetailDialog from '@/components/RecognitionDetailDialog';
 
 // Mock data for demonstration with added dates
 const myRecognitions = [
@@ -113,6 +115,8 @@ const Home = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedRecognition, setSelectedRecognition] = useState<typeof myRecognitions[0] | null>(null);
+  const [detailDialogOpen, setDetailDialogOpen] = useState(false);
 
   const handleLogout = () => {
     toast({
@@ -230,7 +234,14 @@ const Home = () => {
                     </TableHeader>
                     <TableBody>
                       {myRecognitions.map((recognition) => (
-                        <TableRow key={recognition.id}>
+                        <TableRow 
+                          key={recognition.id} 
+                          className="cursor-pointer hover:bg-gray-50"
+                          onClick={() => {
+                            setSelectedRecognition(recognition);
+                            setDetailDialogOpen(true);
+                          }}
+                        >
                           <TableCell className="font-medium">{recognition.reporter}</TableCell>
                           <TableCell className="text-cofcoin-orange font-medium">{recognition.amount}</TableCell>
                           <TableCell className="hidden md:table-cell">{recognition.category}</TableCell>
@@ -301,6 +312,13 @@ const Home = () => {
         open={isDialogOpen} 
         onOpenChange={setIsDialogOpen} 
         categories={categories}
+      />
+      
+      {/* Add Recognition Detail Dialog */}
+      <RecognitionDetailDialog 
+        recognition={selectedRecognition}
+        open={detailDialogOpen}
+        onOpenChange={setDetailDialogOpen}
       />
     </div>
   );

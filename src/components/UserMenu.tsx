@@ -15,8 +15,7 @@ import {
   LogOut, 
   Settings, 
   User as UserIcon, 
-  Bell, 
-  ShieldCheck
+  Bell 
 } from 'lucide-react';
 
 interface UserMenuProps {
@@ -28,7 +27,6 @@ const UserMenu: React.FC<UserMenuProps> = ({ userName, isAdmin = false }) => {
   const navigate = useNavigate();
   
   const handleLogout = () => {
-    // In a real app, we would clear the session
     navigate('/login');
   };
 
@@ -45,7 +43,14 @@ const UserMenu: React.FC<UserMenuProps> = ({ userName, isAdmin = false }) => {
       </DropdownMenuTrigger>
       
       <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
+        <DropdownMenuLabel className="font-normal">
+          <div className="flex flex-col space-y-1">
+            <p className="text-sm font-medium leading-none">{userName}</p>
+            <p className="text-xs leading-none text-muted-foreground">
+              {isAdmin ? 'Administrador' : 'Colaborador'}
+            </p>
+          </div>
+        </DropdownMenuLabel>
         
         <DropdownMenuSeparator />
         
@@ -71,7 +76,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ userName, isAdmin = false }) => {
           <>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => navigate('/admin')} className="cursor-pointer">
-              <ShieldCheck className="mr-2 h-4 w-4" />
+              <Settings className="mr-2 h-4 w-4" />
               <span>Painel Admin</span>
             </DropdownMenuItem>
           </>
@@ -79,7 +84,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ userName, isAdmin = false }) => {
         
         <DropdownMenuSeparator />
         
-        <DropdownMenuItem onClick={handleLogout} className="text-red-600 cursor-pointer">
+        <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600">
           <LogOut className="mr-2 h-4 w-4" />
           <span>Sair</span>
         </DropdownMenuItem>

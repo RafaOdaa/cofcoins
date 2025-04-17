@@ -1,7 +1,6 @@
-
 import React from 'react';
 import CategoryCard from './CategoryCard';
-import { Award, Eye, Gift, Heart, Lightbulb, Shield, Sparkles, Wrench, BookOpen } from "lucide-react";
+import { Award, Eye, Gift, Heart, Lightbulb, Shield, Wrench, BookOpen } from "lucide-react";
 
 const categoriesData = [
   {
@@ -25,7 +24,7 @@ const categoriesData = [
   {
     title: "Mestre do Improviso",
     description: "Pra aquele que, mesmo sem planejar, sempre acha um jeito de resolver a situação e sair da enrascada.",
-    icon: <Sparkles className="h-8 w-8 text-amber-600" />,
+    icon: <Gift className="h-8 w-8 text-amber-600" />,
     color: "bg-amber-100"
   },
   {
@@ -41,14 +40,8 @@ const categoriesData = [
     color: "bg-indigo-100"
   },
   {
-    title: "Toque de Midas",
-    description: "Uma dica de leitura, uma reflexão de curso ou uma simples conversa que muda o dia de alguém. Está sempre lapidando o que toca.",
-    icon: <Sparkles className="h-8 w-8 text-yellow-600" />,
-    color: "bg-yellow-100"
-  },
-  {
-    title: "Resenha de Livro ou Curso",
-    description: "Transforma capítulos em insights e ideias em ação. A mente curiosa que lê por todos nós. A leitura é individual, mas o impacto é coletivo.",
+    title: "Aprendeu por si, falou por todos",
+    description: "Com uma mente inquieta e coração generoso, compartilhou um insight de leitura que virou semente em todo mundo. Uma mente curiosa que lê com propósito e compartilha com paixão.",
     icon: <BookOpen className="h-8 w-8 text-cofcoin-purple" />,
     color: "bg-cofcoin-purple/20"
   },
