@@ -1,8 +1,9 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Coffee, Coins, Gift, History, Home, ShoppingBag, Ticket, Zap, Calendar } from 'lucide-react';
+import { Coins, Gift, History, Home, ShoppingBag, Ticket, Zap, Calendar, Coffee } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -11,8 +12,9 @@ import { format } from 'date-fns';
 import ConfirmationDialog from '@/components/ConfirmationDialog';
 import { TooltipProvider, Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import UserMenu from '@/components/UserMenu';
+import AnimatedCoinBalance from '@/components/AnimatedCoinBalance';
 
-// Modified rewards data
+// Modified rewards data with reordering
 const rewardsData = [
   {
     id: 7,
@@ -22,11 +24,11 @@ const rewardsData = [
     value: 400
   },
   {
-    id: 1,
-    title: "Vale Café",
-    description: "Um café especial na cafeteria parceira",
-    icon: Coffee,
-    value: 150
+    id: 9,
+    title: "1:1 com Augusto",
+    description: "Aquela consultoria ao vivo, troque aquela ideia com o big boss",
+    icon: Calendar,
+    value: 9999
   },
   {
     id: 8,
@@ -34,6 +36,13 @@ const rewardsData = [
     description: "Ninguém é de ferro",
     icon: Calendar,
     value: 2000
+  },
+  {
+    id: 1,
+    title: "Vale Café",
+    description: "Um café especial na cafeteria parceira",
+    icon: Coffee,
+    value: 150
   },
   {
     id: 2,
@@ -69,13 +78,6 @@ const rewardsData = [
     description: "Curso de especialização à sua escolha",
     icon: Zap,
     value: 800
-  },
-  {
-    id: 9,
-    title: "1:1 com Augusto",
-    description: "Aquela consultoria ao vivo, troque aquela ideia com o big boss",
-    icon: Calendar,
-    value: 9999
   }
 ];
 
@@ -217,31 +219,11 @@ const RewardsPage = () => {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => navigate('/dashboard')}
+                onClick={() => navigate('/home')}
                 className="text-gray-600 hover:text-cofcoin-purple transition-colors duration-300"
               >
                 <Home className="h-5 w-5 mr-1" />
-                <span className="hidden sm:inline">Dashboard</span>
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate(-1)}
-                className="text-gray-600 hover:text-cofcoin-purple transition-colors duration-300"
-              >
-                <ArrowLeft className="h-5 w-5 mr-1" />
-                <span className="hidden sm:inline">Voltar</span>
-              </Button>
-              
-              {/* Admin link for reward approval - would be conditionally shown */}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate('/admin/reward-approvals')}
-                className="text-gray-600 hover:text-cofcoin-purple transition-colors duration-300"
-              >
-                <Gift className="h-5 w-5 mr-1" />
-                <span className="hidden sm:inline">Aprovar Recompensas</span>
+                <span className="hidden sm:inline">Home</span>
               </Button>
               
               {/* User Menu */}
@@ -257,34 +239,7 @@ const RewardsPage = () => {
             <h1 className="text-2xl font-bold text-gray-900">Recompensas</h1>
             <p className="text-gray-600">Use seus CofCoins para resgatar prêmios incríveis</p>
           </div>
-          <div className="relative">
-            <div className="absolute inset-0 animate-neon-glow z-0 rounded-lg" />
-            <div className="relative z-10 bg-black bg-opacity-80 backdrop-blur-md rounded-lg p-4 text-white flex items-center">
-              <Coins className="mr-2 h-5 w-5 text-purple-300" />
-              <span>Saldo: <span className="font-semibold text-purple-300">500</span> CofCoins</span>
-            </div>
-            
-            <style jsx>{`
-              @keyframes neon-glow {
-                0% {
-                  box-shadow: 0 0 15px #4A00E0, 0 0 30px #8E2DE2, 0 0 45px #4A00E0;
-                }
-                50% {
-                  box-shadow: 0 0 25px #8E2DE2, 0 0 50px #4A00E0, 0 0 70px #8E2DE2;
-                }
-                100% {
-                  box-shadow: 0 0 15px #4A00E0, 0 0 30px #8E2DE2, 0 0 45px #4A00E0;
-                }
-              }
-
-              .animate-neon-glow {
-                background: linear-gradient(135deg, #4A00E0, #8E2DE2);
-                filter: blur(8px);
-                animation: neon-glow 6s ease-in-out infinite;
-                transition: all 0.5s ease-in;
-              }
-            `}</style>
-          </div>
+          <AnimatedCoinBalance balance={500} />
         </div>
 
         <Tabs defaultValue="rewards" className="w-full mb-8">
@@ -304,7 +259,18 @@ const RewardsPage = () => {
                         <reward.icon className="h-5 w-5 text-cofcoin-purple" />
                       </div>
                     </div>
-                    <CardDescription>{reward.description}</CardDescription>
+                    <CardDescription>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span>{reward.description}</span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>{reward.description}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="flex items-center text-cofcoin-orange font-medium text-lg">
@@ -315,7 +281,7 @@ const RewardsPage = () => {
                   <CardFooter className="bg-gray-50 border-t">
                     <Button 
                       onClick={(e) => handleRedeemReward(reward, e)} 
-                      className={`w-full ${reward.value > 500 ? 'bg-gray-300 hover:bg-gray-300 cursor-not-allowed' : 'bg-cofcoin-purple hover:bg-cofcoin-purple-dark'} text-white transition duration-300 ease-in-out`}
+                      className={`w-full ${reward.value > 500 ? 'bg-gray-400 hover:bg-gray-400 cursor-not-allowed opacity-70' : 'bg-cofcoin-purple hover:bg-cofcoin-purple-dark'} text-white transition duration-300 ease-in-out`}
                       disabled={reward.value > 500}
                     >
                       {reward.value > 500 ? (
@@ -356,7 +322,18 @@ const RewardsPage = () => {
                       {userRewardRequests.length > 0 ? (
                         userRewardRequests.map((request) => (
                           <TableRow key={request.id} className="hover:bg-gray-50">
-                            <TableCell className="font-medium">{request.title}</TableCell>
+                            <TableCell className="font-medium">
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span>{request.title}</span>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>{request.description}</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            </TableCell>
                             <TableCell className="text-cofcoin-orange">
                               <div className="flex items-center">
                                 <Coins className="mr-1 h-4 w-4" />

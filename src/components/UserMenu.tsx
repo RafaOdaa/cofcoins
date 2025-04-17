@@ -15,7 +15,6 @@ import {
   LogOut, 
   Settings, 
   User as UserIcon, 
-  CreditCard, 
   Bell, 
   ShieldCheck
 } from 'lucide-react';
@@ -58,11 +57,6 @@ const UserMenu: React.FC<UserMenuProps> = ({ userName, isAdmin = false }) => {
         <DropdownMenuItem onClick={() => navigate('/settings')} className="cursor-pointer">
           <Settings className="mr-2 h-4 w-4" />
           <span>Configurações</span>
-        </DropdownMenuItem>
-        
-        <DropdownMenuItem onClick={() => navigate('/transactions')} className="cursor-pointer">
-          <CreditCard className="mr-2 h-4 w-4" />
-          <span>Transações</span>
         </DropdownMenuItem>
         
         <DropdownMenuItem onClick={() => navigate('/notifications')} className="cursor-pointer">
