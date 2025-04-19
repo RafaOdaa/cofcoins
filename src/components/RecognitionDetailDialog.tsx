@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { format } from 'date-fns';
 import { Award, Coins } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import { LucideIcon } from 'lucide-react';
 
 export interface Recognition {
   id: number;
@@ -14,6 +15,7 @@ export interface Recognition {
   description: string;
   date: Date;
   status?: string;
+  icon?: LucideIcon;  // Add icon as an optional property
 }
 
 interface RecognitionDetailDialogProps {

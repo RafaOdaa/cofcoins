@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
+import UserMenu from "./UserMenu";
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -23,7 +24,7 @@ const Navbar = () => {
                   <span className="text-white font-bold text-sm">C</span>
                 </div>
               </div>
-              <span className="text-xl font-bold text-gray-900">CofCoinf</span>
+              <span className="text-xl font-bold text-gray-900">CofCoin</span>
             </Link>
           </div>
 
@@ -41,21 +42,17 @@ const Navbar = () => {
             <a href="#rewards" className="text-gray-700 hover:text-cofcoin-purple transition-colors">
               Recompensas
             </a>
-            <Button
-              size="sm"
-              className="ml-4 bg-cofcoin-purple hover:bg-cofcoin-purple-dark text-white"
-              variant="default"
-              onClick={() => window.location.href = '/login'}
-            >
-              Acessar Plataforma
-            </Button>
+            <div className="ml-4 flex items-center">
+              <UserMenu userName="Visitante" />
+            </div>
           </div>
 
           {/* Mobile menu button */}
-          <div className="md:hidden">
+          <div className="md:hidden flex items-center">
+            <UserMenu userName="Visitante" />
             <button
               onClick={toggleMobileMenu}
-              className="text-gray-500 hover:text-cofcoin-purple focus:outline-none"
+              className="ml-2 text-gray-500 hover:text-cofcoin-purple focus:outline-none"
             >
               {mobileMenuOpen ? (
                 <X className="h-6 w-6" />

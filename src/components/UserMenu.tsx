@@ -19,24 +19,31 @@ import {
 } from 'lucide-react';
 
 interface UserMenuProps {
-  userName: string;
+  userName?: string;
   isAdmin?: boolean;
   className?: string;
 }
 
-const UserMenu: React.FC<UserMenuProps> = ({ userName, isAdmin = false, className }) => {
+const UserMenu: React.FC<UserMenuProps> = ({ 
+  userName = "Usuário", 
+  isAdmin = false, 
+  className 
+}) => {
   const navigate = useNavigate();
   
   const handleLogout = () => {
     navigate('/login');
   };
 
+  // Use the first letter of the userName, or 'U' as a fallback
+  const userInitial = userName && userName.length > 0 ? userName.charAt(0) : 'U';
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="flex items-center gap-2">
           <div className="h-8 w-8 rounded-full bg-cofcoin-purple-dark flex items-center justify-center text-white font-medium">
-            {userName.charAt(0)}
+            {userInitial}
           </div>
           <span className="hidden md:inline">{userName}</span>
           <ChevronDown className="h-4 w-4 opacity-60" />
@@ -76,7 +83,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ userName, isAdmin = false, classNam
         {isAdmin && (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="flex items-center cursor-pointer" onClick={() => navigate('/admin')}>
+            <DropdownMenuItem className="flex items-center cursor-pointer" onClick={() => navigate('/admin/dashboard')}>
               <Settings className="mr-2 h-4 w-4" />
               <span>Painel Admin</span>
             </DropdownMenuItem>
