@@ -1,1730 +1,696 @@
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
-} from "@/components/ui/card";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
-import { 
-  Tabs, 
-  TabsContent, 
-  TabsList, 
-  TabsTrigger 
-} from "@/components/ui/tabs";
-import { 
-  ArrowLeft,
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { format } from 'date-fns';
+import {
+  Activity,
   Award,
-  CheckCircle, 
-  Coins,
-  Eye,
-  Filter,
+  CheckCircle,
+  ChevronsUpDown,
   Gift,
-  History,
-  Home,
-  PenSquare,
   Plus,
   Search,
-  Shield,
-  Trash2,
-  Trophy,
-  User,
-  UserRound,
+  Star,
+  TrendingUp,
   Users,
-  Wrench,
-  XCircle,
+  BookOpen
 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { Input } from '@/components/ui/input';
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { format } from 'date-fns';
-import ConfirmationDialog from '@/components/ConfirmationDialog';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Textarea } from "@/components/ui/textarea";
-import RecognitionDetailDialog, { Recognition } from '@/components/RecognitionDetailDialog';
-import EditUserBalanceDialog from '@/components/EditUserBalanceDialog';
-import UserMenu from '@/components/UserMenu';
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
-// Enhanced mock recognition data with approver information
-const approvalRequests = [
+import RecognitionDetailDialog, { Recognition } from "@/components/RecognitionDetailDialog";
+import UserMenu from '@/components/UserMenu';
+
+// Category data with types and colors for charts
+const categories = [
+  { name: "Colaboração Excepcional", value: 42, color: "#8884d8" },
+  { name: "Inovação Constante", value: 28, color: "#82ca9d" },
+  { name: "Compromisso com Qualidade", value: 35, color: "#ffc658" },
+  { name: "Liderança Inspiradora", value: 20, color: "#ff8042" },
+  { name: "Aprendeu por si, falou por todos", value: 15, color: "#0088fe" }
+];
+
+// Mock data for the approval items
+const approvalItems: Recognition[] = [
   {
     id: 1,
-    reporter: "João Silva",
-    recipient: "Maria Oliveira",
-    amount: 100,
-    category: "Fora da Caixa",
-    status: "pendente",
-    date: new Date('2025-04-15T10:15:00'),
-    description: "Maria trouxe uma ideia inovadora para melhorar nosso processo de atendimento ao cliente, resultando em uma redução de 30% no tempo de resposta.",
-    approver: null
+    reporter: "Carolina Silva",
+    recipient: "Lucas Mendes",
+    amount: 25,
+    category: "Colaboração Excepcional",
+    description: "Lucas demonstrou um trabalho exemplar ao auxiliar toda a equipe durante o lançamento do novo produto. Sua disponibilidade e conhecimento técnico foram fundamentais para o sucesso do projeto.",
+    date: new Date(2023, 9, 15),
+    status: "pending",
+    icon: Award
   },
   {
     id: 2,
-    reporter: "Ana Lima",
-    recipient: "Pedro Santos",
-    amount: 50,
-    category: "O Quebra Galho",
-    status: "pendente",
-    date: new Date('2025-04-14T16:30:00'),
-    description: "Pedro resolveu um problema crítico no servidor durante o final de semana, evitando uma paralisação dos serviços na segunda-feira.",
-    approver: null
+    reporter: "Rafael Costa",
+    recipient: "Amanda Oliveira",
+    amount: 10,
+    category: "Inovação Constante",
+    description: "Amanda propôs uma solução criativa que otimizou nosso processo de atendimento, reduzindo o tempo de resposta em 30%.",
+    date: new Date(2023, 9, 14),
+    status: "pending",
+    icon: Star
   },
   {
     id: 3,
-    reporter: "Carlos Costa",
-    recipient: "Juliana Mendes",
-    amount: 100,
-    category: "Segurador de Rojão",
-    status: "concluída",
-    date: new Date('2025-04-12T14:45:00'),
-    description: "Juliana lidou com maestria com um cliente insatisfeito, revertendo completamente a situação e mantendo o contrato que estávamos prestes a perder.",
-    approver: "Marcelo Diretor"
+    reporter: "Juliana Santos",
+    recipient: "Pedro Henrique",
+    amount: 15,
+    category: "Aprendeu por si, falou por todos",
+    description: "Pedro compartilhou conhecimentos valiosos de um curso recente sobre gestão ágil, ajudando toda a equipe a implementar práticas mais eficientes.",
+    date: new Date(2023, 9, 13),
+    status: "pending",
+    icon: BookOpen
+  }
+];
+
+// Mock data for user balances
+const userBalances = [
+  { id: 1, name: "Lucas Mendes", balance: 135, department: "Tecnologia" },
+  { id: 2, name: "Amanda Oliveira", balance: 120, department: "Marketing" },
+  { id: 3, name: "Pedro Henrique", balance: 95, department: "Produto" },
+  { id: 4, name: "Carolina Silva", balance: 85, department: "RH" },
+  { id: 5, name: "Rafael Costa", balance: 75, department: "Vendas" },
+  { id: 6, name: "Juliana Santos", balance: 65, department: "Financeiro" },
+  { id: 7, name: "Bruno Almeida", balance: 60, department: "Atendimento" },
+  { id: 8, name: "Mariana Lima", balance: 55, department: "Operações" },
+  { id: 9, name: "Fernando Gomes", balance: 50, department: "Tecnologia" },
+  { id: 10, name: "Isabela Martins", balance: 45, department: "Marketing" }
+];
+
+// Mock data for recognition history
+const recognitionHistory = [
+  {
+    id: 1,
+    sender: "Carolina Silva",
+    recipient: "Lucas Mendes",
+    category: "Colaboração Excepcional",
+    amount: 25,
+    date: new Date(2023, 9, 15)
+  },
+  {
+    id: 2,
+    sender: "Rafael Costa",
+    recipient: "Amanda Oliveira",
+    category: "Inovação Constante",
+    amount: 10,
+    date: new Date(2023, 9, 14)
+  },
+  {
+    id: 3,
+    sender: "Juliana Santos",
+    recipient: "Pedro Henrique",
+    category: "Aprendeu por si, falou por todos",
+    amount: 15,
+    date: new Date(2023, 9, 13)
   },
   {
     id: 4,
-    reporter: "Fernanda Gomes",
-    recipient: "Rafael Alves",
-    amount: 50,
-    category: "O Vidente",
-    status: "cancelada",
-    date: new Date('2025-04-10T09:20:00'),
-    description: "Rafael previu uma falha iminente no sistema e implementou medidas preventivas antes que causasse problemas maiores.",
-    approver: "Marcelo Diretor"
+    sender: "Bruno Almeida",
+    recipient: "Carolina Silva",
+    category: "Liderança Inspiradora",
+    amount: 20,
+    date: new Date(2023, 9, 12)
   },
   {
     id: 5,
-    reporter: "Paulo Silveira",
-    recipient: "Amanda Costa",
-    amount: 100,
-    category: "Mestre do Improviso",
-    status: "pendente",
-    date: new Date('2025-04-16T09:20:00'),
-    description: "Amanda conseguiu criar uma apresentação incrível para um cliente importante com apenas duas horas de antecedência após a versão original ter sido perdida.",
-    approver: null
-  },
-  {
-    id: 6,
-    reporter: "Marcelo Ferreira",
-    recipient: "Patrícia Santos",
-    amount: 50,
-    category: "Aqui é MedCof!",
-    status: "pendente",
-    date: new Date('2025-04-16T11:35:00'),
-    description: "Patrícia ficou até tarde para garantir que a entrega do projeto fosse feita no prazo, mesmo não sendo sua responsabilidade direta.",
-    approver: null
-  },
-  {
-    id: 7,
-    reporter: "Roberta Lopes",
-    recipient: "Gustavo Martins",
-    amount: 100,
-    category: "Fora da Caixa",
-    status: "pendente",
-    date: new Date('2025-04-15T15:20:00'),
-    description: "Gustavo desenvolveu uma solução criativa para um problema que estávamos enfrentando há meses, economizando recursos significativos para a empresa.",
-    approver: null
-  },
-  {
-    id: 8,
-    reporter: "Carolina Alves",
-    recipient: "Fernando Gomes",
-    amount: 50,
-    category: "O Quebra Galho",
-    status: "concluída",
-    date: new Date('2025-04-11T13:40:00'),
-    description: "Fernando ajudou a resolver um bug crítico mesmo estando de férias, acessando remotamente e orientando a equipe.",
-    approver: "Cláudia Gerente"
-  },
-  {
-    id: 9,
-    reporter: "Eduarda Souza",
-    recipient: "Alexandre Rocha",
-    amount: 100,
-    category: "Segurador de Rojão",
-    status: "pendente",
-    date: new Date('2025-04-15T09:15:00'),
-    description: "Alexandre conseguiu gerenciar uma crise de comunicação com a imprensa de forma exemplar, protegendo a imagem da empresa.",
-    approver: null
-  },
-  {
-    id: 10,
-    reporter: "Ricardo Ferreira",
-    recipient: "Bianca Lima",
-    amount: 50,
-    category: "O Vidente",
-    status: "pendente",
-    date: new Date('2025-04-14T10:30:00'),
-    description: "Bianca identificou uma vulnerabilidade no sistema antes que pudesse ser explorada, evitando um possível vazamento de dados.",
-    approver: null
-  },
-  {
-    id: 11,
-    reporter: "Gabriela Nunes",
-    recipient: "Leonardo Santos",
-    amount: 100,
-    category: "Mestre do Improviso",
-    status: "cancelada",
-    date: new Date('2025-04-09T16:45:00'),
-    description: "Leonardo conseguiu entregar uma solução alternativa para um cliente quando o produto principal apresentou problemas, salvando a relação comercial.",
-    approver: "Cláudia Gerente"
-  },
-  {
-    id: 12,
-    reporter: "Camila Ferreira",
-    recipient: "Henrique Oliveira",
-    amount: 50,
-    category: "Aqui é MedCof!",
-    status: "concluída",
-    date: new Date('2025-04-05T11:20:00'),
-    description: "Henrique frequentemente faz sugestões para melhorar o ambiente de trabalho e participa ativamente de todas as iniciativas da empresa.",
-    approver: "Marcelo Diretor"
+    sender: "Mariana Lima",
+    recipient: "Rafael Costa",
+    category: "Compromisso com Qualidade",
+    amount: 15,
+    date: new Date(2023, 9, 11)
   }
 ];
 
-// Mock reward requests data with approver information
-const rewardRequestsData = [
-  { 
-    id: 1, 
-    user: "Ana Oliveira",
-    title: "Vale Café", 
-    value: 150, 
-    status: "pendente",
-    requestDate: new Date('2025-04-15T14:25:00'),
-    description: "Gostaria de trocar meus CofCoins por um vale café para utilizar na cafeteria do prédio.",
-    approver: null
-  },
-  { 
-    id: 2, 
-    user: "Carlos Mendes",
-    title: "Gift Card R$50", 
-    value: 500, 
-    status: "pendente",
-    requestDate: new Date('2025-04-14T09:30:00'),
-    description: "Quero utilizar meus CofCoins acumulados para um gift card da Amazon.",
-    approver: null
-  },
-  { 
-    id: 3, 
-    user: "Juliana Lima",
-    title: "Vale Cinema", 
-    value: 300, 
-    status: "concluída",
-    requestDate: new Date('2025-04-12T16:45:00'),
-    description: "Vou ao cinema com minha família e gostaria de usar meus CofCoins para isso.",
-    approver: "Ricardo Supervisor"
-  },
-  { 
-    id: 4, 
-    user: "Rodrigo Almeida",
-    title: "Vale Café", 
-    value: 150, 
-    status: "cancelada",
-    requestDate: new Date('2025-04-10T11:20:00'),
-    description: "Preciso de um café para me manter produtivo durante a tarde.",
-    approver: "Cláudia Gerente"
-  },
-  { 
-    id: 5, 
-    user: "Amanda Sousa",
-    title: "Gift Card R$50", 
-    value: 500, 
-    status: "concluída",
-    requestDate: new Date('2025-04-08T13:15:00'),
-    description: "Pretendo comprar um livro com este gift card da Amazon.",
-    approver: "Marcelo Diretor"
-  },
-  { 
-    id: 6, 
-    user: "Fernando Gomes",
-    title: "Vale Restaurante", 
-    value: 450, 
-    status: "pendente",
-    requestDate: new Date('2025-04-16T10:05:00'),
-    description: "Gostaria de usar meus CofCoins para um almoço especial no restaurante próximo ao escritório.",
-    approver: null
-  },
-  { 
-    id: 7, 
-    user: "Mariana Costa",
-    title: "Assinatura Streaming", 
-    value: 350, 
-    status: "pendente",
-    requestDate: new Date('2025-04-16T08:15:00'),
-    description: "Quero trocar meus CofCoins por um mês de assinatura do serviço de streaming.",
-    approver: null
-  },
+// Mock data for dashboard metrics
+const topSenders = [
+  { name: "Carolina Silva", value: 120 },
+  { name: "Rafael Costa", value: 95 },
+  { name: "Bruno Almeida", value: 85 },
+  { name: "Juliana Santos", value: 75 },
+  { name: "Mariana Lima", value: 65 },
 ];
 
-// Balance history mock data
-const balanceHistoryData = [
-  { 
-    id: 1, 
-    user: "Maria Oliveira", 
-    previousBalance: 650, 
-    newBalance: 750, 
-    type: "adição", 
-    reason: "Reconhecimento recebido", 
-    changedBy: "Sistema", 
-    changeDate: new Date('2025-04-15T14:30:00'),
-  },
-  { 
-    id: 2, 
-    user: "João Silva", 
-    previousBalance: 700, 
-    newBalance: 650, 
-    type: "redução", 
-    reason: "Ajuste administrativo", 
-    changedBy: "Cláudia Gerente", 
-    changeDate: new Date('2025-04-14T10:45:00'),
-  },
-  { 
-    id: 3, 
-    user: "Ana Lima", 
-    previousBalance: 400, 
-    newBalance: 500, 
-    type: "adição", 
-    reason: "Reconhecimento recebido", 
-    changedBy: "Sistema", 
-    changeDate: new Date('2025-04-12T09:15:00'),
-  },
-  { 
-    id: 4, 
-    user: "Pedro Santos", 
-    previousBalance: 550, 
-    newBalance: 450, 
-    type: "redução", 
-    reason: "Resgate de recompensa", 
-    changedBy: "Sistema", 
-    changeDate: new Date('2025-04-10T16:20:00'),
-  },
-  { 
-    id: 5, 
-    user: "Juliana Mendes", 
-    previousBalance: 250, 
-    newBalance: 350, 
-    type: "adição", 
-    reason: "Bônus administrativo", 
-    changedBy: "Marcelo Diretor", 
-    changeDate: new Date('2025-04-09T11:30:00'),
-  },
-  { 
-    id: 6, 
-    user: "Carlos Costa", 
-    previousBalance: 350, 
-    newBalance: 300, 
-    type: "redução", 
-    reason: "Resgate de recompensa", 
-    changedBy: "Sistema", 
-    changeDate: new Date('2025-04-08T14:10:00'),
-  },
-  { 
-    id: 7, 
-    user: "Fernanda Gomes", 
-    previousBalance: 200, 
-    newBalance: 250, 
-    type: "adição", 
-    reason: "Reconhecimento recebido", 
-    changedBy: "Sistema", 
-    changeDate: new Date('2025-04-07T09:40:00'),
-  },
-  { 
-    id: 8, 
-    user: "Rafael Alves", 
-    previousBalance: 250, 
-    newBalance: 200, 
-    type: "redução", 
-    reason: "Resgate de recompensa", 
-    changedBy: "Sistema", 
-    changeDate: new Date('2025-04-05T15:50:00'),
-  }
+const topRecipients = [
+  { name: "Lucas Mendes", value: 135 },
+  { name: "Amanda Oliveira", value: 120 },
+  { name: "Pedro Henrique", value: 95 },
+  { name: "Fernando Gomes", value: 75 },
+  { name: "Isabela Martins", value: 65 },
 ];
 
-// Mock user rankings
-const userRankings = [
-  { id: 1, name: "Maria Oliveira", recognitionsReceived: 15, totalCoins: 1250 },
-  { id: 2, name: "João Silva", recognitionsReceived: 12, totalCoins: 950 },
-  { id: 3, name: "Ana Lima", recognitionsReceived: 10, totalCoins: 800 },
-  { id: 4, name: "Pedro Santos", recognitionsReceived: 8, totalCoins: 650 },
-  { id: 5, name: "Juliana Mendes", recognitionsReceived: 7, totalCoins: 550 },
+const monthlyActivity = [
+  { name: "Jan", sent: 65, received: 70 },
+  { name: "Fev", sent: 75, received: 80 },
+  { name: "Mar", sent: 85, received: 90 },
+  { name: "Abr", sent: 70, received: 75 },
+  { name: "Mai", sent: 80, received: 85 },
+  { name: "Jun", sent: 90, received: 95 },
+  { name: "Jul", sent: 75, received: 80 },
+  { name: "Ago", sent: 85, received: 90 },
+  { name: "Set", sent: 95, received: 100 },
+  { name: "Out", sent: 85, received: 90 },
+  { name: "Nov", sent: 0, received: 0 },
+  { name: "Dez", sent: 0, received: 0 },
 ];
-
-// Mock user balances
-const userBalances = [
-  { id: 1, name: "Maria Oliveira", balance: 750, spent: 500 },
-  { id: 2, name: "João Silva", balance: 650, spent: 300 },
-  { id: 3, name: "Ana Lima", balance: 500, spent: 300 },
-  { id: 4, name: "Pedro Santos", balance: 450, spent: 200 },
-  { id: 5, name: "Juliana Mendes", balance: 350, spent: 200 },
-  { id: 6, name: "Carlos Costa", balance: 300, spent: 250 },
-  { id: 7, name: "Fernanda Gomes", balance: 250, spent: 150 },
-  { id: 8, name: "Rafael Alves", balance: 200, spent: 100 },
-];
-
-// Categories for admin recognition
-const categories = [
-  { 
-    id: 1, 
-    name: "Fora da Caixa", 
-    description: "Pra quem sempre surpreende com soluções e ideias que ninguém tinha pensado, mudando o jogo e dando aquele toque criativo que faz toda a diferença.",
-    icon: <Award className="h-5 w-5 text-blue-600" />
-  },
-  { 
-    id: 2, 
-    name: "O Quebra Galho", 
-    description: "Praquele parceiro que aparece rapidinho e resolve o problema sem enrolação. Quando você precisa, ele tá lá para fazer tudo se ajeitar.",
-    icon: <Wrench className="h-5 w-5 text-green-600" />
-  },
-  { 
-    id: 3, 
-    name: "Aqui é MedCof!", 
-    description: "Pra quem age como se a empresa fosse sua casa: cuida, propõe melhorias e não deixa nada no 'deixa pra depois'. É aquele sentimento de 'se eu não fizer, ninguém faz'.",
-    icon: <User className="h-5 w-5 text-red-600" />
-  },
-  { 
-    id: 4, 
-    name: "Mestre do Improviso", 
-    description: "Pra aquele que, mesmo sem planejar, sempre acha um jeito de resolver a situação e sair da enrascada.",
-    icon: <Gift className="h-5 w-5 text-amber-600" />
-  },
-  { 
-    id: 5, 
-    name: "Segurador de Rojão", 
-    description: "Para aquele(a) colega que chega na hora certa para domar situações explosivas e manter a paz com muita habilidade e leveza.",
-    icon: <Shield className="h-5 w-5 text-purple-600" />
-  },
-  { 
-    id: 6, 
-    name: "O Vidente", 
-    description: "Praquele que, com uma visão quase sobrenatural, identifica e resolve perrengues antes mesmo de acontecerem.",
-    icon: <Eye className="h-5 w-5 text-indigo-600" />
-  },
-];
-
-type Status = "pendente" | "concluída" | "cancelada";
-
-const ITEMS_PER_PAGE = 5;
 
 const AdminDashboard = () => {
-  const navigate = useNavigate();
   const { toast } = useToast();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [selectedTab, setSelectedTab] = useState("approvals");
-  
-  // State for recognition data
-  const [recognitionData, setRecognitionData] = useState(approvalRequests);
-  const [rewardData, setRewardData] = useState(rewardRequestsData);
-  const [balanceHistory, setBalanceHistory] = useState(balanceHistoryData);
-  
-  // Recognition states
   const [selectedRecognition, setSelectedRecognition] = useState<Recognition | null>(null);
-  const [detailModalOpen, setDetailModalOpen] = useState(false);
-  const [confirmDialog, setConfirmDialog] = useState<{
-    open: boolean;
-    requestId: number;
-    type: 'recognition' | 'reward' | 'delete';
-    action: 'approve' | 'reject' | 'delete';
-  }>({ open: false, requestId: 0, type: 'recognition', action: 'approve' });
-  
-  // User balance states
-  const [selectedUser, setSelectedUser] = useState<any | null>(null);
-  const [editBalanceDialogOpen, setEditBalanceDialogOpen] = useState(false);
-  
-  // Admin recognition state
-  const [isRecognitionDialogOpen, setIsRecognitionDialogOpen] = useState(false);
-  const [recipient, setRecipient] = useState('');
-  const [coinAmount, setCoinAmount] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
-  const [description, setDescription] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  // Statistics
-  const pendingRecognitions = recognitionData.filter(r => r.status === 'pendente').length;
-  const approvedRecognitions = recognitionData.filter(r => r.status === 'concluída').length;
-  const rejectedRecognitions = recognitionData.filter(r => r.status === 'cancelada').length;
-  
-  const pendingRewards = rewardData.filter(r => r.status === 'pendente').length;
-  const approvedRewards = rewardData.filter(r => r.status === 'concluída').length;
-  const rejectedRewards = rewardData.filter(r => r.status === 'cancelada').length;
-  
-  // Filtered recognition requests
-  const filteredApprovals = recognitionData.filter(request => {
-    // Text search filter
-    const searchMatch = 
-      request.reporter.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      request.recipient.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      request.category.toLowerCase().includes(searchQuery.toLowerCase());
-      
-    // Status filter
-    const statusMatch = 
-      statusFilter === 'all' || request.status === statusFilter;
-    
-    return searchMatch && statusMatch;
-  });
-  
-  // Pagination
-  const totalApprovalPages = Math.ceil(filteredApprovals.length / ITEMS_PER_PAGE);
-  const paginatedApprovals = filteredApprovals.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  );
-  
-  // Filtered rewards
-  const filteredRewards = rewardData.filter(request => {
-    // Text search filter
-    const searchMatch = 
-      request.user.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      request.title.toLowerCase().includes(searchQuery.toLowerCase());
-      
-    // Status filter
-    const statusMatch = 
-      statusFilter === 'all' || request.status === statusFilter;
-    
-    return searchMatch && statusMatch;
-  });
-  
-  const totalRewardPages = Math.ceil(filteredRewards.length / ITEMS_PER_PAGE);
-  const paginatedRewards = filteredRewards.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  );
+  const [isRecognitionDetailOpen, setIsRecognitionDetailOpen] = useState(false);
+  const [isEditBalanceOpen, setIsEditBalanceOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<typeof userBalances[0] | null>(null);
+  const [newBalance, setNewBalance] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
-  // Filtered balance history
-  const filteredHistory = balanceHistory.filter(entry => {
-    const searchMatch = 
-      entry.user.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      entry.reason.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      entry.changedBy.toLowerCase().includes(searchQuery.toLowerCase());
-      
-    return searchMatch;
-  });
-  
-  const totalHistoryPages = Math.ceil(filteredHistory.length / ITEMS_PER_PAGE);
-  const paginatedHistory = filteredHistory.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  );
-
-  const handleTabChange = (value: string) => {
-    setSelectedTab(value);
-    setCurrentPage(1); // Reset pagination on tab change
-    setSearchQuery(''); // Reset search on tab change
-    setStatusFilter('all'); // Reset filter on tab change
-  };
-
-  const handleRecognitionRowClick = (recognition: any) => {
-    // Convert to our recognition format
-    const formattedRecognition: Recognition = {
-      id: recognition.id,
-      reporter: recognition.reporter,
-      recipient: recognition.recipient,
-      amount: recognition.amount,
-      category: recognition.category,
-      description: recognition.description,
-      status: recognition.status as "pendente" | "concluída" | "cancelada",
-      date: recognition.date,
-      icon: getCategoryIcon(recognition.category),
-      approver: recognition.approver
-    };
-    
-    setSelectedRecognition(formattedRecognition);
-    setDetailModalOpen(true);
-  };
-
-  const handleRewardRowClick = (reward: any) => {
-    setSelectedRecognition({
-      id: reward.id,
-      recipient: reward.user,
-      amount: reward.value,
-      category: reward.title,
-      description: reward.description,
-      status: reward.status as "pendente" | "concluída" | "cancelada",
-      date: reward.requestDate,
-      icon: <Gift className="h-5 w-5 text-cofcoin-orange" />,
-      approver: reward.approver
-    });
-    setDetailModalOpen(true);
-  };
-
-  const handleConfirmDialog = (requestId: number, type: 'recognition' | 'reward' | 'delete', action: 'approve' | 'reject' | 'delete') => {
-    setConfirmDialog({
-      open: true,
-      requestId,
-      type,
-      action
-    });
-  };
-
-  const handleConfirmAction = () => {
-    const { requestId, type, action } = confirmDialog;
-    
-    try {
-      if (action === 'delete') {
-        if (type === 'recognition') {
-          // Delete the recognition
-          const updatedRecognitions = recognitionData.filter(r => r.id !== requestId);
-          setRecognitionData(updatedRecognitions);
-          
-          toast({
-            title: "Reconhecimento excluído",
-            description: "O reconhecimento foi excluído com sucesso.",
-          });
-        } else if (type === 'reward') {
-          // Delete the reward request
-          const updatedRewards = rewardData.filter(r => r.id !== requestId);
-          setRewardData(updatedRewards);
-          
-          toast({
-            title: "Solicitação de recompensa excluída",
-            description: "A solicitação de recompensa foi excluída com sucesso.",
-          });
-        }
-      } else {
-        // Handle approve/reject
-        const actionText = action === 'approve' ? 'aprovado' : 'rejeitado';
-        const statusUpdate = action === 'approve' ? 'concluída' : 'cancelada';
-        const adminName = "Administrador"; // In a real app this would be the logged-in admin name
-        
-        if (type === 'recognition') {
-          // Update recognition status
-          const updatedRecognitions = recognitionData.map(r => {
-            if (r.id === requestId) {
-              return { ...r, status: statusUpdate, approver: adminName };
-            }
-            return r;
-          });
-          
-          setRecognitionData(updatedRecognitions);
-          
-          // Add to balance history if approved
-          if (action === 'approve') {
-            const recognition = recognitionData.find(r => r.id === requestId);
-            if (recognition) {
-              // Find the user
-              const user = userBalances.find(u => u.name === recognition.recipient);
-              if (user) {
-                const newBalance = user.balance + recognition.amount;
-                
-                // Add balance history entry
-                const newHistoryEntry = {
-                  id: balanceHistory.length + 1,
-                  user: recognition.recipient,
-                  previousBalance: user.balance,
-                  newBalance: newBalance,
-                  type: "adição" as const,
-                  reason: "Reconhecimento aprovado",
-                  changedBy: adminName,
-                  changeDate: new Date()
-                };
-                
-                setBalanceHistory([newHistoryEntry, ...balanceHistory]);
-              }
-            }
-          }
-          
-          toast({
-            title: `Reconhecimento ${actionText}`,
-            description: `O reconhecimento foi ${actionText} com sucesso.`,
-          });
-        } else if (type === 'reward') {
-          // Update reward status
-          const updatedRewards = rewardData.map(r => {
-            if (r.id === requestId) {
-              return { ...r, status: statusUpdate, approver: adminName };
-            }
-            return r;
-          });
-          
-          setRewardData(updatedRewards);
-          
-          // Deduct from user's balance if approved
-          if (action === 'approve') {
-            const reward = rewardData.find(r => r.id === requestId);
-            if (reward) {
-              // Find the user
-              const userIndex = userBalances.findIndex(u => u.name === reward.user);
-              if (userIndex !== -1) {
-                const user = userBalances[userIndex];
-                const newBalance = user.balance - reward.value;
-                
-                // Add balance history entry
-                const newHistoryEntry = {
-                  id: balanceHistory.length + 1,
-                  user: reward.user,
-                  previousBalance: user.balance,
-                  newBalance: newBalance,
-                  type: "redução" as const,
-                  reason: "Resgate de recompensa",
-                  changedBy: adminName,
-                  changeDate: new Date()
-                };
-                
-                setBalanceHistory([newHistoryEntry, ...balanceHistory]);
-              }
-            }
-          }
-          
-          toast({
-            title: `Solicitação de recompensa ${actionText}`,
-            description: `A solicitação de recompensa foi ${actionText} com sucesso.`,
-          });
-        }
-      }
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Ocorreu um erro ao processar a solicitação.",
-        variant: "destructive"
-      });
-    } finally {
-      setConfirmDialog({ ...confirmDialog, open: false });
-    }
-  };
-  
-  const handleEditUserBalance = (user: any) => {
-    setSelectedUser(user);
-    setEditBalanceDialogOpen(true);
-  };
-  
-  // Handle balance edit completion
-  const handleBalanceEditComplete = (userId: number, previousBalance: number, newBalance: number, reason: string) => {
-    // Update user balance in userBalances array
-    const updatedBalances = userBalances.map(user => {
-      if (user.id === userId) {
-        return { ...user, balance: newBalance };
-      }
-      return user;
-    });
-    
-    // Add to balance history
-    const user = userBalances.find(u => u.id === userId);
-    if (user) {
-      const newHistoryEntry = {
-        id: balanceHistory.length + 1,
-        user: user.name,
-        previousBalance: previousBalance,
-        newBalance: newBalance,
-        type: newBalance > previousBalance ? "adição" : "redução" as "adição" | "redução",
-        reason: reason,
-        changedBy: "Administrador", // In a real app this would be the logged-in admin name
-        changeDate: new Date()
-      };
-      
-      setBalanceHistory([newHistoryEntry, ...balanceHistory]);
-    }
-    
+  const handleApprove = (id: number) => {
     toast({
-      title: "Saldo atualizado",
-      description: "O saldo do colaborador foi atualizado com sucesso.",
+      title: "Reconhecimento aprovado",
+      description: `O reconhecimento #${id} foi aprovado com sucesso.`,
     });
+    setIsRecognitionDetailOpen(false);
   };
-  
-  const handleAdminRecognition = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!recipient || !coinAmount || !selectedCategory || !description) {
+
+  const handleReject = (id: number) => {
+    toast({
+      title: "Reconhecimento rejeitado",
+      description: `O reconhecimento #${id} foi rejeitado.`,
+      variant: "destructive",
+    });
+    setIsRecognitionDetailOpen(false);
+  };
+
+  const handleEditBalance = (user: typeof userBalances[0]) => {
+    setSelectedUser(user);
+    setNewBalance(user.balance.toString());
+    setIsEditBalanceOpen(true);
+  };
+
+  const handleSaveBalance = () => {
+    if (selectedUser) {
       toast({
-        title: "Campos obrigatórios",
-        description: "Preencha todos os campos para continuar.",
-        variant: "destructive",
+        title: "Saldo atualizado",
+        description: `O saldo de ${selectedUser.name} foi atualizado para ${newBalance} CofCoins.`,
       });
-      return;
-    }
-    
-    setIsSubmitting(true);
-    
-    try {
-      // Create a new recognition
-      const newRecognition = {
-        id: recognitionData.length + 1,
-        reporter: "Administrador",
-        recipient: recipient,
-        amount: parseInt(coinAmount),
-        category: categories.find(c => c.id === selectedCategory)?.name || "Não especificada",
-        status: "concluída" as const,
-        date: new Date(),
-        description: description,
-        approver: "Administrador (Auto-aprovado)"
-      };
-      
-      setRecognitionData([newRecognition, ...recognitionData]);
-      
-      // Add to balance history and update user balance
-      const userIndex = userBalances.findIndex(u => u.name === recipient);
-      if (userIndex !== -1) {
-        const user = userBalances[userIndex];
-        const newBalance = user.balance + parseInt(coinAmount);
-        
-        // Add balance history entry
-        const newHistoryEntry = {
-          id: balanceHistory.length + 1,
-          user: recipient,
-          previousBalance: user.balance,
-          newBalance: newBalance,
-          type: "adição" as const,
-          reason: "Reconhecimento especial de administrador",
-          changedBy: "Administrador",
-          changeDate: new Date()
-        };
-        
-        setBalanceHistory([newHistoryEntry, ...balanceHistory]);
-      }
-      
-      toast({
-        title: "Reconhecimento enviado",
-        description: `Reconhecimento enviado com sucesso para ${recipient} com ${coinAmount} CofCoins.`,
-      });
-      
-      // Reset form
-      setRecipient('');
-      setCoinAmount('');
-      setSelectedCategory(null);
-      setDescription('');
-      
-      // Close dialog
-      setIsRecognitionDialogOpen(false);
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Ocorreu um erro ao enviar o reconhecimento.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
+      setIsEditBalanceOpen(false);
     }
   };
-  
-  const getStatusColor = (status: Status) => {
-    switch(status) {
-      case "pendente": return "bg-yellow-100 text-yellow-800";
-      case "concluída": return "bg-green-100 text-green-800";
-      case "cancelada": return "bg-red-100 text-red-800";
-      default: return "bg-gray-100 text-gray-800";
-    }
-  };
-  
-  const getCategoryIcon = (categoryName: string) => {
-    const category = categories.find(cat => cat.name === categoryName);
-    return category?.icon || <Award className="h-5 w-5 text-gray-600" />;
-  };
+
+  const filteredUsers = userBalances.filter(user => 
+    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.department.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const filteredHistory = recognitionHistory.filter(record => 
+    record.sender.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    record.recipient.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    record.category.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm border-b border-gray-200">
+      {/* Header */}
+      <header className="bg-white shadow-sm">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex justify-between items-center py-4">
             <div className="flex items-center">
-              <div className="relative h-10 w-10 mr-2">
-                <div className="absolute inset-0 bg-cofcoin-orange rounded-full opacity-20"></div>
-                <div className="absolute inset-1 bg-cofcoin-purple rounded-full flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">C</span>
+              <div className="flex-shrink-0">
+                <div className="h-10 w-10 relative">
+                  <div className="absolute inset-0 bg-cofcoin-orange rounded-full opacity-20"></div>
+                  <div className="absolute inset-1 bg-cofcoin-purple rounded-full flex items-center justify-center">
+                    <span className="text-white font-bold text-sm">C</span>
+                  </div>
                 </div>
               </div>
-              <span className="text-xl font-bold text-gray-900">CofCoins</span>
+              <h1 className="ml-3 text-xl font-semibold text-gray-900">CofCoin Admin</h1>
             </div>
-            
-            <div className="flex items-center space-x-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate('/home')}
-                className="text-gray-600 hover:text-cofcoin-purple"
-              >
-                <Home className="h-5 w-5 mr-1" />
-                <span className="hidden sm:inline">Home</span>
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate('/rewards')}
-                className="text-gray-600 hover:text-cofcoin-purple"
-              >
-                <Gift className="h-5 w-5 mr-1" />
-                <span className="hidden sm:inline">Recompensas</span>
-              </Button>
+            <div className="flex items-center">
               <UserMenu userName="Admin" isAdmin={true} />
             </div>
           </div>
         </div>
       </header>
 
+      {/* Main content */}
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Painel Administrativo</h1>
-          
-          <Button 
-            onClick={() => setIsRecognitionDialogOpen(true)}
-            className="bg-cofcoin-purple hover:bg-cofcoin-purple-dark text-white"
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Enviar Reconhecimento Especial
-          </Button>
+        <div className="mb-8">
+          <h2 className="text-2xl font-semibold text-gray-900">Painel de Administração</h2>
+          <p className="text-gray-600">Gerencie reconhecimentos, recompensas e visualize estatísticas.</p>
         </div>
-        
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-          {/* Pending Approvals Card */}
-          <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border-yellow-200">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg flex items-center text-yellow-800">
-                <CheckCircle className="h-5 w-5 mr-2 text-yellow-600" />
-                Aprovações Pendentes
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex flex-col">
-                  <span className="text-2xl font-bold text-yellow-800">{pendingRecognitions}</span>
-                  <span className="text-sm text-yellow-700">Reconhecimentos</span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-2xl font-bold text-yellow-800">{pendingRewards}</span>
-                  <span className="text-sm text-yellow-700">Recompensas</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          {/* Approved Card */}
-          <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg flex items-center text-green-800">
-                <CheckCircle className="h-5 w-5 mr-2 text-green-600" />
-                Aprovados
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex flex-col">
-                  <span className="text-2xl font-bold text-green-800">{approvedRecognitions}</span>
-                  <span className="text-sm text-green-700">Reconhecimentos</span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-2xl font-bold text-green-800">{approvedRewards}</span>
-                  <span className="text-sm text-green-700">Recompensas</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          {/* Rejected Card */}
-          <Card className="bg-gradient-to-br from-red-50 to-rose-50 border-red-200">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg flex items-center text-red-800">
-                <XCircle className="h-5 w-5 mr-2 text-red-600" />
-                Rejeitados
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex flex-col">
-                  <span className="text-2xl font-bold text-red-800">{rejectedRecognitions}</span>
-                  <span className="text-sm text-red-700">Reconhecimentos</span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-2xl font-bold text-red-800">{rejectedRewards}</span>
-                  <span className="text-sm text-red-700">Recompensas</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-        
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>Filtros</CardTitle>
-            <CardDescription>Filtre as solicitações e reconhecimentos</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="relative">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
-                <Input
-                  placeholder="Buscar..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-8"
-                />
-              </div>
-              
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger>
-                  <div className="flex items-center">
-                    <Filter className="h-4 w-4 mr-2" />
-                    <SelectValue placeholder="Filtrar por status" />
-                  </div>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos os status</SelectItem>
-                  <SelectItem value="pendente">Pendente</SelectItem>
-                  <SelectItem value="concluída">Concluída</SelectItem>
-                  <SelectItem value="cancelada">Cancelada</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Tabs value={selectedTab} onValueChange={handleTabChange} className="w-full">
-          <TabsList className="grid w-full max-w-lg grid-cols-5 mb-4">
-            <TabsTrigger value="approvals">Aprovações</TabsTrigger>
-            <TabsTrigger value="rewards">Recompensas</TabsTrigger>
-            <TabsTrigger value="rankings">Rankings</TabsTrigger>
-            <TabsTrigger value="balances">Saldos</TabsTrigger>
-            <TabsTrigger value="history">Histórico</TabsTrigger>
+
+        {/* Tabs */}
+        <Tabs defaultValue="approvals" className="space-y-8">
+          <TabsList className="grid sm:grid-cols-3 md:grid-cols-5 mb-8 w-full bg-white">
+            <TabsTrigger value="approvals" className="data-[state=active]:bg-cofcoin-purple data-[state=active]:text-white">
+              Aprovações
+            </TabsTrigger>
+            <TabsTrigger value="rewards" className="data-[state=active]:bg-cofcoin-purple data-[state=active]:text-white">
+              Recompensas
+            </TabsTrigger>
+            <TabsTrigger value="ranking" className="data-[state=active]:bg-cofcoin-purple data-[state=active]:text-white">
+              Ranking
+            </TabsTrigger>
+            <TabsTrigger value="balances" className="data-[state=active]:bg-cofcoin-purple data-[state=active]:text-white">
+              Saldos
+            </TabsTrigger>
+            <TabsTrigger value="history" className="data-[state=active]:bg-cofcoin-purple data-[state=active]:text-white">
+              Histórico
+            </TabsTrigger>
           </TabsList>
-          
-          {/* Approval Tab Content */}
-          <TabsContent value="approvals">
+
+          {/* Approvals Tab */}
+          <TabsContent value="approvals" className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg flex items-center">
+                    <CheckCircle className="h-5 w-5 text-cofcoin-purple mr-2" />
+                    Aprovações Pendentes
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold">{approvalItems.length}</div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg flex items-center">
+                    <Users className="h-5 w-5 text-cofcoin-purple mr-2" />
+                    Usuários Ativos
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold">{userBalances.length}</div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg flex items-center">
+                    <Activity className="h-5 w-5 text-cofcoin-purple mr-2" />
+                    Total de CofCoins
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold">{userBalances.reduce((sum, user) => sum + user.balance, 0)}</div>
+                </CardContent>
+              </Card>
+            </div>
+            
             <Card>
               <CardHeader>
-                <CardTitle>Aprovações de Reconhecimentos</CardTitle>
-                <CardDescription>Gerencie as solicitações de reconhecimento entre colaboradores</CardDescription>
+                <CardTitle>Aprovações Pendentes</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="rounded-md border">
+                {approvalItems.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <CheckCircle className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                    <p>Não há reconhecimentos pendentes de aprovação.</p>
+                  </div>
+                ) : (
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Relator</TableHead>
+                        <TableHead>Solicitante</TableHead>
                         <TableHead>Destinatário</TableHead>
-                        <TableHead>Quantidade</TableHead>
-                        <TableHead className="hidden lg:table-cell">Categoria</TableHead>
-                        <TableHead>Data/Hora</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Aprovador</TableHead>
-                        <TableHead className="text-right">Ações</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {paginatedApprovals.length > 0 ? (
-                        paginatedApprovals.map((request) => (
-                          <TableRow 
-                            key={request.id}
-                            className="cursor-pointer hover:bg-gray-50"
-                            onClick={() => handleRecognitionRowClick(request)}
-                          >
-                            <TableCell>{request.reporter}</TableCell>
-                            <TableCell>{request.recipient}</TableCell>
-                            <TableCell>
-                              <div className="flex items-center text-cofcoin-orange">
-                                <Coins className="h-4 w-4 mr-1" />
-                                {request.amount}
-                              </div>
-                            </TableCell>
-                            <TableCell className="hidden lg:table-cell">
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <span>{request.category}</span>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>{request.description}</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            </TableCell>
-                            <TableCell>{format(request.date, 'dd/MM/yyyy HH:mm')}</TableCell>
-                            <TableCell>
-                              <Badge variant="outline" className={getStatusColor(request.status as Status)}>
-                                {request.status}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              {request.approver ? (
-                                <div className="flex items-center text-sm">
-                                  <UserRound className="h-3 w-3 mr-1 text-gray-500" />
-                                  {request.approver}
-                                </div>
-                              ) : (
-                                <span className="text-gray-400 text-sm">-</span>
-                              )}
-                            </TableCell>
-                            <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
-                              {request.status === "pendente" ? (
-                                <div className="flex justify-end gap-2">
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    className="flex items-center text-green-600 border-green-200 hover:bg-green-50"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleConfirmDialog(request.id, 'recognition', 'approve');
-                                    }}
-                                  >
-                                    <CheckCircle className="h-4 w-4 mr-1" />
-                                    <span className="hidden sm:inline">Aprovar</span>
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    className="flex items-center text-red-600 border-red-200 hover:bg-red-50"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleConfirmDialog(request.id, 'recognition', 'reject');
-                                    }}
-                                  >
-                                    <XCircle className="h-4 w-4 mr-1" />
-                                    <span className="hidden sm:inline">Rejeitar</span>
-                                  </Button>
-                                </div>
-                              ) : (
-                                <div className="flex justify-end">
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    className="flex items-center text-red-600 border-red-200 hover:bg-red-50"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleConfirmDialog(request.id, 'delete', 'delete');
-                                    }}
-                                  >
-                                    <Trash2 className="h-4 w-4 mr-1" />
-                                    <span className="hidden sm:inline">Excluir</span>
-                                  </Button>
-                                </div>
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      ) : (
-                        <TableRow>
-                          <TableCell colSpan={8} className="text-center py-6 text-gray-500">
-                            Nenhuma solicitação de reconhecimento encontrada.
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-                
-                {/* Pagination */}
-                {totalApprovalPages > 1 && (
-                  <div className="mt-4">
-                    <Pagination>
-                      <PaginationContent>
-                        <PaginationItem>
-                          <PaginationPrevious 
-                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                            className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                          >
-                            Anterior
-                          </PaginationPrevious>
-                        </PaginationItem>
-                        
-                        {Array.from({length: totalApprovalPages}, (_, i) => i + 1).map(page => (
-                          <PaginationItem key={page}>
-                            <PaginationLink 
-                              onClick={() => setCurrentPage(page)}
-                              isActive={currentPage === page}
-                            >
-                              {page}
-                            </PaginationLink>
-                          </PaginationItem>
-                        ))}
-                        
-                        <PaginationItem>
-                          <PaginationNext 
-                            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalApprovalPages))}
-                            className={currentPage === totalApprovalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                          >
-                            Próximo
-                          </PaginationNext>
-                        </PaginationItem>
-                      </PaginationContent>
-                    </Pagination>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          {/* Rewards Tab Content */}
-          <TabsContent value="rewards">
-            <Card>
-              <CardHeader>
-                <CardTitle>Solicitações de Recompensas</CardTitle>
-                <CardDescription>Gerencie as solicitações de troca de CofCoins por recompensas</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Usuário</TableHead>
-                        <TableHead>Recompensa</TableHead>
+                        <TableHead>Categoria</TableHead>
                         <TableHead>Valor</TableHead>
-                        <TableHead>Data/Hora</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Aprovador</TableHead>
+                        <TableHead>Data</TableHead>
                         <TableHead className="text-right">Ações</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {paginatedRewards.length > 0 ? (
-                        paginatedRewards.map((request) => (
-                          <TableRow 
-                            key={request.id}
-                            className="cursor-pointer hover:bg-gray-50"
-                            onClick={() => handleRewardRowClick(request)}
-                          >
-                            <TableCell>{request.user}</TableCell>
-                            <TableCell className="font-medium">
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <span>{request.title}</span>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>{request.description}</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center text-cofcoin-orange">
-                                <Coins className="h-4 w-4 mr-1" />
-                                {request.value}
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              {format(request.requestDate, 'dd/MM/yyyy HH:mm')}
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant="outline" className={getStatusColor(request.status as Status)}>
-                                {request.status}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              {request.approver ? (
-                                <div className="flex items-center text-sm">
-                                  <UserRound className="h-3 w-3 mr-1 text-gray-500" />
-                                  {request.approver}
-                                </div>
-                              ) : (
-                                <span className="text-gray-400 text-sm">-</span>
-                              )}
-                            </TableCell>
-                            <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
-                              {request.status === "pendente" ? (
-                                <div className="flex justify-end gap-2">
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    className="flex items-center text-green-600 border-green-200 hover:bg-green-50"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleConfirmDialog(request.id, 'reward', 'approve');
-                                    }}
-                                  >
-                                    <CheckCircle className="h-4 w-4 mr-1" />
-                                    <span className="hidden sm:inline">Aprovar</span>
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    className="flex items-center text-red-600 border-red-200 hover:bg-red-50"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleConfirmDialog(request.id, 'reward', 'reject');
-                                    }}
-                                  >
-                                    <XCircle className="h-4 w-4 mr-1" />
-                                    <span className="hidden sm:inline">Rejeitar</span>
-                                  </Button>
-                                </div>
-                              ) : (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="flex items-center text-red-600 border-red-200 hover:bg-red-50"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleConfirmDialog(request.id, 'delete', 'delete');
-                                  }}
-                                >
-                                  <Trash2 className="h-4 w-4 mr-1" />
-                                  <span className="hidden sm:inline">Excluir</span>
-                                </Button>
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      ) : (
-                        <TableRow>
-                          <TableCell colSpan={7} className="text-center py-6 text-gray-500">
-                            Nenhuma solicitação de recompensa encontrada.
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-                
-                {/* Pagination */}
-                {totalRewardPages > 1 && (
-                  <div className="mt-4">
-                    <Pagination>
-                      <PaginationContent>
-                        <PaginationItem>
-                          <PaginationPrevious 
-                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                            className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                          >
-                            Anterior
-                          </PaginationPrevious>
-                        </PaginationItem>
-                        
-                        {Array.from({length: totalRewardPages}, (_, i) => i + 1).map(page => (
-                          <PaginationItem key={page}>
-                            <PaginationLink 
-                              onClick={() => setCurrentPage(page)}
-                              isActive={currentPage === page}
-                            >
-                              {page}
-                            </PaginationLink>
-                          </PaginationItem>
-                        ))}
-                        
-                        <PaginationItem>
-                          <PaginationNext 
-                            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalRewardPages))}
-                            className={currentPage === totalRewardPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                          >
-                            Próximo
-                          </PaginationNext>
-                        </PaginationItem>
-                      </PaginationContent>
-                    </Pagination>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          {/* Rankings Tab Content */}
-          <TabsContent value="rankings">
-            <Card>
-              <CardHeader>
-                <CardTitle>Ranking de Reconhecimentos</CardTitle>
-                <CardDescription>Colaboradores que mais receberam reconhecimentos</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Posição</TableHead>
-                        <TableHead>Colaborador</TableHead>
-                        <TableHead>Reconhecimentos</TableHead>
-                        <TableHead>Total CofCoins</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {userRankings.map((user, index) => (
-                        <TableRow key={user.id}>
-                          <TableCell>
-                            <div className="flex items-center font-bold">
-                              {index === 0 && <Trophy className="h-5 w-5 text-yellow-500 mr-1" />}
-                              {index === 1 && <Trophy className="h-5 w-5 text-gray-400 mr-1" />}
-                              {index === 2 && <Trophy className="h-5 w-5 text-amber-700 mr-1" />}
-                              {index > 2 && <span className="w-6 text-center">{index + 1}</span>}
-                            </div>
-                          </TableCell>
-                          <TableCell className="font-medium">{user.name}</TableCell>
-                          <TableCell>{user.recognitionsReceived}</TableCell>
-                          <TableCell>
-                            <div className="flex items-center text-cofcoin-orange font-medium">
-                              <Coins className="h-4 w-4 mr-1" />
-                              {user.totalCoins}
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          {/* Balances Tab Content */}
-          <TabsContent value="balances">
-            <Card>
-              <CardHeader>
-                <CardTitle>Saldos dos Usuários</CardTitle>
-                <CardDescription>Gerencie os saldos de CofCoins de todos os colaboradores</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Colaborador</TableHead>
-                        <TableHead>Saldo Atual</TableHead>
-                        <TableHead>Já Utilizado</TableHead>
-                        <TableHead>Total</TableHead>
-                        <TableHead className="text-right">Ações</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {userBalances.map((user) => (
-                        <TableRow key={user.id}>
-                          <TableCell className="font-medium">{user.name}</TableCell>
-                          <TableCell>
-                            <div className="flex items-center text-cofcoin-orange font-medium">
-                              <Coins className="h-4 w-4 mr-1" />
-                              {user.balance}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center text-gray-600">
-                              <Coins className="h-4 w-4 mr-1" />
-                              {user.spent}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center font-medium">
-                              <Coins className="h-4 w-4 mr-1" />
-                              {user.balance + user.spent}
-                            </div>
-                          </TableCell>
+                      {approvalItems.map((item) => (
+                        <TableRow key={item.id}>
+                          <TableCell>{item.reporter}</TableCell>
+                          <TableCell>{item.recipient}</TableCell>
+                          <TableCell>{item.category}</TableCell>
+                          <TableCell>{item.amount} CofCoins</TableCell>
+                          <TableCell>{format(item.date, 'dd/MM/yyyy')}</TableCell>
                           <TableCell className="text-right">
-                            <Button
+                            <Button 
+                              variant="ghost" 
                               size="sm"
-                              variant="outline"
-                              className="text-cofcoin-purple border-cofcoin-purple/30 hover:bg-cofcoin-purple/10"
-                              onClick={() => handleEditUserBalance(user)}
+                              onClick={() => {
+                                setSelectedRecognition(item);
+                                setIsRecognitionDetailOpen(true);
+                              }}
                             >
-                              <PenSquare className="h-4 w-4 mr-1" />
-                              <span>Editar</span>
+                              Detalhes
                             </Button>
                           </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
                   </Table>
-                </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
-          
-          {/* History Tab Content - New Tab */}
+
+          {/* Rewards Tab */}
+          <TabsContent value="rewards">
+            <Card>
+              <CardHeader>
+                <CardTitle>Recompensas</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <div className="relative flex-1 max-w-sm">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Input 
+                      placeholder="Buscar recompensa..." 
+                      className="pl-10"
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                  </div>
+                  <Button className="bg-cofcoin-purple hover:bg-cofcoin-purple-dark">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Adicionar Recompensa
+                  </Button>
+                </div>
+                
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Nome</TableHead>
+                      <TableHead>Valor</TableHead>
+                      <TableHead>Disponibilidade</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Ações</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell>Day Off</TableCell>
+                      <TableCell>100 CofCoins</TableCell>
+                      <TableCell>10 disponíveis</TableCell>
+                      <TableCell><Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Ativa</Badge></TableCell>
+                      <TableCell>
+                        <Button variant="ghost" size="sm">Editar</Button>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>Vale Presente R$50</TableCell>
+                      <TableCell>50 CofCoins</TableCell>
+                      <TableCell>15 disponíveis</TableCell>
+                      <TableCell><Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Ativa</Badge></TableCell>
+                      <TableCell>
+                        <Button variant="ghost" size="sm">Editar</Button>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>Almoço com CEO</TableCell>
+                      <TableCell>200 CofCoins</TableCell>
+                      <TableCell>2 disponíveis</TableCell>
+                      <TableCell><Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Ativa</Badge></TableCell>
+                      <TableCell>
+                        <Button variant="ghost" size="sm">Editar</Button>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>Curso Online</TableCell>
+                      <TableCell>150 CofCoins</TableCell>
+                      <TableCell>5 disponíveis</TableCell>
+                      <TableCell><Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">Esgotando</Badge></TableCell>
+                      <TableCell>
+                        <Button variant="ghost" size="sm">Editar</Button>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>Home Office por 1 semana</TableCell>
+                      <TableCell>175 CofCoins</TableCell>
+                      <TableCell>0 disponíveis</TableCell>
+                      <TableCell><Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">Esgotada</Badge></TableCell>
+                      <TableCell>
+                        <Button variant="ghost" size="sm">Editar</Button>
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Ranking Tab */}
+          <TabsContent value="ranking">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <TrendingUp className="h-5 w-5 text-cofcoin-purple mr-2" /> 
+                    Maiores Envios
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={topSenders} layout="vertical">
+                      <XAxis type="number" />
+                      <YAxis type="category" dataKey="name" width={120} />
+                      <Tooltip />
+                      <Bar dataKey="value" fill="#8884d8" name="CofCoins enviados" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Award className="h-5 w-5 text-cofcoin-purple mr-2" /> 
+                    Maiores Receptores
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={topRecipients} layout="vertical">
+                      <XAxis type="number" />
+                      <YAxis type="category" dataKey="name" width={120} />
+                      <Tooltip />
+                      <Bar dataKey="value" fill="#82ca9d" name="CofCoins recebidos" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+
+              <Card className="md:col-span-2">
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Activity className="h-5 w-5 text-cofcoin-purple mr-2" /> 
+                    Atividade Mensal
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={monthlyActivity}>
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip />
+                      <Legend />
+                      <Bar dataKey="sent" fill="#8884d8" name="CofCoins enviados" />
+                      <Bar dataKey="received" fill="#82ca9d" name="CofCoins recebidos" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+
+              <Card className="md:col-span-2">
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Gift className="h-5 w-5 text-cofcoin-purple mr-2" /> 
+                    Distribuição por Categoria
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="flex items-center justify-center">
+                  <ResponsiveContainer width="100%" height={300}>
+                    <PieChart>
+                      <Pie
+                        data={categories}
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={100}
+                        dataKey="value"
+                        nameKey="name"
+                        label={({ name, value }) => `${name}: ${value}`}
+                      >
+                        {categories.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Balances Tab */}
+          <TabsContent value="balances">
+            <Card>
+              <CardHeader>
+                <CardTitle>Saldo de Usuários</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="relative max-w-sm">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input 
+                    placeholder="Buscar por nome ou departamento..." 
+                    className="pl-10"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+                
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Nome</TableHead>
+                      <TableHead>Departamento</TableHead>
+                      <TableHead>Saldo</TableHead>
+                      <TableHead className="text-right">Ações</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredUsers.map((user) => (
+                      <TableRow key={user.id}>
+                        <TableCell>{user.name}</TableCell>
+                        <TableCell>{user.department}</TableCell>
+                        <TableCell>{user.balance} CofCoins</TableCell>
+                        <TableCell className="text-right">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleEditBalance(user)}
+                          >
+                            Editar Saldo
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* History Tab */}
           <TabsContent value="history">
             <Card>
               <CardHeader>
-                <CardTitle>Histórico de Alterações de Saldo</CardTitle>
-                <CardDescription>Registro de todas as alterações de saldo dos colaboradores</CardDescription>
+                <CardTitle>Histórico de Reconhecimentos</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Data/Hora</TableHead>
-                        <TableHead>Colaborador</TableHead>
-                        <TableHead>Tipo</TableHead>
-                        <TableHead>Saldo Anterior</TableHead>
-                        <TableHead>Novo Saldo</TableHead>
-                        <TableHead>Motivo</TableHead>
-                        <TableHead>Alterado Por</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {paginatedHistory.length > 0 ? (
-                        paginatedHistory.map((entry) => (
-                          <TableRow key={entry.id} className="hover:bg-gray-50">
-                            <TableCell className="whitespace-nowrap">
-                              {format(entry.changeDate, 'dd/MM/yyyy HH:mm')}
-                            </TableCell>
-                            <TableCell className="font-medium">{entry.user}</TableCell>
-                            <TableCell>
-                              <Badge 
-                                variant="outline" 
-                                className={entry.type === "adição" ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-800"}
-                              >
-                                {entry.type}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="text-gray-600">
-                              <div className="flex items-center">
-                                <Coins className="h-4 w-4 mr-1" />
-                                {entry.previousBalance}
-                              </div>
-                            </TableCell>
-                            <TableCell className="font-medium">
-                              <div className="flex items-center text-cofcoin-orange">
-                                <Coins className="h-4 w-4 mr-1" />
-                                {entry.newBalance}
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <span className="truncate max-w-xs block">
-                                      {entry.reason.length > 25 ? `${entry.reason.substring(0, 25)}...` : entry.reason}
-                                    </span>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>{entry.reason}</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center text-sm">
-                                <UserRound className="h-3 w-3 mr-1 text-gray-500" />
-                                {entry.changedBy}
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      ) : (
-                        <TableRow>
-                          <TableCell colSpan={7} className="text-center py-6 text-gray-500">
-                            Nenhum histórico de alteração de saldo encontrado.
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
+              <CardContent className="space-y-6">
+                <div className="relative max-w-sm">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input 
+                    placeholder="Buscar no histórico..." 
+                    className="pl-10"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
                 </div>
                 
-                {/* Pagination */}
-                {totalHistoryPages > 1 && (
-                  <div className="mt-4">
-                    <Pagination>
-                      <PaginationContent>
-                        <PaginationItem>
-                          <PaginationPrevious 
-                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                            className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                          >
-                            Anterior
-                          </PaginationPrevious>
-                        </PaginationItem>
-                        
-                        {Array.from({length: totalHistoryPages}, (_, i) => i + 1).map(page => (
-                          <PaginationItem key={page}>
-                            <PaginationLink 
-                              onClick={() => setCurrentPage(page)}
-                              isActive={currentPage === page}
-                            >
-                              {page}
-                            </PaginationLink>
-                          </PaginationItem>
-                        ))}
-                        
-                        <PaginationItem>
-                          <PaginationNext 
-                            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalHistoryPages))}
-                            className={currentPage === totalHistoryPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                          >
-                            Próximo
-                          </PaginationNext>
-                        </PaginationItem>
-                      </PaginationContent>
-                    </Pagination>
-                  </div>
-                )}
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Remetente</TableHead>
+                      <TableHead>Destinatário</TableHead>
+                      <TableHead>Categoria</TableHead>
+                      <TableHead>Quantidade</TableHead>
+                      <TableHead>Data</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredHistory.map((record) => (
+                      <TableRow key={record.id}>
+                        <TableCell>{record.sender}</TableCell>
+                        <TableCell>{record.recipient}</TableCell>
+                        <TableCell>{record.category}</TableCell>
+                        <TableCell>{record.amount} CofCoins</TableCell>
+                        <TableCell>{format(record.date, 'dd/MM/yyyy')}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
-      </main>
 
-      {/* Confirmation Dialog */}
-      <ConfirmationDialog
-        open={confirmDialog.open}
-        onOpenChange={(open) => setConfirmDialog({ ...confirmDialog, open })}
-        onConfirm={handleConfirmAction}
-        title={
-          confirmDialog.action === 'delete'
-            ? 'Confirmar Exclusão'
-            : confirmDialog.action === 'approve'
-            ? 'Confirmar Aprovação'
-            : 'Confirmar Rejeição'
-        }
-        description={
-          confirmDialog.action === 'delete'
-            ? `Tem certeza que deseja excluir ${confirmDialog.type === 'recognition' ? 'este reconhecimento' : 'esta solicitação de recompensa'}?`
-            : `Tem certeza que deseja ${confirmDialog.action === 'approve' ? 'aprovar' : 'rejeitar'} ${confirmDialog.type === 'recognition' ? 'este reconhecimento' : 'esta solicitação de recompensa'}?`
-        }
-        confirmText={
-          confirmDialog.action === 'delete'
-            ? 'Excluir'
-            : confirmDialog.action === 'approve'
-            ? 'Aprovar'
-            : 'Rejeitar'
-        }
-        variant={confirmDialog.action === 'delete' || confirmDialog.action === 'reject' ? 'destructive' : 'default'}
-      />
+        {/* RecognitionDetail Dialog */}
+        <RecognitionDetailDialog 
+          recognition={selectedRecognition}
+          open={isRecognitionDetailOpen}
+          onOpenChange={setIsRecognitionDetailOpen}
+          showActions={true}
+          onApprove={handleApprove}
+          onReject={handleReject}
+        />
 
-      {/* Recognition Detail Dialog */}
-      <RecognitionDetailDialog
-        open={detailModalOpen}
-        onOpenChange={setDetailModalOpen}
-        recognition={selectedRecognition}
-        showActions={selectedRecognition?.status === "pendente"}
-        onApprove={(id) => handleConfirmDialog(id, selectedTab === "approvals" ? 'recognition' : 'reward', 'approve')}
-        onReject={(id) => handleConfirmDialog(id, selectedTab === "approvals" ? 'recognition' : 'reward', 'reject')}
-      />
-
-      {/* Admin Special Recognition Dialog */}
-      <Dialog open={isRecognitionDialogOpen} onOpenChange={setIsRecognitionDialogOpen}>
-        <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-xl flex items-center">
-              <Award className="mr-2 h-5 w-5 text-cofcoin-purple" />
-              Reconhecimento Especial (Admin)
-            </DialogTitle>
-            <DialogDescription>
-              Envie um reconhecimento especial com valor personalizado
-            </DialogDescription>
-          </DialogHeader>
-          
-          <form onSubmit={handleAdminRecognition} className="space-y-6 py-4">
-            {/* Recipient Field */}
-            <div className="space-y-2">
-              <Label htmlFor="recipient">Destinatário</Label>
-              <div className="relative">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
+        {/* Edit Balance Dialog */}
+        <Dialog open={isEditBalanceOpen} onOpenChange={setIsEditBalanceOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Editar Saldo</DialogTitle>
+              <DialogDescription>
+                {selectedUser && `Atualizando o saldo de ${selectedUser.name}`}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="balance">Novo Saldo (CofCoins)</Label>
                 <Input
-                  id="recipient"
-                  placeholder="Digite o nome do colaborador"
-                  value={recipient}
-                  onChange={(e) => setRecipient(e.target.value)}
-                  className="pl-8"
+                  id="balance"
+                  type="number"
+                  value={newBalance}
+                  onChange={(e) => setNewBalance(e.target.value)}
+                  min="0"
                 />
               </div>
             </div>
-
-            {/* Custom Amount Field */}
-            <div className="space-y-2">
-              <Label htmlFor="coinAmount">Valor em CofCoins</Label>
-              <Input
-                id="coinAmount"
-                type="number"
-                placeholder="Digite o valor"
-                value={coinAmount}
-                onChange={(e) => setCoinAmount(e.target.value)}
-                min="1"
-              />
-              <p className="text-sm text-gray-500">
-                Como administrador, você pode definir um valor personalizado
-              </p>
-            </div>
-
-            {/* Category Selection */}
-            <div className="space-y-3">
-              <Label>Selecione a Categoria</Label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {categories.map(category => (
-                  <div
-                    key={category.id}
-                    onClick={() => setSelectedCategory(category.id)}
-                    className={`border rounded-md p-3 cursor-pointer transition-colors ${
-                      selectedCategory === category.id 
-                        ? "border-cofcoin-purple bg-cofcoin-purple/10" 
-                        : "border-gray-200 hover:border-cofcoin-purple/50"
-                    }`}
-                  >
-                    <div className="flex items-center gap-2 mb-1">
-                      {category.icon}
-                      <h4 className="font-medium">{category.name}</h4>
-                    </div>
-                    <p className="text-sm text-gray-600">{category.description}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            {/* Description Field */}
-            <div className="space-y-2">
-              <Label htmlFor="description">Descrição</Label>
-              <Textarea
-                id="description"
-                placeholder="Descreva por que você está reconhecendo essa pessoa..."
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="min-h-[100px]"
-              />
-              <p className="text-sm text-gray-500">
-                Explique o motivo do reconhecimento e como isso ajudou a equipe ou empresa
-              </p>
-            </div>
-
             <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsRecognitionDialogOpen(false)}
-                disabled={isSubmitting}
+              <Button 
+                variant="outline" 
+                onClick={() => setIsEditBalanceOpen(false)}
               >
                 Cancelar
               </Button>
               <Button 
-                type="submit"
-                className="bg-cofcoin-purple hover:bg-cofcoin-purple-dark text-white"
-                disabled={isSubmitting}
+                className="bg-cofcoin-purple hover:bg-cofcoin-purple-dark"
+                onClick={handleSaveBalance}
               >
-                {isSubmitting ? (
-                  <div className="flex items-center">
-                    <div className="animate-spin mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
-                    Enviando...
-                  </div>
-                ) : (
-                  "Enviar Reconhecimento"
-                )}
+                Salvar
               </Button>
             </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
-      
-      {/* Edit User Balance Dialog */}
-      <EditUserBalanceDialog
-        open={editBalanceDialogOpen}
-        onOpenChange={setEditBalanceDialogOpen}
-        user={selectedUser}
-        onBalanceEditComplete={handleBalanceEditComplete}
-      />
+          </DialogContent>
+        </Dialog>
+      </main>
     </div>
   );
 };

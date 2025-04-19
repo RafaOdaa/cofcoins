@@ -2,14 +2,19 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import UserMenu from "./UserMenu";
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
+  };
+
+  const handleLoginClick = () => {
+    navigate("/login");
   };
 
   return (
@@ -43,13 +48,27 @@ const Navbar = () => {
               Recompensas
             </a>
             <div className="ml-4 flex items-center">
-              <UserMenu userName="Visitante" />
+              <Button
+                size="sm"
+                className="bg-cofcoin-purple hover:bg-cofcoin-purple-dark text-white"
+                variant="default"
+                onClick={handleLoginClick}
+              >
+                Acessar Plataforma
+              </Button>
             </div>
           </div>
 
           {/* Mobile menu button */}
           <div className="md:hidden flex items-center">
-            <UserMenu userName="Visitante" />
+            <Button
+              size="sm"
+              className="mr-2 bg-cofcoin-purple hover:bg-cofcoin-purple-dark text-white"
+              variant="default"
+              onClick={handleLoginClick}
+            >
+              Entrar
+            </Button>
             <button
               onClick={toggleMobileMenu}
               className="ml-2 text-gray-500 hover:text-cofcoin-purple focus:outline-none"
@@ -100,7 +119,7 @@ const Navbar = () => {
               size="sm"
               className="w-full bg-cofcoin-purple hover:bg-cofcoin-purple-dark text-white"
               variant="default"
-              onClick={() => window.location.href = '/login'}
+              onClick={handleLoginClick}
             >
               Acessar Plataforma
             </Button>
