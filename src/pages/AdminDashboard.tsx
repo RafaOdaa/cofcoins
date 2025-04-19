@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,30 +28,34 @@ import { format } from 'date-fns';
 import {
   Activity,
   Award,
+  BookOpen,
+  Check,
   CheckCircle,
   ChevronsUpDown,
   Gift,
+  Home,
   Plus,
   Search,
   Star,
   TrendingUp,
   Users,
-  BookOpen,
-  Home,
+  X,
   XCircle
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import RecognitionDetailDialog, { Recognition } from "@/components/RecognitionDetailDialog";
 import UserMenu from '@/components/UserMenu';
+import ConfirmationDialog from '@/components/ConfirmationDialog';
+import NewRecognitionDialog from '@/components/NewRecognitionDialog';
 
 // Category data with types and colors for charts
 const categories = [
-  { name: "Colaboração Excepcional", value: 42, color: "#8884d8" },
-  { name: "Inovação Constante", value: 28, color: "#82ca9d" },
-  { name: "Compromisso com Qualidade", value: 35, color: "#ffc658" },
-  { name: "Liderança Inspiradora", value: 20, color: "#ff8042" },
-  { name: "Aprendeu por si, falou por todos", value: 15, color: "#0088fe" }
+  { id: 1, name: "Colaboração Excepcional", value: 42, color: "#8884d8", icon: Award },
+  { id: 2, name: "Inovação Constante", value: 28, color: "#82ca9d", icon: Star },
+  { id: 3, name: "Compromisso com Qualidade", value: 35, color: "#ffc658", icon: CheckCircle },
+  { id: 4, name: "Liderança Inspiradora", value: 20, color: "#ff8042", icon: Users },
+  { id: 5, name: "Aprendeu por si, falou por todos", value: 15, color: "#0088fe", icon: BookOpen }
 ];
 
 // Mock data for the approval items
@@ -90,6 +95,46 @@ const approvalItems: Recognition[] = [
   }
 ];
 
+// Mock data for reward requests
+const rewardRequestsData = [
+  { 
+    id: 1, 
+    user: "Ana Oliveira",
+    title: "Vale Café", 
+    value: 150, 
+    status: "pendente",
+    requestDate: new Date("2025-04-15T14:25:00"),
+    description: "Gostaria de trocar meus CofCoins por um vale café para utilizar na cafeteria do prédio." 
+  },
+  { 
+    id: 2, 
+    user: "Carlos Mendes",
+    title: "Gift Card R$50", 
+    value: 500, 
+    status: "pendente",
+    requestDate: new Date("2025-04-14T09:30:00"),
+    description: "Quero utilizar meus CofCoins acumulados para um gift card da Amazon." 
+  },
+  { 
+    id: 3, 
+    user: "Juliana Lima",
+    title: "Vale Cinema", 
+    value: 300, 
+    status: "aprovado",
+    requestDate: new Date("2025-04-12T16:45:00"),
+    description: "Vou ao cinema com minha família e gostaria de usar meus CofCoins para isso."
+  },
+  { 
+    id: 4, 
+    user: "Rodrigo Almeida",
+    title: "Vale Café", 
+    value: 150, 
+    status: "reprovado",
+    requestDate: new Date("2025-04-10T11:20:00"),
+    description: "Preciso de um café para me manter produtivo durante a tarde."
+  }
+];
+
 // Mock data for user balances
 const userBalances = [
   { id: 1, name: "Lucas Mendes", balance: 135, department: "Tecnologia" },
@@ -112,7 +157,8 @@ const recognitionHistory = [
     recipient: "Lucas Mendes",
     category: "Colaboração Excepcional",
     amount: 25,
-    date: new Date(2023, 9, 15)
+    date: new Date(2023, 9, 15),
+    status: "aprovado"
   },
   {
     id: 2,
@@ -120,7 +166,8 @@ const recognitionHistory = [
     recipient: "Amanda Oliveira",
     category: "Inovação Constante",
     amount: 10,
-    date: new Date(2023, 9, 14)
+    date: new Date(2023, 9, 14),
+    status: "aprovado"
   },
   {
     id: 3,
@@ -128,7 +175,8 @@ const recognitionHistory = [
     recipient: "Pedro Henrique",
     category: "Aprendeu por si, falou por todos",
     amount: 15,
-    date: new Date(2023, 9, 13)
+    date: new Date(2023, 9, 13),
+    status: "pendente"
   },
   {
     id: 4,
@@ -136,7 +184,8 @@ const recognitionHistory = [
     recipient: "Carolina Silva",
     category: "Liderança Inspiradora",
     amount: 20,
-    date: new Date(2023, 9, 12)
+    date: new Date(2023, 9, 12),
+    status: "reprovado"
   },
   {
     id: 5,
@@ -144,7 +193,8 @@ const recognitionHistory = [
     recipient: "Rafael Costa",
     category: "Compromisso com Qualidade",
     amount: 15,
-    date: new Date(2023, 9, 11)
+    date: new Date(2023, 9, 11),
+    status: "aprovado"
   }
 ];
 
@@ -189,22 +239,54 @@ const AdminDashboard = () => {
   const [newBalance, setNewBalance] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
+  
+  // Estado para controle do diálogo de ação (aprovar/rejeitar)
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean;
+    id: number;
+    action: 'approve' | 'reject';
+  }>({
+    open: false,
+    id: 0,
+    action: 'approve'
+  });
 
+  // Estado para controle do diálogo de novo reconhecimento especial
+  const [isNewRecognitionOpen, setIsNewRecognitionOpen] = useState(false);
+
+  // Função para aprovar um reconhecimento
   const handleApprove = (id: number) => {
-    toast({
-      title: "Reconhecimento aprovado",
-      description: `O reconhecimento #${id} foi aprovado com sucesso.`,
+    setConfirmDialog({
+      open: true,
+      id,
+      action: 'approve'
     });
-    setIsRecognitionDetailOpen(false);
   };
 
+  // Função para rejeitar um reconhecimento
   const handleReject = (id: number) => {
-    toast({
-      title: "Reconhecimento rejeitado",
-      description: `O reconhecimento #${id} foi rejeitado.`,
-      variant: "destructive",
+    setConfirmDialog({
+      open: true,
+      id,
+      action: 'reject'
     });
-    setIsRecognitionDetailOpen(false);
+  };
+
+  // Função para confirmar a ação (aprovar/rejeitar)
+  const handleConfirmAction = () => {
+    if (confirmDialog.action === 'approve') {
+      toast({
+        title: "Reconhecimento aprovado",
+        description: `O reconhecimento #${confirmDialog.id} foi aprovado com sucesso.`,
+      });
+    } else {
+      toast({
+        title: "Reconhecimento rejeitado",
+        description: `O reconhecimento #${confirmDialog.id} foi rejeitado.`,
+        variant: "destructive",
+      });
+    }
+    setConfirmDialog({ ...confirmDialog, open: false });
   };
 
   const handleEditBalance = (user: typeof userBalances[0]) => {
@@ -223,16 +305,38 @@ const AdminDashboard = () => {
     }
   };
 
+  // Filtrar usuários com base no termo de pesquisa
   const filteredUsers = userBalances.filter(user => 
     user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.department.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Filtrar histórico com base no termo de pesquisa
   const filteredHistory = recognitionHistory.filter(record => 
     record.sender.toLowerCase().includes(searchTerm.toLowerCase()) ||
     record.recipient.toLowerCase().includes(searchTerm.toLowerCase()) ||
     record.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Contar estatísticas para os cards
+  const approvedCount = recognitionHistory.filter(record => record.status === "aprovado").length;
+  const rejectedCount = recognitionHistory.filter(record => record.status === "reprovado").length;
+  const pendingCount = recognitionHistory.filter(record => record.status === "pendente").length;
+
+  // Contar estatísticas para recompensas
+  const approvedRewards = rewardRequestsData.filter(reward => reward.status === "aprovado").length;
+  const pendingRewards = rewardRequestsData.filter(reward => reward.status === "pendente").length;
+  const rejectedRewards = rewardRequestsData.filter(reward => reward.status === "reprovado").length;
+
+  // Função para obter a cor baseada no status
+  const getStatusColor = (status: string) => {
+    switch(status.toLowerCase()) {
+      case "aprovado": return "bg-green-100 text-green-800 border-green-200";
+      case "pendente": return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      case "reprovado": return "bg-red-100 text-red-800 border-red-200";
+      default: return "bg-gray-100 text-gray-800 border-gray-200";
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -287,6 +391,16 @@ const AdminDashboard = () => {
           <p className="text-gray-600">Gerencie reconhecimentos, recompensas e visualize estatísticas.</p>
         </div>
 
+        <div className="flex justify-end mb-4">
+          <Button 
+            onClick={() => setIsNewRecognitionOpen(true)}
+            className="bg-cofcoin-purple hover:bg-cofcoin-purple-dark text-white"
+          >
+            <Plus className="h-4 w-4 mr-1" />
+            Reconhecimento Especial
+          </Button>
+        </div>
+
         {/* Tabs */}
         <Tabs defaultValue="approvals" className="space-y-8">
           <TabsList className="inline-flex h-10 items-center justify-center rounded-md bg-white p-1">
@@ -309,7 +423,7 @@ const AdminDashboard = () => {
 
           {/* Approvals Tab */}
           <TabsContent value="approvals" className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-lg flex items-center">
@@ -318,7 +432,7 @@ const AdminDashboard = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-green-600">24</div>
+                  <div className="text-3xl font-bold text-green-600">{approvedCount}</div>
                 </CardContent>
               </Card>
               
@@ -330,7 +444,19 @@ const AdminDashboard = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-red-600">8</div>
+                  <div className="text-3xl font-bold text-red-600">{rejectedCount}</div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg flex items-center">
+                    <Award className="h-5 w-5 text-yellow-600 mr-2" />
+                    Aprovações Pendentes
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-yellow-600">{pendingCount}</div>
                 </CardContent>
               </Card>
             </div>
@@ -354,6 +480,7 @@ const AdminDashboard = () => {
                         <TableHead>Categoria</TableHead>
                         <TableHead>Valor</TableHead>
                         <TableHead>Data</TableHead>
+                        <TableHead>Status</TableHead>
                         <TableHead className="text-right">Ações</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -365,16 +492,18 @@ const AdminDashboard = () => {
                           <TableCell>{item.category}</TableCell>
                           <TableCell>{item.amount} CofCoins</TableCell>
                           <TableCell>{format(item.date, 'dd/MM/yyyy')}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-200">
+                              Pendente
+                            </Badge>
+                          </TableCell>
                           <TableCell className="text-right">
                             <Button 
                               variant="ghost" 
                               size="sm"
-                              onClick={() => {
-                                setSelectedRecognition(item);
-                                setIsRecognitionDetailOpen(true);
-                              }}
+                              onClick={() => handleApprove(item.id)}
                             >
-                              Detalhes
+                              Avaliar
                             </Button>
                           </TableCell>
                         </TableRow>
@@ -388,24 +517,56 @@ const AdminDashboard = () => {
 
           {/* Rewards Tab */}
           <TabsContent value="rewards">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg flex items-center">
+                    <CheckCircle className="h-5 w-5 text-green-600 mr-2" />
+                    Recompensas Aprovadas
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-green-600">{approvedRewards}</div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg flex items-center">
+                    <XCircle className="h-5 w-5 text-red-600 mr-2" />
+                    Recompensas Rejeitadas
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-red-600">{rejectedRewards}</div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg flex items-center">
+                    <Award className="h-5 w-5 text-yellow-600 mr-2" />
+                    Recompensas Pendentes
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-yellow-600">{pendingRewards}</div>
+                </CardContent>
+              </Card>
+            </div>
+
             <Card>
               <CardHeader>
                 <CardTitle>Recompensas</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="flex justify-between items-center">
-                  <div className="relative flex-1 max-w-sm">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                    <Input 
-                      placeholder="Buscar recompensa..." 
-                      className="pl-10"
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                  </div>
-                  <Button className="bg-cofcoin-purple hover:bg-cofcoin-purple-dark">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Adicionar Recompensa
-                  </Button>
+                <div className="relative flex-1 max-w-sm">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input 
+                    placeholder="Buscar recompensa..." 
+                    className="pl-10"
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
                 </div>
                 
                 <Table>
@@ -424,7 +585,7 @@ const AdminDashboard = () => {
                       <TableCell>100 CofCoins</TableCell>
                       <TableCell>10 disponíveis</TableCell>
                       <TableCell>
-                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                        <Badge variant="outline" className={getStatusColor("aprovado")}>
                           Aprovado
                         </Badge>
                       </TableCell>
@@ -437,7 +598,7 @@ const AdminDashboard = () => {
                       <TableCell>50 CofCoins</TableCell>
                       <TableCell>15 disponíveis</TableCell>
                       <TableCell>
-                        <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+                        <Badge variant="outline" className={getStatusColor("pendente")}>
                           Pendente
                         </Badge>
                       </TableCell>
@@ -450,7 +611,7 @@ const AdminDashboard = () => {
                       <TableCell>175 CofCoins</TableCell>
                       <TableCell>5 disponíveis</TableCell>
                       <TableCell>
-                        <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+                        <Badge variant="outline" className={getStatusColor("reprovado")}>
                           Reprovado
                         </Badge>
                       </TableCell>
@@ -674,6 +835,7 @@ const AdminDashboard = () => {
                       <TableHead>Categoria</TableHead>
                       <TableHead>Quantidade</TableHead>
                       <TableHead>Data</TableHead>
+                      <TableHead>Status</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -684,6 +846,11 @@ const AdminDashboard = () => {
                         <TableCell>{record.category}</TableCell>
                         <TableCell>{record.amount} CofCoins</TableCell>
                         <TableCell>{format(record.date, 'dd/MM/yyyy')}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className={getStatusColor(record.status)}>
+                            {record.status.charAt(0).toUpperCase() + record.status.slice(1)}
+                          </Badge>
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -693,7 +860,18 @@ const AdminDashboard = () => {
           </TabsContent>
         </Tabs>
 
-        {/* RecognitionDetail Dialog */}
+        {/* Diálogo de confirmação para aprovar/rejeitar reconhecimento */}
+        <ConfirmationDialog
+          open={confirmDialog.open}
+          onOpenChange={(open) => setConfirmDialog({...confirmDialog, open})}
+          title={confirmDialog.action === 'approve' ? 'Aprovar Reconhecimento' : 'Rejeitar Reconhecimento'}
+          description={`Deseja realmente ${confirmDialog.action === 'approve' ? 'aprovar' : 'rejeitar'} este reconhecimento?`}
+          confirmText={confirmDialog.action === 'approve' ? 'Aprovar' : 'Rejeitar'}
+          variant={confirmDialog.action === 'reject' ? 'destructive' : 'default'}
+          onConfirm={handleConfirmAction}
+        />
+
+        {/* Diálogo de detalhes de reconhecimento */}
         <RecognitionDetailDialog 
           recognition={selectedRecognition}
           open={isRecognitionDetailOpen}
@@ -740,6 +918,14 @@ const AdminDashboard = () => {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Novo Reconhecimento Especial Dialog */}
+        <NewRecognitionDialog
+          open={isNewRecognitionOpen}
+          onOpenChange={setIsNewRecognitionOpen}
+          isAdmin={true}
+          categories={categories}
+        />
       </main>
     </div>
   );

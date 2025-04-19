@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import {
   Dialog,
@@ -13,17 +14,28 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
+import { LucideIcon } from 'lucide-react';
+
+// Definição da interface para categorias
+interface Category {
+  id: number;
+  name: string;
+  description?: string;
+  icon?: LucideIcon;
+}
 
 interface NewRecognitionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   isAdmin?: boolean;
+  categories?: Category[];
 }
 
 const NewRecognitionDialog: React.FC<NewRecognitionDialogProps> = ({
   open,
   onOpenChange,
-  isAdmin = false
+  isAdmin = false,
+  categories = []
 }) => {
   const { toast } = useToast();
   const [recipient, setRecipient] = useState("");
@@ -95,9 +107,18 @@ const NewRecognitionDialog: React.FC<NewRecognitionDialogProps> = ({
                   <SelectValue placeholder="Selecione a categoria" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Colaboração Excepcional">Colaboração Excepcional</SelectItem>
-                  <SelectItem value="Inovação Constante">Inovação Constante</SelectItem>
-                  <SelectItem value="Compromisso com Qualidade">Compromisso com Qualidade</SelectItem>
+                  {categories && categories.length > 0 ? (
+                    categories.map((cat) => (
+                      <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
+                    ))
+                  ) : (
+                    <>
+                      <SelectItem value="Colaboração Excepcional">Colaboração Excepcional</SelectItem>
+                      <SelectItem value="Inovação Constante">Inovação Constante</SelectItem>
+                      <SelectItem value="Compromisso com Qualidade">Compromisso com Qualidade</SelectItem>
+                      <SelectItem value="Aprendeu por si, falou por todos">Aprendeu por si, falou por todos</SelectItem>
+                    </>
+                  )}
                 </SelectContent>
               </Select>
             </div>
