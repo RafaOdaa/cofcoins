@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -36,8 +35,11 @@ import {
   Star,
   TrendingUp,
   Users,
-  BookOpen
+  BookOpen,
+  Home,
+  XCircle
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 import RecognitionDetailDialog, { Recognition } from "@/components/RecognitionDetailDialog";
 import UserMenu from '@/components/UserMenu';
@@ -186,6 +188,7 @@ const AdminDashboard = () => {
   const [selectedUser, setSelectedUser] = useState<typeof userBalances[0] | null>(null);
   const [newBalance, setNewBalance] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const navigate = useNavigate();
 
   const handleApprove = (id: number) => {
     toast({
@@ -248,7 +251,29 @@ const AdminDashboard = () => {
               </div>
               <h1 className="ml-3 text-xl font-semibold text-gray-900">CofCoin Admin</h1>
             </div>
-            <div className="flex items-center">
+            <div className="flex items-center space-x-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/home')}
+                className="text-gray-600 hover:text-cofcoin-purple"
+              >
+                <Home className="h-5 w-5 mr-1" />
+                <span>Home</span>
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/rewards')}
+                className="text-gray-600 hover:text-cofcoin-purple"
+              >
+                <Gift className="h-5 w-5 mr-1" />
+                <span>Recompensas</span>
+              </Button>
+              <div className="flex items-center space-x-2 px-4 py-2 bg-gray-50 rounded-lg">
+                <Users className="h-4 w-4 text-gray-500" />
+                <span className="text-sm text-gray-600">{userBalances.length} usuários ativos</span>
+              </div>
               <UserMenu userName="Admin" isAdmin={true} />
             </div>
           </div>
@@ -264,60 +289,48 @@ const AdminDashboard = () => {
 
         {/* Tabs */}
         <Tabs defaultValue="approvals" className="space-y-8">
-          <TabsList className="grid sm:grid-cols-3 md:grid-cols-5 mb-8 w-full bg-white">
-            <TabsTrigger value="approvals" className="data-[state=active]:bg-cofcoin-purple data-[state=active]:text-white">
+          <TabsList className="inline-flex h-10 items-center justify-center rounded-md bg-white p-1">
+            <TabsTrigger value="approvals" className="px-3">
               Aprovações
             </TabsTrigger>
-            <TabsTrigger value="rewards" className="data-[state=active]:bg-cofcoin-purple data-[state=active]:text-white">
+            <TabsTrigger value="rewards" className="px-3">
               Recompensas
             </TabsTrigger>
-            <TabsTrigger value="ranking" className="data-[state=active]:bg-cofcoin-purple data-[state=active]:text-white">
+            <TabsTrigger value="ranking" className="px-3">
               Ranking
             </TabsTrigger>
-            <TabsTrigger value="balances" className="data-[state=active]:bg-cofcoin-purple data-[state=active]:text-white">
+            <TabsTrigger value="balances" className="px-3">
               Saldos
             </TabsTrigger>
-            <TabsTrigger value="history" className="data-[state=active]:bg-cofcoin-purple data-[state=active]:text-white">
+            <TabsTrigger value="history" className="px-3">
               Histórico
             </TabsTrigger>
           </TabsList>
 
           {/* Approvals Tab */}
           <TabsContent value="approvals" className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-lg flex items-center">
-                    <CheckCircle className="h-5 w-5 text-cofcoin-purple mr-2" />
-                    Aprovações Pendentes
+                    <CheckCircle className="h-5 w-5 text-green-600 mr-2" />
+                    Aprovações Concluídas
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold">{approvalItems.length}</div>
+                  <div className="text-3xl font-bold text-green-600">24</div>
                 </CardContent>
               </Card>
               
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-lg flex items-center">
-                    <Users className="h-5 w-5 text-cofcoin-purple mr-2" />
-                    Usuários Ativos
+                    <XCircle className="h-5 w-5 text-red-600 mr-2" />
+                    Aprovações Rejeitadas
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold">{userBalances.length}</div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg flex items-center">
-                    <Activity className="h-5 w-5 text-cofcoin-purple mr-2" />
-                    Total de CofCoins
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold">{userBalances.reduce((sum, user) => sum + user.balance, 0)}</div>
+                  <div className="text-3xl font-bold text-red-600">8</div>
                 </CardContent>
               </Card>
             </div>
@@ -410,7 +423,11 @@ const AdminDashboard = () => {
                       <TableCell>Day Off</TableCell>
                       <TableCell>100 CofCoins</TableCell>
                       <TableCell>10 disponíveis</TableCell>
-                      <TableCell><Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Ativa</Badge></TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                          Aprovado
+                        </Badge>
+                      </TableCell>
                       <TableCell>
                         <Button variant="ghost" size="sm">Editar</Button>
                       </TableCell>
@@ -419,25 +436,11 @@ const AdminDashboard = () => {
                       <TableCell>Vale Presente R$50</TableCell>
                       <TableCell>50 CofCoins</TableCell>
                       <TableCell>15 disponíveis</TableCell>
-                      <TableCell><Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Ativa</Badge></TableCell>
                       <TableCell>
-                        <Button variant="ghost" size="sm">Editar</Button>
+                        <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+                          Pendente
+                        </Badge>
                       </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>Almoço com CEO</TableCell>
-                      <TableCell>200 CofCoins</TableCell>
-                      <TableCell>2 disponíveis</TableCell>
-                      <TableCell><Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Ativa</Badge></TableCell>
-                      <TableCell>
-                        <Button variant="ghost" size="sm">Editar</Button>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>Curso Online</TableCell>
-                      <TableCell>150 CofCoins</TableCell>
-                      <TableCell>5 disponíveis</TableCell>
-                      <TableCell><Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">Esgotando</Badge></TableCell>
                       <TableCell>
                         <Button variant="ghost" size="sm">Editar</Button>
                       </TableCell>
@@ -445,8 +448,12 @@ const AdminDashboard = () => {
                     <TableRow>
                       <TableCell>Home Office por 1 semana</TableCell>
                       <TableCell>175 CofCoins</TableCell>
-                      <TableCell>0 disponíveis</TableCell>
-                      <TableCell><Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">Esgotada</Badge></TableCell>
+                      <TableCell>5 disponíveis</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+                          Reprovado
+                        </Badge>
+                      </TableCell>
                       <TableCell>
                         <Button variant="ghost" size="sm">Editar</Button>
                       </TableCell>
@@ -459,95 +466,138 @@ const AdminDashboard = () => {
 
           {/* Ranking Tab */}
           <TabsContent value="ranking">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <TrendingUp className="h-5 w-5 text-cofcoin-purple mr-2" /> 
-                    Maiores Envios
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={topSenders} layout="vertical">
-                      <XAxis type="number" />
-                      <YAxis type="category" dataKey="name" width={120} />
-                      <Tooltip />
-                      <Bar dataKey="value" fill="#8884d8" name="CofCoins enviados" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
+            <Tabs defaultValue="charts" className="space-y-4">
+              <TabsList>
+                <TabsTrigger value="charts">Gráficos</TabsTrigger>
+                <TabsTrigger value="list">Lista Completa</TabsTrigger>
+              </TabsList>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Award className="h-5 w-5 text-cofcoin-purple mr-2" /> 
-                    Maiores Receptores
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={topRecipients} layout="vertical">
-                      <XAxis type="number" />
-                      <YAxis type="category" dataKey="name" width={120} />
-                      <Tooltip />
-                      <Bar dataKey="value" fill="#82ca9d" name="CofCoins recebidos" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
+              <TabsContent value="charts">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center">
+                        <TrendingUp className="h-5 w-5 text-cofcoin-purple mr-2" /> 
+                        Maiores Envios
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={topSenders} layout="vertical">
+                          <XAxis type="number" />
+                          <YAxis type="category" dataKey="name" width={120} />
+                          <Tooltip />
+                          <Bar dataKey="value" fill="#8884d8" name="CofCoins enviados" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
 
-              <Card className="md:col-span-2">
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Activity className="h-5 w-5 text-cofcoin-purple mr-2" /> 
-                    Atividade Mensal
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={monthlyActivity}>
-                      <XAxis dataKey="name" />
-                      <YAxis />
-                      <Tooltip />
-                      <Legend />
-                      <Bar dataKey="sent" fill="#8884d8" name="CofCoins enviados" />
-                      <Bar dataKey="received" fill="#82ca9d" name="CofCoins recebidos" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center">
+                        <Award className="h-5 w-5 text-cofcoin-purple mr-2" /> 
+                        Maiores Receptores
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={topRecipients} layout="vertical">
+                          <XAxis type="number" />
+                          <YAxis type="category" dataKey="name" width={120} />
+                          <Tooltip />
+                          <Bar dataKey="value" fill="#82ca9d" name="CofCoins recebidos" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
 
-              <Card className="md:col-span-2">
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Gift className="h-5 w-5 text-cofcoin-purple mr-2" /> 
-                    Distribuição por Categoria
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="flex items-center justify-center">
-                  <ResponsiveContainer width="100%" height={300}>
-                    <PieChart>
-                      <Pie
-                        data={categories}
-                        cx="50%"
-                        cy="50%"
-                        outerRadius={100}
-                        dataKey="value"
-                        nameKey="name"
-                        label={({ name, value }) => `${name}: ${value}`}
-                      >
-                        {categories.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
+                  <Card className="md:col-span-2">
+                    <CardHeader>
+                      <CardTitle className="flex items-center">
+                        <Activity className="h-5 w-5 text-cofcoin-purple mr-2" /> 
+                        Atividade Mensal
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={monthlyActivity}>
+                          <XAxis dataKey="name" />
+                          <YAxis />
+                          <Tooltip />
+                          <Legend />
+                          <Bar dataKey="sent" fill="#8884d8" name="CofCoins enviados" />
+                          <Bar dataKey="received" fill="#82ca9d" name="CofCoins recebidos" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="md:col-span-2">
+                    <CardHeader>
+                      <CardTitle className="flex items-center">
+                        <Gift className="h-5 w-5 text-cofcoin-purple mr-2" /> 
+                        Distribuição por Categoria
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex items-center justify-center">
+                      <ResponsiveContainer width="100%" height={300}>
+                        <PieChart>
+                          <Pie
+                            data={categories}
+                            cx="50%"
+                            cy="50%"
+                            outerRadius={100}
+                            dataKey="value"
+                            nameKey="name"
+                            label={({ name, value }) => `${name}: ${value}`}
+                          >
+                            {categories.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.color} />
+                            ))}
+                          </Pie>
+                          <Tooltip />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="list">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Ranking Completo</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Posição</TableHead>
+                          <TableHead>Usuário</TableHead>
+                          <TableHead>Departamento</TableHead>
+                          <TableHead>Total Enviado</TableHead>
+                          <TableHead>Total Recebido</TableHead>
+                          <TableHead>Saldo</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {userBalances.sort((a, b) => b.balance - a.balance).map((user, index) => (
+                          <TableRow key={user.id}>
+                            <TableCell>{index + 1}º</TableCell>
+                            <TableCell className="font-medium">{user.name}</TableCell>
+                            <TableCell>{user.department}</TableCell>
+                            <TableCell>{Math.floor(Math.random() * 500)} CofCoins</TableCell>
+                            <TableCell>{Math.floor(Math.random() * 500)} CofCoins</TableCell>
+                            <TableCell className="font-bold">{user.balance} CofCoins</TableCell>
+                          </TableRow>
                         ))}
-                      </Pie>
-                      <Tooltip />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-            </div>
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
           </TabsContent>
 
           {/* Balances Tab */}
