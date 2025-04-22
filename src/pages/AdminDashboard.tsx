@@ -455,49 +455,49 @@ const AdminDashboard = () => {
               </Card>
             </div>
             
-          <Card>
-            <CardContent className="pt-6">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Solicitante</TableHead>
-                    <TableHead>Destinatário</TableHead>
-                    <TableHead>Categoria</TableHead>
-                    <TableHead>Valor</TableHead>
-                    <TableHead>Data</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {approvalItems.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell>{item.reporter}</TableCell>
-                      <TableCell>{item.recipient}</TableCell>
-                      <TableCell>{item.category}</TableCell>
-                      <TableCell>{item.amount} CofCoins</TableCell>
-                      <TableCell>{format(item.date, 'dd/MM/yyyy')}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-200">
-                          Pendente
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => handleApprove(item.id)}
-                        >
-                          Avaliar
-                        </Button>
-                      </TableCell>
+            <Card>
+              <CardContent className="pt-6">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Solicitante</TableHead>
+                      <TableHead>Destinatário</TableHead>
+                      <TableHead>Categoria</TableHead>
+                      <TableHead>Valor</TableHead>
+                      <TableHead>Data</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Ações</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
+                  </TableHeader>
+                  <TableBody>
+                    {approvalItems.map((item) => (
+                      <TableRow key={item.id}>
+                        <TableCell>{item.reporter}</TableCell>
+                        <TableCell>{item.recipient}</TableCell>
+                        <TableCell>{item.category}</TableCell>
+                        <TableCell>{item.amount} CofCoins</TableCell>
+                        <TableCell>{format(item.date, 'dd/MM/yyyy')}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-200">
+                            Pendente
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleApprove(item.id)}
+                          >
+                            Avaliar
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           {/* Rewards Tab */}
           <TabsContent value="rewards">
