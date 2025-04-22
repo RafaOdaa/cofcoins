@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   DropdownMenu,
@@ -35,7 +34,6 @@ const UserMenu: React.FC<UserMenuProps> = ({
     navigate('/login');
   };
 
-  // Use the first letter of the userName, or 'U' as a fallback
   const userInitial = userName && userName.length > 0 ? userName.charAt(0) : 'U';
 
   return (

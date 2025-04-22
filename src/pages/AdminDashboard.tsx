@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -13,14 +12,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { format } from 'date-fns';
@@ -28,9 +19,7 @@ import {
   Activity,
   Award,
   BookOpen,
-  Check,
   CheckCircle,
-  ChevronsUpDown,
   Gift,
   Home,
   Plus,
@@ -38,7 +27,6 @@ import {
   Star,
   TrendingUp,
   Users,
-  X,
   XCircle
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -366,26 +354,24 @@ const AdminDashboard = () => {
               <h1 className="ml-3 text-xl font-semibold text-gray-900">CofCoin Admin</h1>
             </div>
             <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => navigate('/home')}
-                  className="text-gray-600 hover:text-cofcoin-purple"
-                >
-                  <Home className="h-5 w-5 mr-1" />
-                  <span>Home</span>
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => navigate('/rewards')}
-                  className="text-gray-600 hover:text-cofcoin-purple"
-                >
-                  <Gift className="h-5 w-5 mr-1" />
-                  <span>Recompensas</span>
-                </Button>
-              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/home')}
+                className="text-gray-600 hover:text-cofcoin-purple"
+              >
+                <Home className="h-5 w-5 mr-1" />
+                <span>Home</span>
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/rewards')}
+                className="text-gray-600 hover:text-cofcoin-purple"
+              >
+                <Gift className="h-5 w-5 mr-1" />
+                <span>Recompensas</span>
+              </Button>
               <UserMenu userName="Admin" isAdmin={true} />
             </div>
           </div>
@@ -819,4 +805,15 @@ const AdminDashboard = () => {
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input 
                     placeholder="Buscar no histórico..." 
-                    className="pl-
+                    className="pl-10"
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Remetente</TableHead>
+                      <TableHead>Destinatário</TableHead>
+                      <TableHead>Categoria</TableHead>
+                      <TableHead>Valor</TableHead>

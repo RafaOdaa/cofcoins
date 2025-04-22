@@ -3,25 +3,16 @@ import React, { useState } from 'react';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { Award, Star, CheckCircle, Users, BookOpen } from 'lucide-react';
-
-// Define interfaces
-interface Category {
-  id: number;
-  name: string;
-  description?: string;
-  icon: any;
-}
+import { Award, Star, CheckCircle, Users } from 'lucide-react';
 
 interface NewRecognitionDialogProps {
   open: boolean;
@@ -29,12 +20,11 @@ interface NewRecognitionDialogProps {
   isAdmin?: boolean;
 }
 
-const categories: Category[] = [
+const categories = [
   { id: 1, name: "Colaboração Excepcional", description: "Reconheça quem vai além para ajudar os outros", icon: Award },
   { id: 2, name: "Inovação Constante", description: "Para quem traz ideias e soluções criativas", icon: Star },
   { id: 3, name: "Compromisso com Qualidade", description: "Destaque para excelência no trabalho", icon: CheckCircle },
   { id: 4, name: "Liderança Inspiradora", description: "Reconheça quem inspira e guia a equipe", icon: Users },
-  { id: 5, name: "Aprendeu por si, falou por todos", description: "Reconheça quem compartilha conhecimento", icon: BookOpen }
 ];
 
 const NewRecognitionDialog: React.FC<NewRecognitionDialogProps> = ({
@@ -46,13 +36,12 @@ const NewRecognitionDialog: React.FC<NewRecognitionDialogProps> = ({
   const [recipient, setRecipient] = useState("");
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
-  const [manualCoins, setManualCoins] = useState<number>(0);
-  const [isManualMode, setIsManualMode] = useState(false);
+  const [coins, setCoins] = useState<number>(25);
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     
-    if (!recipient || !category || (!isManualMode && !description)) {
+    if (!recipient || !category || !description) {
       toast({
         title: "Erro",
         description: "Por favor, preencha todos os campos obrigatórios.",
@@ -79,20 +68,9 @@ const NewRecognitionDialog: React.FC<NewRecognitionDialogProps> = ({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit}>
-          <div className="grid gap-6 py-4">
-            {isAdmin && (
-              <div className="flex items-center gap-2">
-                <Switch
-                  id="manual-mode"
-                  checked={isManualMode}
-                  onCheckedChange={setIsManualMode}
-                />
-                <Label htmlFor="manual-mode">Modo Admin (CofCoins manual)</Label>
-              </div>
-            )}
-
-            <div className="grid gap-2">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-4">
+            <div>
               <Label htmlFor="recipient">Colega</Label>
               <Select onValueChange={setRecipient}>
                 <SelectTrigger>
@@ -106,7 +84,7 @@ const NewRecognitionDialog: React.FC<NewRecognitionDialogProps> = ({
               </Select>
             </div>
 
-            <div className="grid gap-2">
+            <div>
               <Label htmlFor="category">Categoria</Label>
               <Select onValueChange={setCategory}>
                 <SelectTrigger>
@@ -125,35 +103,33 @@ const NewRecognitionDialog: React.FC<NewRecognitionDialogProps> = ({
               </Select>
             </div>
 
-            {isAdmin && isManualMode ? (
-              <div className="grid gap-2">
+            {isAdmin && (
+              <div>
                 <Label htmlFor="coins">Quantidade de CofCoins</Label>
                 <Input
                   id="coins"
                   type="number"
-                  value={manualCoins}
-                  onChange={(e) => setManualCoins(Number(e.target.value))}
+                  value={coins}
+                  onChange={(e) => setCoins(Number(e.target.value))}
                   min="0"
-                  className="w-full"
-                />
-              </div>
-            ) : (
-              <div className="grid gap-2">
-                <Label htmlFor="description">Descrição</Label>
-                <Input
-                  id="description"
-                  placeholder="Descreva o motivo do reconhecimento..."
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  className="w-full"
                 />
               </div>
             )}
 
-            <Button type="submit" className="w-full bg-cofcoin-purple hover:bg-cofcoin-purple-dark">
-              Enviar Reconhecimento
-            </Button>
+            <div>
+              <Label htmlFor="description">Descrição</Label>
+              <Input
+                id="description"
+                placeholder="Descreva o motivo do reconhecimento..."
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+            </div>
           </div>
+
+          <Button type="submit" className="w-full bg-cofcoin-purple hover:bg-cofcoin-purple-dark">
+            Enviar Reconhecimento
+          </Button>
         </form>
       </DialogContent>
     </Dialog>

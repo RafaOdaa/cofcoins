@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { Gift, Coffee, Pizza, BookOpen, Ticket, Calendar, BadgeCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { motion } from 'framer-motion';
+import RewardCard from './RewardCard';
 
 const rewardsData = [
   {
@@ -43,39 +42,6 @@ const rewardsData = [
   }
 ];
 
-const RewardCard = ({ title, description, coins, icon, index }) => {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: index * 0.1 }}
-      viewport={{ once: true }}
-      className="bg-white rounded-lg overflow-hidden border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300"
-    >
-      <div className="p-6">
-        <div className="flex items-start justify-between mb-4">
-          <div className="bg-gray-50 p-3 rounded-lg">
-            {icon}
-          </div>
-          <div className="flex items-center">
-            <div className="h-6 w-6 rounded-full bg-cofcoin-orange flex items-center justify-center mr-2">
-              <span className="text-white text-xs font-bold">C</span>
-            </div>
-            <span className="font-semibold text-lg">{coins}</span>
-          </div>
-        </div>
-        <h3 className="text-xl font-semibold mb-2">{title}</h3>
-        <p className="text-gray-600 text-sm">{description}</p>
-      </div>
-      <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
-        <Button className="w-full bg-cofcoin-purple hover:bg-cofcoin-purple-dark text-white">
-          Resgatar
-        </Button>
-      </div>
-    </motion.div>
-  );
-};
-
 const Rewards = () => {
   return (
     <section id="rewards" className="py-20 bg-gray-50">
@@ -98,18 +64,6 @@ const Rewards = () => {
               index={index}
             />
           ))}
-        </div>
-
-        <div className="mt-16 text-center">
-          <div className="inline-block">
-            <div className="relative inline-flex items-center justify-center">
-              <div className="absolute -inset-4 rounded-full bg-gradient-to-r from-cofcoin-purple/20 to-cofcoin-orange/20 animate-pulse"></div>
-              <Button size="lg" className="relative bg-cofcoin-purple hover:bg-cofcoin-purple-dark text-white">
-                <Gift className="mr-2 h-5 w-5" />
-                Ver todas as recompensas
-              </Button>
-            </div>
-          </div>
         </div>
       </div>
     </section>
