@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Coins, User } from "lucide-react";
+import { Coins } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 
@@ -43,9 +43,12 @@ const EditUserBalanceDialog = ({
 
   if (!user) return null;
 
+  const balanceDifference = parseInt(newBalance) - user.balance;
+  const isBalanceIncreased = balanceDifference > 0;
+  const isBalanceDecreased = balanceDifference < 0;
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!newBalance || parseInt(newBalance) < 0) {
       toast({
         title: "Valor inválido",
@@ -64,59 +67,16 @@ const EditUserBalanceDialog = ({
       return;
     }
 
-    // Open confirmation dialog
     setConfirmDialogOpen(true);
   };
 
-  const handleConfirmEdit = () => {
-    setIsSubmitting(true);
-
-    try {
-      const parsedNewBalance = parseInt(newBalance);
-      
-      // Call the callback function
-      if (onBalanceEditComplete) {
-        onBalanceEditComplete(user.id, user.balance, parsedNewBalance, reason);
-      }
-      
-      // Reset form and close dialog
-      setNewBalance("");
-      setReason("");
-      onOpenChange(false);
-
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Ocorreu um erro ao atualizar o saldo.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-      setConfirmDialogOpen(false);
-    }
-  };
-
-  const handleDialogClose = (open: boolean) => {
-    if (!open) {
-      // Reset form when dialog is closed
-      setNewBalance(user ? user.balance.toString() : "");
-      setReason("");
-    }
-    onOpenChange(open);
-  };
-
-  const balanceDifference = parseInt(newBalance) - user.balance;
-  const isBalanceIncreased = balanceDifference > 0;
-  const isBalanceDecreased = balanceDifference < 0;
-  const isBalanceUnchanged = balanceDifference === 0;
-  
   return (
     <>
-      <Dialog open={open} onOpenChange={handleDialogClose}>
+      <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle className="flex items-center">
-              <Coins className="mr-2 h-5 w-5 text-cofcoin-orange" />
+            <DialogTitle className="flex items-center gap-2">
+              <Coins className="h-5 w-5 text-cofcoin-orange" />
               Editar Saldo de CofCoins
             </DialogTitle>
             <DialogDescription>
@@ -124,81 +84,64 @@ const EditUserBalanceDialog = ({
             </DialogDescription>
           </DialogHeader>
 
-          <form onSubmit={handleSubmit} className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label>Colaborador</Label>
-              <div className="flex items-center p-2 bg-gray-50 rounded-md border">
-                <User className="h-5 w-5 mr-2 text-gray-500" />
-                <span className="font-medium">{user.name}</span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="current-balance">Saldo Atual</Label>
-                <div className="flex items-center p-2 bg-gray-50 rounded-md border">
-                  <Coins className="h-5 w-5 mr-2 text-gray-500" />
-                  <span>{user.balance}</span>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-4">
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <div className="text-sm text-gray-600">Colaborador</div>
+                <div className="font-medium text-lg">{user.name}</div>
+                <div className="mt-2 flex items-center gap-1.5">
+                  <div className="text-sm text-gray-600">Saldo atual:</div>
+                  <div className="font-medium">{user.balance} CofCoins</div>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="new-balance">Novo Saldo</Label>
+                <Label htmlFor="newBalance">Novo Saldo</Label>
                 <div className="relative">
-                  <Coins className="absolute left-2.5 top-2.5 h-4 w-4 text-cofcoin-orange" />
+                  <Coins className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
                   <Input
-                    id="new-balance"
+                    id="newBalance"
                     type="number"
                     min="0"
                     value={newBalance}
                     onChange={(e) => setNewBalance(e.target.value)}
-                    className="pl-9"
+                    className="pl-10"
                   />
                 </div>
               </div>
-            </div>
 
-            {!isBalanceUnchanged && newBalance && (
-              <div className={`p-2 rounded-md text-sm ${
-                isBalanceIncreased ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-700'
-              }`}>
-                <p className="font-medium">
-                  {isBalanceIncreased ? (
-                    <>Adicionando {balanceDifference} CofCoins</>
-                  ) : (
-                    <>Removendo {Math.abs(balanceDifference)} CofCoins</>
-                  )}
+              {(isBalanceIncreased || isBalanceDecreased) && (
+                <div className={`p-3 rounded-lg ${
+                  isBalanceIncreased ? 'bg-green-50 border border-green-100' : 'bg-orange-50 border border-orange-100'
+                }`}>
+                  <div className={`text-sm ${isBalanceIncreased ? 'text-green-700' : 'text-orange-700'}`}>
+                    <span className="font-medium">
+                      {isBalanceIncreased ? 'Adicionando' : 'Removendo'} {Math.abs(balanceDifference)} CofCoins
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <Label htmlFor="reason">Motivo da Alteração</Label>
+                <Textarea
+                  id="reason"
+                  placeholder="Descreva o motivo da alteração de saldo..."
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value)}
+                  className="min-h-[80px]"
+                />
+                <p className="text-sm text-gray-500">
+                  Esta informação será registrada no histórico de alterações
                 </p>
               </div>
-            )}
-
-            <div className="space-y-2">
-              <Label htmlFor="reason">Motivo da Alteração</Label>
-              <Textarea
-                id="reason"
-                placeholder="Descreva o motivo da alteração de saldo..."
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                className="min-h-[80px]"
-              />
-              <p className="text-sm text-gray-500">
-                Esta informação será registrada no histórico de alterações
-              </p>
             </div>
 
-            <DialogFooter className="pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-                disabled={isSubmitting}
-              >
-                Cancelar
-              </Button>
+            <DialogFooter className="gap-2 sm:gap-0">
               <Button 
                 type="submit"
-                className="bg-cofcoin-purple hover:bg-cofcoin-purple-dark text-white"
-                disabled={isSubmitting || isBalanceUnchanged}
+                disabled={isSubmitting || !newBalance || parseInt(newBalance) === user.balance}
+                className="w-full sm:w-auto bg-cofcoin-purple hover:bg-cofcoin-purple-dark text-white"
               >
                 Salvar Alterações
               </Button>
@@ -207,11 +150,18 @@ const EditUserBalanceDialog = ({
         </DialogContent>
       </Dialog>
 
-      {/* Confirmation Dialog */}
       <ConfirmationDialog
         open={confirmDialogOpen}
         onOpenChange={setConfirmDialogOpen}
-        onConfirm={handleConfirmEdit}
+        onConfirm={() => {
+          setIsSubmitting(true);
+          if (onBalanceEditComplete) {
+            onBalanceEditComplete(user.id, user.balance, parseInt(newBalance), reason);
+          }
+          setIsSubmitting(false);
+          setConfirmDialogOpen(false);
+          onOpenChange(false);
+        }}
         title="Confirmar Alteração de Saldo"
         description={`Tem certeza que deseja ${isBalanceIncreased ? 'adicionar' : 'remover'} ${Math.abs(balanceDifference)} CofCoins ${isBalanceIncreased ? 'ao' : 'do'} saldo de ${user.name}?`}
         confirmText="Confirmar"
