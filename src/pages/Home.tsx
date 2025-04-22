@@ -144,12 +144,12 @@ const Home = () => {
               <span className="text-xl font-bold text-gray-900">CofCoins</span>
             </div>
             
-            <div className="flex items-center">
+            <div className="flex items-center space-x-4">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate('/rewards')}
-                className="text-gray-600 hover:text-cofcoin-purple mr-2"
+                className="text-gray-600 hover:text-cofcoin-purple"
               >
                 <Gift className="h-5 w-5 mr-1" />
                 <span className="hidden sm:inline">Recompensas</span>
@@ -160,20 +160,10 @@ const Home = () => {
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate('/admin/dashboard')}
-                className="text-gray-600 hover:text-cofcoin-purple mr-2"
+                className="text-gray-600 hover:text-cofcoin-purple"
               >
                 <Settings className="h-5 w-5 mr-1" />
                 <span className="hidden sm:inline">Admin</span>
-              </Button>
-              
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleLogout}
-                className="text-gray-600 hover:text-cofcoin-purple mr-2"
-              >
-                <LogOut className="h-5 w-5 mr-1" />
-                <span className="hidden sm:inline">Sair</span>
               </Button>
               
               <UserMenu userName="João Silva" />
