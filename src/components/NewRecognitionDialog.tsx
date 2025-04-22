@@ -6,7 +6,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,28 +13,34 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { LucideIcon } from 'lucide-react';
+import { Award, Star, CheckCircle, Users, BookOpen } from 'lucide-react';
 
-// Definição da interface para categorias
+// Define interfaces
 interface Category {
   id: number;
   name: string;
   description?: string;
-  icon?: LucideIcon;
+  icon: any;
 }
 
 interface NewRecognitionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   isAdmin?: boolean;
-  categories?: Category[];
 }
+
+const categories: Category[] = [
+  { id: 1, name: "Colaboração Excepcional", description: "Reconheça quem vai além para ajudar os outros", icon: Award },
+  { id: 2, name: "Inovação Constante", description: "Para quem traz ideias e soluções criativas", icon: Star },
+  { id: 3, name: "Compromisso com Qualidade", description: "Destaque para excelência no trabalho", icon: CheckCircle },
+  { id: 4, name: "Liderança Inspiradora", description: "Reconheça quem inspira e guia a equipe", icon: Users },
+  { id: 5, name: "Aprendeu por si, falou por todos", description: "Reconheça quem compartilha conhecimento", icon: BookOpen }
+];
 
 const NewRecognitionDialog: React.FC<NewRecognitionDialogProps> = ({
   open,
   onOpenChange,
-  isAdmin = false,
-  categories = []
+  isAdmin = false
 }) => {
   const { toast } = useToast();
   const [recipient, setRecipient] = useState("");
@@ -46,20 +51,21 @@ const NewRecognitionDialog: React.FC<NewRecognitionDialogProps> = ({
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-
+    
     if (!recipient || !category || (!isManualMode && !description)) {
       toast({
         title: "Erro",
-        description: "Por favor, preencha todos os campos.",
+        description: "Por favor, preencha todos os campos obrigatórios.",
         variant: "destructive",
       });
       return;
     }
-
+    
     toast({
       title: "Reconhecimento enviado",
-      description: `Reconhecimento para ${recipient} na categoria ${category} enviado com sucesso!`,
+      description: `Reconhecimento para ${recipient} enviado com sucesso!`
     });
+    
     onOpenChange(false);
   };
 
@@ -74,7 +80,7 @@ const NewRecognitionDialog: React.FC<NewRecognitionDialogProps> = ({
         </DialogHeader>
 
         <form onSubmit={handleSubmit}>
-          <div className="grid gap-4 py-4">
+          <div className="grid gap-6 py-4">
             {isAdmin && (
               <div className="flex items-center gap-2">
                 <Switch
@@ -89,7 +95,7 @@ const NewRecognitionDialog: React.FC<NewRecognitionDialogProps> = ({
             <div className="grid gap-2">
               <Label htmlFor="recipient">Colega</Label>
               <Select onValueChange={setRecipient}>
-                <SelectTrigger id="recipient">
+                <SelectTrigger>
                   <SelectValue placeholder="Selecione um colega" />
                 </SelectTrigger>
                 <SelectContent>
@@ -103,22 +109,18 @@ const NewRecognitionDialog: React.FC<NewRecognitionDialogProps> = ({
             <div className="grid gap-2">
               <Label htmlFor="category">Categoria</Label>
               <Select onValueChange={setCategory}>
-                <SelectTrigger id="category">
-                  <SelectValue placeholder="Selecione a categoria" />
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione uma categoria" />
                 </SelectTrigger>
                 <SelectContent>
-                  {categories && categories.length > 0 ? (
-                    categories.map((cat) => (
-                      <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
-                    ))
-                  ) : (
-                    <>
-                      <SelectItem value="Colaboração Excepcional">Colaboração Excepcional</SelectItem>
-                      <SelectItem value="Inovação Constante">Inovação Constante</SelectItem>
-                      <SelectItem value="Compromisso com Qualidade">Compromisso com Qualidade</SelectItem>
-                      <SelectItem value="Aprendeu por si, falou por todos">Aprendeu por si, falou por todos</SelectItem>
-                    </>
-                  )}
+                  {categories.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.name}>
+                      <div className="flex items-center gap-2">
+                        <cat.icon className="h-4 w-4" />
+                        <span>{cat.name}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -132,7 +134,7 @@ const NewRecognitionDialog: React.FC<NewRecognitionDialogProps> = ({
                   value={manualCoins}
                   onChange={(e) => setManualCoins(Number(e.target.value))}
                   min="0"
-                  max="1000"
+                  className="w-full"
                 />
               </div>
             ) : (
@@ -140,14 +142,15 @@ const NewRecognitionDialog: React.FC<NewRecognitionDialogProps> = ({
                 <Label htmlFor="description">Descrição</Label>
                 <Input
                   id="description"
-                  placeholder="Descreva o reconhecimento"
+                  placeholder="Descreva o motivo do reconhecimento..."
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
+                  className="w-full"
                 />
               </div>
             )}
 
-            <Button type="submit" className="bg-cofcoin-purple hover:bg-cofcoin-purple-dark text-white">
+            <Button type="submit" className="w-full bg-cofcoin-purple hover:bg-cofcoin-purple-dark">
               Enviar Reconhecimento
             </Button>
           </div>

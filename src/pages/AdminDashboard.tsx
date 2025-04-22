@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -48,6 +47,7 @@ import RecognitionDetailDialog, { Recognition } from "@/components/RecognitionDe
 import UserMenu from '@/components/UserMenu';
 import ConfirmationDialog from '@/components/ConfirmationDialog';
 import NewRecognitionDialog from '@/components/NewRecognitionDialog';
+import EditUserBalanceDialog from '@/components/EditUserBalanceDialog';
 
 // Category data with types and colors for charts
 const categories = [
@@ -137,16 +137,16 @@ const rewardRequestsData = [
 
 // Mock data for user balances
 const userBalances = [
-  { id: 1, name: "Lucas Mendes", balance: 135, department: "Tecnologia" },
-  { id: 2, name: "Amanda Oliveira", balance: 120, department: "Marketing" },
-  { id: 3, name: "Pedro Henrique", balance: 95, department: "Produto" },
-  { id: 4, name: "Carolina Silva", balance: 85, department: "RH" },
-  { id: 5, name: "Rafael Costa", balance: 75, department: "Vendas" },
-  { id: 6, name: "Juliana Santos", balance: 65, department: "Financeiro" },
-  { id: 7, name: "Bruno Almeida", balance: 60, department: "Atendimento" },
-  { id: 8, name: "Mariana Lima", balance: 55, department: "Operações" },
-  { id: 9, name: "Fernando Gomes", balance: 50, department: "Tecnologia" },
-  { id: 10, name: "Isabela Martins", balance: 45, department: "Marketing" }
+  { id: 1, name: "Lucas Mendes", balance: 135, department: "Tecnologia", spent: 20 },
+  { id: 2, name: "Amanda Oliveira", balance: 120, department: "Marketing", spent: 30 },
+  { id: 3, name: "Pedro Henrique", balance: 95, department: "Produto", spent: 10 },
+  { id: 4, name: "Carolina Silva", balance: 85, department: "RH", spent: 5 },
+  { id: 5, name: "Rafael Costa", balance: 75, department: "Vendas", spent: 15 },
+  { id: 6, name: "Juliana Santos", balance: 65, department: "Financeiro", spent: 25 },
+  { id: 7, name: "Bruno Almeida", balance: 60, department: "Atendimento", spent: 0 },
+  { id: 8, name: "Mariana Lima", balance: 55, department: "Operações", spent: 35 },
+  { id: 9, name: "Fernando Gomes", balance: 50, department: "Tecnologia", spent: 40 },
+  { id: 10, name: "Isabela Martins", balance: 45, department: "Marketing", spent: 50 }
 ];
 
 // Mock data for recognition history
@@ -305,6 +305,16 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleBalanceEditComplete = (userId: number, previousBalance: number, newBalance: number, reason: string) => {
+    // Implement your logic here to update the user's balance
+    console.log(`User ${userId} balance updated from ${previousBalance} to ${newBalance} due to: ${reason}`);
+    // You might want to call an API to update the balance in your database
+    toast({
+      title: "Saldo atualizado",
+      description: `O saldo do usuário foi atualizado com sucesso.`,
+    });
+  };
+
   // Filtrar usuários com base no termo de pesquisa
   const filteredUsers = userBalances.filter(user => 
     user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -356,27 +366,25 @@ const AdminDashboard = () => {
               <h1 className="ml-3 text-xl font-semibold text-gray-900">CofCoin Admin</h1>
             </div>
             <div className="flex items-center space-x-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate('/home')}
-                className="text-gray-600 hover:text-cofcoin-purple"
-              >
-                <Home className="h-5 w-5 mr-1" />
-                <span>Home</span>
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate('/rewards')}
-                className="text-gray-600 hover:text-cofcoin-purple"
-              >
-                <Gift className="h-5 w-5 mr-1" />
-                <span>Recompensas</span>
-              </Button>
-              <div className="flex items-center space-x-2 px-4 py-2 bg-gray-50 rounded-lg">
-                <Users className="h-4 w-4 text-gray-500" />
-                <span className="text-sm text-gray-600">{userBalances.length} usuários ativos</span>
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate('/home')}
+                  className="text-gray-600 hover:text-cofcoin-purple"
+                >
+                  <Home className="h-5 w-5 mr-1" />
+                  <span>Home</span>
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate('/rewards')}
+                  className="text-gray-600 hover:text-cofcoin-purple"
+                >
+                  <Gift className="h-5 w-5 mr-1" />
+                  <span>Recompensas</span>
+                </Button>
               </div>
               <UserMenu userName="Admin" isAdmin={true} />
             </div>
@@ -423,7 +431,7 @@ const AdminDashboard = () => {
 
           {/* Approvals Tab */}
           <TabsContent value="approvals" className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-lg flex items-center">
@@ -461,59 +469,49 @@ const AdminDashboard = () => {
               </Card>
             </div>
             
-            <Card>
-              <CardHeader>
-                <CardTitle>Aprovações Pendentes</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {approvalItems.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    <CheckCircle className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                    <p>Não há reconhecimentos pendentes de aprovação.</p>
-                  </div>
-                ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Solicitante</TableHead>
-                        <TableHead>Destinatário</TableHead>
-                        <TableHead>Categoria</TableHead>
-                        <TableHead>Valor</TableHead>
-                        <TableHead>Data</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead className="text-right">Ações</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {approvalItems.map((item) => (
-                        <TableRow key={item.id}>
-                          <TableCell>{item.reporter}</TableCell>
-                          <TableCell>{item.recipient}</TableCell>
-                          <TableCell>{item.category}</TableCell>
-                          <TableCell>{item.amount} CofCoins</TableCell>
-                          <TableCell>{format(item.date, 'dd/MM/yyyy')}</TableCell>
-                          <TableCell>
-                            <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-200">
-                              Pendente
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              onClick={() => handleApprove(item.id)}
-                            >
-                              Avaliar
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
+          <Card>
+            <CardContent className="pt-6">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Solicitante</TableHead>
+                    <TableHead>Destinatário</TableHead>
+                    <TableHead>Categoria</TableHead>
+                    <TableHead>Valor</TableHead>
+                    <TableHead>Data</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {approvalItems.map((item) => (
+                    <TableRow key={item.id}>
+                      <TableCell>{item.reporter}</TableCell>
+                      <TableCell>{item.recipient}</TableCell>
+                      <TableCell>{item.category}</TableCell>
+                      <TableCell>{item.amount} CofCoins</TableCell>
+                      <TableCell>{format(item.date, 'dd/MM/yyyy')}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-200">
+                          Pendente
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleApprove(item.id)}
+                        >
+                          Avaliar
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
           {/* Rewards Tab */}
           <TabsContent value="rewards">
@@ -821,114 +819,4 @@ const AdminDashboard = () => {
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input 
                     placeholder="Buscar no histórico..." 
-                    className="pl-10"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                </div>
-                
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Remetente</TableHead>
-                      <TableHead>Destinatário</TableHead>
-                      <TableHead>Categoria</TableHead>
-                      <TableHead>Quantidade</TableHead>
-                      <TableHead>Data</TableHead>
-                      <TableHead>Status</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredHistory.map((record) => (
-                      <TableRow key={record.id}>
-                        <TableCell>{record.sender}</TableCell>
-                        <TableCell>{record.recipient}</TableCell>
-                        <TableCell>{record.category}</TableCell>
-                        <TableCell>{record.amount} CofCoins</TableCell>
-                        <TableCell>{format(record.date, 'dd/MM/yyyy')}</TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className={getStatusColor(record.status)}>
-                            {record.status.charAt(0).toUpperCase() + record.status.slice(1)}
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-
-        {/* Diálogo de confirmação para aprovar/rejeitar reconhecimento */}
-        <ConfirmationDialog
-          open={confirmDialog.open}
-          onOpenChange={(open) => setConfirmDialog({...confirmDialog, open})}
-          title={confirmDialog.action === 'approve' ? 'Aprovar Reconhecimento' : 'Rejeitar Reconhecimento'}
-          description={`Deseja realmente ${confirmDialog.action === 'approve' ? 'aprovar' : 'rejeitar'} este reconhecimento?`}
-          confirmText={confirmDialog.action === 'approve' ? 'Aprovar' : 'Rejeitar'}
-          variant={confirmDialog.action === 'reject' ? 'destructive' : 'default'}
-          onConfirm={handleConfirmAction}
-        />
-
-        {/* Diálogo de detalhes de reconhecimento */}
-        <RecognitionDetailDialog 
-          recognition={selectedRecognition}
-          open={isRecognitionDetailOpen}
-          onOpenChange={setIsRecognitionDetailOpen}
-          showActions={true}
-          onApprove={handleApprove}
-          onReject={handleReject}
-        />
-
-        {/* Edit Balance Dialog */}
-        <Dialog open={isEditBalanceOpen} onOpenChange={setIsEditBalanceOpen}>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Editar Saldo</DialogTitle>
-              <DialogDescription>
-                {selectedUser && `Atualizando o saldo de ${selectedUser.name}`}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="balance">Novo Saldo (CofCoins)</Label>
-                <Input
-                  id="balance"
-                  type="number"
-                  value={newBalance}
-                  onChange={(e) => setNewBalance(e.target.value)}
-                  min="0"
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button 
-                variant="outline" 
-                onClick={() => setIsEditBalanceOpen(false)}
-              >
-                Cancelar
-              </Button>
-              <Button 
-                className="bg-cofcoin-purple hover:bg-cofcoin-purple-dark"
-                onClick={handleSaveBalance}
-              >
-                Salvar
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        {/* Novo Reconhecimento Especial Dialog */}
-        <NewRecognitionDialog
-          open={isNewRecognitionOpen}
-          onOpenChange={setIsNewRecognitionOpen}
-          isAdmin={true}
-          categories={categories}
-        />
-      </main>
-    </div>
-  );
-};
-
-export default AdminDashboard;
+                    className="pl-

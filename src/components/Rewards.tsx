@@ -50,24 +50,26 @@ const RewardCard = ({ title, description, coins, icon, index }) => {
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: index * 0.1 }}
       viewport={{ once: true }}
-      className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col h-full"
+      className="bg-white rounded-lg overflow-hidden border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300"
     >
-      <div className="flex items-start mb-4">
-        <div className="bg-gray-100 p-3 rounded-lg">
-          {icon}
-        </div>
-      </div>
-      <h3 className="text-xl font-semibold mb-2">{title}</h3>
-      <p className="text-gray-600 mb-4 flex-grow">{description}</p>
-      <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-100">
-        <div className="flex items-center">
-          <div className="h-6 w-6 rounded-full bg-cofcoin-orange flex items-center justify-center mr-2">
-            <span className="text-white text-xs font-bold">C</span>
+      <div className="p-6">
+        <div className="flex items-start justify-between mb-4">
+          <div className="bg-gray-50 p-3 rounded-lg">
+            {icon}
           </div>
-          <span className="font-semibold">{coins}</span>
+          <div className="flex items-center">
+            <div className="h-6 w-6 rounded-full bg-cofcoin-orange flex items-center justify-center mr-2">
+              <span className="text-white text-xs font-bold">C</span>
+            </div>
+            <span className="font-semibold text-lg">{coins}</span>
+          </div>
         </div>
-        <Button size="sm" className="bg-cofcoin-purple hover:bg-cofcoin-purple-dark text-white">
-          Trocar
+        <h3 className="text-xl font-semibold mb-2">{title}</h3>
+        <p className="text-gray-600 text-sm">{description}</p>
+      </div>
+      <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
+        <Button className="w-full bg-cofcoin-purple hover:bg-cofcoin-purple-dark text-white">
+          Resgatar
         </Button>
       </div>
     </motion.div>
