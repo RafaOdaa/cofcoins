@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -817,3 +818,89 @@ const AdminDashboard = () => {
                       <TableHead>Destinatário</TableHead>
                       <TableHead>Categoria</TableHead>
                       <TableHead>Valor</TableHead>
+                      <TableHead>Data</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Ações</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredHistory.map((record) => (
+                      <TableRow key={record.id}>
+                        <TableCell>{record.sender}</TableCell>
+                        <TableCell>{record.recipient}</TableCell>
+                        <TableCell>{record.category}</TableCell>
+                        <TableCell>{record.amount} CofCoins</TableCell>
+                        <TableCell>{format(record.date, 'dd/MM/yyyy')}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className={getStatusColor(record.status)}>
+                            {record.status === "aprovado" ? "Aprovado" : 
+                             record.status === "reprovado" ? "Reprovado" : "Pendente"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => {
+                              setSelectedRecognition({
+                                id: record.id,
+                                reporter: record.sender,
+                                recipient: record.recipient,
+                                amount: record.amount,
+                                category: record.category,
+                                description: "",  // No description in history records
+                                date: record.date,
+                                status: record.status
+                              });
+                              setIsRecognitionDetailOpen(true);
+                            }}
+                          >
+                            Detalhes
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </main>
+
+      {/* Dialogs */}
+      <NewRecognitionDialog
+        open={isNewRecognitionOpen}
+        onOpenChange={setIsNewRecognitionOpen}
+        isAdmin={true}
+      />
+
+      <EditUserBalanceDialog
+        open={isEditBalanceOpen}
+        onOpenChange={setIsEditBalanceOpen}
+        user={selectedUser}
+        onComplete={handleBalanceEditComplete}
+      />
+
+      <RecognitionDetailDialog
+        recognition={selectedRecognition}
+        open={isRecognitionDetailOpen}
+        onOpenChange={setIsRecognitionDetailOpen}
+      />
+
+      <ConfirmationDialog
+        open={confirmDialog.open}
+        onOpenChange={(open) => setConfirmDialog({ ...confirmDialog, open })}
+        onConfirm={handleConfirmAction}
+        title={confirmDialog.action === 'approve' ? "Aprovar Reconhecimento" : "Rejeitar Reconhecimento"}
+        description={confirmDialog.action === 'approve' ? 
+          "Tem certeza que deseja aprovar este reconhecimento?" : 
+          "Tem certeza que deseja rejeitar este reconhecimento?"}
+        confirmText={confirmDialog.action === 'approve' ? "Aprovar" : "Rejeitar"}
+        variant={confirmDialog.action === 'approve' ? 'default' : 'destructive'}
+      />
+    </div>
+  );
+};
+
+export default AdminDashboard;
