@@ -11,9 +11,13 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
 const users = [
@@ -97,7 +101,6 @@ const NewRecognitionDialog: React.FC<NewRecognitionDialogProps> = ({
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
   const [coins, setCoins] = useState<number>(isAdmin ? 25 : 50);
-  const [openCombobox, setOpenCombobox] = useState(false);
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
@@ -132,48 +135,19 @@ const NewRecognitionDialog: React.FC<NewRecognitionDialogProps> = ({
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Colega</Label>
-              <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={openCombobox}
-                    className="w-full justify-between"
-                  >
-                    {recipient
-                      ? users.find((user) => user.value === recipient)?.label
-                      : "Selecione um colega..."}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-full p-0">
-                  <Command>
-                    <CommandInput placeholder="Procurar colega..." />
-                    <CommandEmpty>Nenhum colega encontrado.</CommandEmpty>
-                    <CommandGroup>
-                      {users.map((user) => (
-                        <CommandItem
-                          key={user.value}
-                          value={user.value}
-                          onSelect={(currentValue) => {
-                            setRecipient(currentValue === recipient ? "" : currentValue);
-                            setOpenCombobox(false);
-                          }}
-                        >
-                          <Check
-                            className={cn(
-                              "mr-2 h-4 w-4",
-                              recipient === user.value ? "opacity-100" : "opacity-0"
-                            )}
-                          />
-                          {user.label}
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </Command>
-                </PopoverContent>
-              </Popover>
+              <Label htmlFor="recipient">Colega</Label>
+              <Select value={recipient} onValueChange={setRecipient}>
+                <SelectTrigger id="recipient" className="w-full">
+                  <SelectValue placeholder="Selecione um colega..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {users.map((user) => (
+                    <SelectItem key={user.value} value={user.value}>
+                      {user.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {isAdmin ? (
@@ -220,7 +194,7 @@ const NewRecognitionDialog: React.FC<NewRecognitionDialogProps> = ({
                     type="button"
                     onClick={() => setCategory(cat.name)}
                     className={cn(
-                      "flex flex-col items-center p-3 rounded-lg border transition-all group",
+                      "flex flex-col items-center p-3 rounded-lg border transition-all",
                       category === cat.name 
                         ? "border-cofcoin-purple bg-purple-50 shadow-sm" 
                         : "border-gray-200 hover:border-gray-300 hover:bg-gray-50",
@@ -229,7 +203,7 @@ const NewRecognitionDialog: React.FC<NewRecognitionDialogProps> = ({
                   >
                     <span className="text-2xl mb-2">{cat.icon}</span>
                     <span className="text-sm font-medium text-center">{cat.name}</span>
-                    <span className="hidden group-hover:block text-xs text-gray-600 mt-2 text-center">
+                    <span className="text-xs text-gray-600 mt-2 text-center line-clamp-3">
                       {cat.description}
                     </span>
                   </button>
