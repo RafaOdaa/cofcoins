@@ -73,7 +73,6 @@ const categories = [
   }
 ];
 
-// Additional category for admin recognition
 const adminCategories = [
   ...categories,
   { 
@@ -194,7 +193,7 @@ const NewRecognitionDialog: React.FC<NewRecognitionDialogProps> = ({
                     type="button"
                     onClick={() => setCategory(cat.name)}
                     className={cn(
-                      "flex flex-col items-center p-3 rounded-lg border transition-all",
+                      "flex flex-col items-center p-3 rounded-lg border transition-all h-full",
                       category === cat.name 
                         ? "border-cofcoin-purple bg-purple-50 shadow-sm" 
                         : "border-gray-200 hover:border-gray-300 hover:bg-gray-50",
@@ -203,7 +202,7 @@ const NewRecognitionDialog: React.FC<NewRecognitionDialogProps> = ({
                   >
                     <span className="text-2xl mb-2">{cat.icon}</span>
                     <span className="text-sm font-medium text-center">{cat.name}</span>
-                    <span className="text-xs text-gray-600 mt-2 text-center line-clamp-3">
+                    <span className="text-xs text-gray-600 mt-2 text-center">
                       {cat.description}
                     </span>
                   </button>

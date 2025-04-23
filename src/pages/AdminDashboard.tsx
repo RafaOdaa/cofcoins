@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -131,6 +130,17 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleEditBalance = (userId: number, newBalance: number) => {
+    const updatedUsers = users.map(user =>
+      user.id === userId ? { ...user, balance: newBalance } : user
+    );
+    
+    toast({
+      title: "Saldo atualizado",
+      description: `Saldo do usuário ${users.find(u => u.id === userId)?.name} atualizado para ${newBalance} CofCoins.`,
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -228,8 +238,7 @@ const AdminDashboard = () => {
                                 <TooltipContent>
                                   <p className="max-w-xs">{recognition.description}</p>
                                 </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
+                              </TooltipProvider>
                           </TableCell>
                           <TableCell>
                             <Badge variant="outline" className={getStatusColor(recognition.status)}>
@@ -337,7 +346,7 @@ const AdminDashboard = () => {
         open={isEditBalanceOpen}
         onOpenChange={setIsEditBalanceOpen}
         user={selectedUser || { id: 0, name: "", balance: 0, department: "", spent: 0 }}
-        onBalanceChange={handleBalanceEditComplete}
+        onSubmit={handleEditBalance}
       />
       
       <NewRecognitionDialog 
