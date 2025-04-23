@@ -75,7 +75,7 @@ const adminCategories = [
   { 
     id: 7, 
     name: "Leu por si, falou por todos", 
-    description: "Leu, refletiu, conectou com a realidade e compartilhou algo que virou aprendizado coletivo. Uma mente curiosa que lê com propósito e compartilha com paixão.", 
+    description: "Leu, refletiu, conectou com a realidade e compartilhou algo que virou aprendizado coletivo.", 
     icon: "📚",
     color: "bg-teal-100" 
   }
@@ -220,7 +220,7 @@ const NewRecognitionDialog: React.FC<NewRecognitionDialogProps> = ({
                     type="button"
                     onClick={() => setCategory(cat.name)}
                     className={cn(
-                      "flex flex-col items-center p-3 rounded-lg border transition-all group",
+                      "flex flex-col items-center p-3 rounded-lg border transition-all",
                       category === cat.name 
                         ? "border-cofcoin-purple bg-purple-50 shadow-sm" 
                         : "border-gray-200 hover:border-gray-300 hover:bg-gray-50",
@@ -229,7 +229,7 @@ const NewRecognitionDialog: React.FC<NewRecognitionDialogProps> = ({
                   >
                     <span className="text-2xl mb-2">{cat.icon}</span>
                     <span className="text-sm font-medium text-center">{cat.name}</span>
-                    <span className="hidden group-hover:block text-xs text-gray-600 mt-2 text-center">
+                    <span className="text-xs text-gray-600 mt-2 text-center">
                       {cat.description}
                     </span>
                   </button>
