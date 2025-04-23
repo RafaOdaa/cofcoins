@@ -356,8 +356,8 @@ const Dashboard = () => {
       {/* New Recognition Dialog */}
       <NewRecognitionDialog 
         open={isDialogOpen} 
-        onOpenChange={setIsDialogOpen} 
-        categories={categories}
+        onOpenChange={setIsDialogOpen}
+        isAdmin={true}
       />
 
       {/* Recognition Details Dialog */}
