@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
@@ -179,13 +179,13 @@ const NewRecognitionDialog: React.FC<NewRecognitionDialogProps> = ({
             {isAdmin ? (
               <div className="space-y-2">
                 <Label htmlFor="coins">Quantidade de CofCoins</Label>
-                <Input
-                  id="coins"
+                <input
                   type="number"
+                  id="coins"
                   value={coins}
                   onChange={(e) => setCoins(Number(e.target.value))}
                   min="0"
-                  className="w-full"
+                  className="w-full px-3 py-2 border rounded-md"
                 />
               </div>
             ) : (
@@ -220,7 +220,7 @@ const NewRecognitionDialog: React.FC<NewRecognitionDialogProps> = ({
                     type="button"
                     onClick={() => setCategory(cat.name)}
                     className={cn(
-                      "flex flex-col items-center p-3 rounded-lg border transition-all",
+                      "flex flex-col items-center p-3 rounded-lg border transition-all group",
                       category === cat.name 
                         ? "border-cofcoin-purple bg-purple-50 shadow-sm" 
                         : "border-gray-200 hover:border-gray-300 hover:bg-gray-50",
@@ -229,6 +229,9 @@ const NewRecognitionDialog: React.FC<NewRecognitionDialogProps> = ({
                   >
                     <span className="text-2xl mb-2">{cat.icon}</span>
                     <span className="text-sm font-medium text-center">{cat.name}</span>
+                    <span className="hidden group-hover:block text-xs text-gray-600 mt-2 text-center">
+                      {cat.description}
+                    </span>
                   </button>
                 ))}
               </div>
@@ -236,11 +239,12 @@ const NewRecognitionDialog: React.FC<NewRecognitionDialogProps> = ({
 
             <div className="space-y-2">
               <Label htmlFor="description">Descrição</Label>
-              <Input
+              <Textarea
                 id="description"
                 placeholder="Descreva o motivo do reconhecimento..."
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
+                className="min-h-[100px]"
               />
             </div>
           </div>
