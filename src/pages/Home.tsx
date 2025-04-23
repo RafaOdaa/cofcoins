@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -339,6 +338,7 @@ const Home = () => {
       <NewRecognitionDialog 
         open={isDialogOpen} 
         onOpenChange={setIsDialogOpen} 
+        categories={categories}
       />
       
       {/* Recognition Detail Dialog */}
