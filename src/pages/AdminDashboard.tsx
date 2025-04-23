@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,22 +20,28 @@ import {
   Award,
   BookOpen,
   CheckCircle,
+  Edit,
   Gift,
   Home,
   Plus,
   Search,
+  Settings,
   Star,
+  ToggleLeft,
+  ToggleRight,
   TrendingUp,
   Users,
   XCircle
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { Switch } from "@/components/ui/switch";
 
 import RecognitionDetailDialog, { Recognition } from "@/components/RecognitionDetailDialog";
 import UserMenu from '@/components/UserMenu';
 import ConfirmationDialog from '@/components/ConfirmationDialog';
 import NewRecognitionDialog from '@/components/NewRecognitionDialog';
 import EditUserBalanceDialog from '@/components/EditUserBalanceDialog';
+import RewardConfigModal, { RewardItem } from '@/components/RewardConfigModal';
 
 // Category data with types and colors for charts
 const categories = [
@@ -219,6 +224,37 @@ const monthlyActivity = [
   { name: "Dez", sent: 0, received: 0 },
 ];
 
+// Initial reward data for configuration
+const initialRewards: RewardItem[] = [
+  {
+    id: 1,
+    name: "Day Off",
+    description: "Um dia de folga para descansar e recarregar as energias.",
+    value: 500,
+    areas: ["tech", "marketing", "product", "hr", "sales", "finance", "ops"],
+    stock: 10,
+    active: true
+  },
+  {
+    id: 2,
+    name: "Vale Presente R$50",
+    description: "Vale presente para utilizar em lojas parceiras.",
+    value: 100,
+    areas: ["tech", "marketing", "product", "hr", "sales", "finance", "ops"],
+    stock: 15,
+    active: true
+  },
+  {
+    id: 3,
+    name: "Home Office por 1 semana",
+    description: "Trabalhe de casa por uma semana inteira.",
+    value: 250,
+    areas: ["tech", "product", "sales"],
+    stock: 5,
+    active: false
+  }
+];
+
 const AdminDashboard = () => {
   const { toast } = useToast();
   const [selectedRecognition, setSelectedRecognition] = useState<Recognition | null>(null);
@@ -228,6 +264,12 @@ const AdminDashboard = () => {
   const [newBalance, setNewBalance] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
+  
+  // State for reward configuration
+  const [rewards, setRewards] = useState<RewardItem[]>(initialRewards);
+  const [isRewardModalOpen, setIsRewardModalOpen] = useState(false);
+  const [editingReward, setEditingReward] = useState<RewardItem | null>(null);
+  const [rewardSearchTerm, setRewardSearchTerm] = useState("");
   
   // Estado para controle do diálogo de ação (aprovar/rejeitar)
   const [confirmDialog, setConfirmDialog] = useState<{
@@ -294,6 +336,48 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleEditReward = (reward: RewardItem) => {
+    setEditingReward(reward);
+    setIsRewardModalOpen(true);
+  };
+
+  const handleAddNewReward = () => {
+    setEditingReward(null);
+    setIsRewardModalOpen(true);
+  };
+
+  const handleSaveReward = (rewardData: RewardItem) => {
+    if (rewardData.id && rewards.find(r => r.id === rewardData.id)) {
+      // Update existing reward
+      setRewards(rewards.map(r => r.id === rewardData.id ? rewardData : r));
+      toast({
+        title: "Recompensa atualizada",
+        description: `A recompensa "${rewardData.name}" foi atualizada com sucesso.`,
+      });
+    } else {
+      // Add new reward
+      setRewards([...rewards, rewardData]);
+      toast({
+        title: "Recompensa adicionada",
+        description: `A recompensa "${rewardData.name}" foi adicionada com sucesso.`,
+      });
+    }
+  };
+
+  const handleToggleRewardStatus = (id: number, currentStatus: boolean) => {
+    setRewards(rewards.map(reward => {
+      if (reward.id === id) {
+        const newStatus = !currentStatus;
+        toast({
+          title: newStatus ? "Recompensa ativada" : "Recompensa desativada",
+          description: `A recompensa foi ${newStatus ? "ativada" : "desativada"} com sucesso.`,
+        });
+        return { ...reward, active: newStatus };
+      }
+      return reward;
+    }));
+  };
+
   const handleBalanceEditComplete = (userId: number, previousBalance: number, newBalance: number, reason: string) => {
     // Implement your logic here to update the user's balance
     console.log(`User ${userId} balance updated from ${previousBalance} to ${newBalance} due to: ${reason}`);
@@ -303,6 +387,12 @@ const AdminDashboard = () => {
       description: `O saldo do usuário foi atualizado com sucesso.`,
     });
   };
+
+  // Filter rewards based on search term
+  const filteredRewards = rewards.filter(reward => 
+    reward.name.toLowerCase().includes(rewardSearchTerm.toLowerCase()) ||
+    reward.description.toLowerCase().includes(rewardSearchTerm.toLowerCase())
+  );
 
   // Filtrar usuários com base no termo de pesquisa
   const filteredUsers = userBalances.filter(user => 
@@ -335,6 +425,21 @@ const AdminDashboard = () => {
       case "reprovado": return "bg-red-100 text-red-800 border-red-200";
       default: return "bg-gray-100 text-gray-800 border-gray-200";
     }
+  };
+
+  // Get areas names from IDs
+  const getAreaNames = (areaIds: string[]) => {
+    const areaMap: Record<string, string> = {
+      "tech": "Tecnologia",
+      "marketing": "Marketing",
+      "product": "Produto",
+      "hr": "RH",
+      "sales": "Vendas",
+      "finance": "Financeiro",
+      "ops": "Operações"
+    };
+    
+    return areaIds.map(id => areaMap[id] || id).join(", ");
   };
 
   return (
@@ -404,6 +509,9 @@ const AdminDashboard = () => {
             </TabsTrigger>
             <TabsTrigger value="rewards" className="px-3">
               Recompensas
+            </TabsTrigger>
+            <TabsTrigger value="rewardsConfig" className="px-3">
+              Configurar Recompensas
             </TabsTrigger>
             <TabsTrigger value="ranking" className="px-3">
               Ranking
@@ -610,6 +718,88 @@ const AdminDashboard = () => {
             </Card>
           </TabsContent>
 
+          {/* Rewards Configuration Tab - NEW */}
+          <TabsContent value="rewardsConfig">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle className="flex items-center">
+                  <Settings className="h-5 w-5 text-cofcoin-purple mr-2" /> 
+                  Configuração de Recompensas
+                </CardTitle>
+                <Button 
+                  onClick={handleAddNewReward}
+                  className="bg-cofcoin-purple hover:bg-cofcoin-purple-dark"
+                >
+                  <Plus className="h-4 w-4 mr-1" />
+                  Nova Recompensa
+                </Button>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="relative flex-1 max-w-sm">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input 
+                    placeholder="Buscar recompensa..." 
+                    className="pl-10"
+                    value={rewardSearchTerm}
+                    onChange={(e) => setRewardSearchTerm(e.target.value)}
+                  />
+                </div>
+                
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Nome</TableHead>
+                      <TableHead>Descrição</TableHead>
+                      <TableHead>Valor</TableHead>
+                      <TableHead>Áreas</TableHead>
+                      <TableHead>Estoque</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Ações</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredRewards.map(reward => (
+                      <TableRow key={reward.id}>
+                        <TableCell className="font-medium">{reward.name}</TableCell>
+                        <TableCell className="max-w-[200px] truncate">
+                          {reward.description}
+                        </TableCell>
+                        <TableCell>{reward.value} CofCoins</TableCell>
+                        <TableCell className="max-w-[200px] truncate">
+                          {getAreaNames(reward.areas)}
+                        </TableCell>
+                        <TableCell>{reward.stock} unidades</TableCell>
+                        <TableCell>
+                          <div className="flex items-center space-x-2">
+                            <Switch
+                              checked={reward.active}
+                              onCheckedChange={() => 
+                                handleToggleRewardStatus(reward.id, reward.active)
+                              }
+                            />
+                            <span>
+                              {reward.active ? "Ativo" : "Inativo"}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEditReward(reward)}
+                          >
+                            <Edit className="h-4 w-4 mr-1" />
+                            Editar
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           {/* Ranking Tab */}
           <TabsContent value="ranking">
             <Tabs defaultValue="charts" className="space-y-4">
@@ -629,278 +819,3 @@ const AdminDashboard = () => {
                     </CardHeader>
                     <CardContent>
                       <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={topSenders} layout="vertical">
-                          <XAxis type="number" />
-                          <YAxis type="category" dataKey="name" width={120} />
-                          <Tooltip />
-                          <Bar dataKey="value" fill="#8884d8" name="CofCoins enviados" />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center">
-                        <Award className="h-5 w-5 text-cofcoin-purple mr-2" /> 
-                        Maiores Receptores
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={topRecipients} layout="vertical">
-                          <XAxis type="number" />
-                          <YAxis type="category" dataKey="name" width={120} />
-                          <Tooltip />
-                          <Bar dataKey="value" fill="#82ca9d" name="CofCoins recebidos" />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="md:col-span-2">
-                    <CardHeader>
-                      <CardTitle className="flex items-center">
-                        <Activity className="h-5 w-5 text-cofcoin-purple mr-2" /> 
-                        Atividade Mensal
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={monthlyActivity}>
-                          <XAxis dataKey="name" />
-                          <YAxis />
-                          <Tooltip />
-                          <Legend />
-                          <Bar dataKey="sent" fill="#8884d8" name="CofCoins enviados" />
-                          <Bar dataKey="received" fill="#82ca9d" name="CofCoins recebidos" />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="md:col-span-2">
-                    <CardHeader>
-                      <CardTitle className="flex items-center">
-                        <Gift className="h-5 w-5 text-cofcoin-purple mr-2" /> 
-                        Distribuição por Categoria
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="flex items-center justify-center">
-                      <ResponsiveContainer width="100%" height={300}>
-                        <PieChart>
-                          <Pie
-                            data={categories}
-                            cx="50%"
-                            cy="50%"
-                            outerRadius={100}
-                            dataKey="value"
-                            nameKey="name"
-                            label={({ name, value }) => `${name}: ${value}`}
-                          >
-                            {categories.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={entry.color} />
-                            ))}
-                          </Pie>
-                          <Tooltip />
-                        </PieChart>
-                      </ResponsiveContainer>
-                    </CardContent>
-                  </Card>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="list">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Ranking Completo</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Posição</TableHead>
-                          <TableHead>Usuário</TableHead>
-                          <TableHead>Departamento</TableHead>
-                          <TableHead>Total Enviado</TableHead>
-                          <TableHead>Total Recebido</TableHead>
-                          <TableHead>Saldo</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {userBalances.sort((a, b) => b.balance - a.balance).map((user, index) => (
-                          <TableRow key={user.id}>
-                            <TableCell>{index + 1}º</TableCell>
-                            <TableCell className="font-medium">{user.name}</TableCell>
-                            <TableCell>{user.department}</TableCell>
-                            <TableCell>{Math.floor(Math.random() * 500)} CofCoins</TableCell>
-                            <TableCell>{Math.floor(Math.random() * 500)} CofCoins</TableCell>
-                            <TableCell className="font-bold">{user.balance} CofCoins</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
-          </TabsContent>
-
-          {/* Balances Tab */}
-          <TabsContent value="balances">
-            <Card>
-              <CardHeader>
-                <CardTitle>Saldo de Usuários</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="relative max-w-sm">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input 
-                    placeholder="Buscar por nome ou departamento..." 
-                    className="pl-10"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                </div>
-                
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Nome</TableHead>
-                      <TableHead>Departamento</TableHead>
-                      <TableHead>Saldo</TableHead>
-                      <TableHead className="text-right">Ações</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredUsers.map((user) => (
-                      <TableRow key={user.id}>
-                        <TableCell>{user.name}</TableCell>
-                        <TableCell>{user.department}</TableCell>
-                        <TableCell>{user.balance} CofCoins</TableCell>
-                        <TableCell className="text-right">
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => handleEditBalance(user)}
-                          >
-                            Editar Saldo
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* History Tab */}
-          <TabsContent value="history">
-            <Card>
-              <CardHeader>
-                <CardTitle>Histórico de Reconhecimentos</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="relative max-w-sm">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input 
-                    placeholder="Buscar no histórico..." 
-                    className="pl-10"
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                </div>
-
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Remetente</TableHead>
-                      <TableHead>Destinatário</TableHead>
-                      <TableHead>Categoria</TableHead>
-                      <TableHead>Valor</TableHead>
-                      <TableHead>Data</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Ações</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredHistory.map((record) => (
-                      <TableRow key={record.id}>
-                        <TableCell>{record.sender}</TableCell>
-                        <TableCell>{record.recipient}</TableCell>
-                        <TableCell>{record.category}</TableCell>
-                        <TableCell>{record.amount} CofCoins</TableCell>
-                        <TableCell>{format(record.date, 'dd/MM/yyyy')}</TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className={getStatusColor(record.status)}>
-                            {record.status === "aprovado" ? "Aprovado" : 
-                             record.status === "reprovado" ? "Reprovado" : "Pendente"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => {
-                              setSelectedRecognition({
-                                id: record.id,
-                                reporter: record.sender,
-                                recipient: record.recipient,
-                                amount: record.amount,
-                                category: record.category,
-                                description: "",  // No description in history records
-                                date: record.date,
-                                status: record.status
-                              });
-                              setIsRecognitionDetailOpen(true);
-                            }}
-                          >
-                            Detalhes
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </main>
-
-      {/* Dialogs */}
-      <NewRecognitionDialog
-        open={isNewRecognitionOpen}
-        onOpenChange={setIsNewRecognitionOpen}
-        isAdmin={true}
-      />
-
-      <EditUserBalanceDialog
-        open={isEditBalanceOpen}
-        onOpenChange={setIsEditBalanceOpen}
-        user={selectedUser}
-        onComplete={handleBalanceEditComplete}
-      />
-
-      <RecognitionDetailDialog
-        recognition={selectedRecognition}
-        open={isRecognitionDetailOpen}
-        onOpenChange={setIsRecognitionDetailOpen}
-      />
-
-      <ConfirmationDialog
-        open={confirmDialog.open}
-        onOpenChange={(open) => setConfirmDialog({ ...confirmDialog, open })}
-        onConfirm={handleConfirmAction}
-        title={confirmDialog.action === 'approve' ? "Aprovar Reconhecimento" : "Rejeitar Reconhecimento"}
-        description={confirmDialog.action === 'approve' ? 
-          "Tem certeza que deseja aprovar este reconhecimento?" : 
-          "Tem certeza que deseja rejeitar este reconhecimento?"}
-        confirmText={confirmDialog.action === 'approve' ? "Aprovar" : "Rejeitar"}
-        variant={confirmDialog.action === 'approve' ? 'default' : 'destructive'}
-      />
-    </div>
-  );
-};
-
-export default AdminDashboard;

@@ -15,6 +15,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const users = [
   { value: "lucas.mendes", label: "Lucas Mendes" },
@@ -98,6 +99,7 @@ const NewRecognitionDialog: React.FC<NewRecognitionDialogProps> = ({
   const [description, setDescription] = useState("");
   const [coins, setCoins] = useState<number>(isAdmin ? 25 : 50);
   const [openCombobox, setOpenCombobox] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
@@ -119,6 +121,11 @@ const NewRecognitionDialog: React.FC<NewRecognitionDialogProps> = ({
     onOpenChange(false);
   };
 
+  // Filter users based on search query
+  const filteredUsers = users.filter(user => 
+    user.label.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
@@ -129,130 +136,137 @@ const NewRecognitionDialog: React.FC<NewRecognitionDialogProps> = ({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Colega</Label>
-              <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={openCombobox}
-                    className="w-full justify-between"
-                  >
-                    {recipient
-                      ? users.find((user) => user.value === recipient)?.label
-                      : "Selecione um colega..."}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-full p-0">
-                  <Command>
-                    <CommandInput placeholder="Procurar colega..." />
-                    <CommandEmpty>Nenhum colega encontrado.</CommandEmpty>
-                    <CommandGroup>
-                      {users.map((user) => (
-                        <CommandItem
-                          key={user.value}
-                          value={user.value}
-                          onSelect={(currentValue) => {
-                            setRecipient(currentValue === recipient ? "" : currentValue);
-                            setOpenCombobox(false);
-                          }}
-                        >
-                          <Check
-                            className={cn(
-                              "mr-2 h-4 w-4",
-                              recipient === user.value ? "opacity-100" : "opacity-0"
-                            )}
-                          />
-                          {user.label}
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            {isAdmin ? (
+        <ScrollArea className="max-h-[70vh] pr-3">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="coins">Quantidade de CofCoins</Label>
-                <input
-                  type="number"
-                  id="coins"
-                  value={coins}
-                  onChange={(e) => setCoins(Number(e.target.value))}
-                  min="0"
-                  className="w-full px-3 py-2 border rounded-md"
-                />
+                <Label>Colega</Label>
+                <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={openCombobox}
+                      className="w-full justify-between"
+                    >
+                      {recipient
+                        ? users.find((user) => user.value === recipient)?.label
+                        : "Selecione um colega..."}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full p-0">
+                    <Command>
+                      <CommandInput 
+                        placeholder="Procurar colega..." 
+                        value={searchQuery}
+                        onValueChange={setSearchQuery}
+                      />
+                      <CommandEmpty>Nenhum colega encontrado.</CommandEmpty>
+                      <CommandGroup>
+                        {filteredUsers.map((user) => (
+                          <CommandItem
+                            key={user.value}
+                            value={user.value}
+                            onSelect={(currentValue) => {
+                              setRecipient(currentValue === recipient ? "" : currentValue);
+                              setOpenCombobox(false);
+                              setSearchQuery("");
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                recipient === user.value ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            {user.label}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
               </div>
-            ) : (
+
+              {isAdmin ? (
+                <div className="space-y-2">
+                  <Label htmlFor="coins">Quantidade de CofCoins</Label>
+                  <input
+                    type="number"
+                    id="coins"
+                    value={coins}
+                    onChange={(e) => setCoins(Number(e.target.value))}
+                    min="0"
+                    className="w-full px-3 py-2 border rounded-md"
+                  />
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Label>Quantidade de CofCoins</Label>
+                  <div className="grid grid-cols-3 gap-3">
+                    {[50, 100, 150].map((amount) => (
+                      <button
+                        key={amount}
+                        type="button"
+                        onClick={() => setCoins(amount)}
+                        className={cn(
+                          "py-2 px-4 rounded-lg border transition-all text-center",
+                          coins === amount 
+                            ? "border-cofcoin-purple bg-purple-50 text-cofcoin-purple font-medium" 
+                            : "border-gray-200 hover:border-gray-300"
+                        )}
+                      >
+                        {amount} CofCoins
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="space-y-2">
-                <Label>Quantidade de CofCoins</Label>
-                <div className="grid grid-cols-3 gap-3">
-                  {[50, 100, 150].map((amount) => (
+                <Label>Categoria</Label>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  {(isAdmin ? adminCategories : categories).map((cat) => (
                     <button
-                      key={amount}
+                      key={cat.id}
                       type="button"
-                      onClick={() => setCoins(amount)}
+                      onClick={() => setCategory(cat.name)}
                       className={cn(
-                        "py-2 px-4 rounded-lg border transition-all text-center",
-                        coins === amount 
-                          ? "border-cofcoin-purple bg-purple-50 text-cofcoin-purple font-medium" 
-                          : "border-gray-200 hover:border-gray-300"
+                        "flex flex-col items-center p-3 rounded-lg border transition-all",
+                        category === cat.name 
+                          ? "border-cofcoin-purple bg-purple-50 shadow-sm" 
+                          : "border-gray-200 hover:border-gray-300 hover:bg-gray-50",
+                        cat.color
                       )}
                     >
-                      {amount} CofCoins
+                      <span className="text-2xl mb-2">{cat.icon}</span>
+                      <span className="text-sm font-medium text-center">{cat.name}</span>
+                      <span className="text-xs text-gray-600 mt-2 text-center">
+                        {cat.description}
+                      </span>
                     </button>
                   ))}
                 </div>
               </div>
-            )}
 
-            <div className="space-y-2">
-              <Label>Categoria</Label>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {(isAdmin ? adminCategories : categories).map((cat) => (
-                  <button
-                    key={cat.id}
-                    type="button"
-                    onClick={() => setCategory(cat.name)}
-                    className={cn(
-                      "flex flex-col items-center p-3 rounded-lg border transition-all",
-                      category === cat.name 
-                        ? "border-cofcoin-purple bg-purple-50 shadow-sm" 
-                        : "border-gray-200 hover:border-gray-300 hover:bg-gray-50",
-                      cat.color
-                    )}
-                  >
-                    <span className="text-2xl mb-2">{cat.icon}</span>
-                    <span className="text-sm font-medium text-center">{cat.name}</span>
-                    <span className="text-xs text-gray-600 mt-2 text-center">
-                      {cat.description}
-                    </span>
-                  </button>
-                ))}
+              <div className="space-y-2">
+                <Label htmlFor="description">Descrição</Label>
+                <Textarea
+                  id="description"
+                  placeholder="Descreva o motivo do reconhecimento..."
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="min-h-[100px]"
+                />
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="description">Descrição</Label>
-              <Textarea
-                id="description"
-                placeholder="Descreva o motivo do reconhecimento..."
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="min-h-[100px]"
-              />
-            </div>
-          </div>
-
-          <Button type="submit" className="w-full bg-cofcoin-purple hover:bg-cofcoin-purple-dark">
-            Enviar Reconhecimento
-          </Button>
-        </form>
+            <Button type="submit" className="w-full bg-cofcoin-purple hover:bg-cofcoin-purple-dark">
+              Enviar Reconhecimento
+            </Button>
+          </form>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );
