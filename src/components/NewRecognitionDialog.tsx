@@ -128,7 +128,7 @@ const NewRecognitionDialog: React.FC<NewRecognitionDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh]">
         <DialogHeader>
           <DialogTitle>{isAdmin ? "Novo Reconhecimento Especial" : "Novo Reconhecimento"}</DialogTitle>
           <DialogDescription>
