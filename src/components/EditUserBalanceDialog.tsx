@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -7,11 +8,15 @@ import { Label } from "@/components/ui/label";
 interface EditUserBalanceDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  user: {
+  user?: {
     id: number;
     name: string;
     balance: number;
   };
+  // Alternative props for direct values
+  userId?: number;
+  userName?: string;
+  currentBalance?: number;
   onComplete: (userId: number, previousBalance: number, newBalance: number, reason: string) => void;
 }
 
@@ -19,17 +24,25 @@ const EditUserBalanceDialog: React.FC<EditUserBalanceDialogProps> = ({
   open,
   onOpenChange,
   user,
+  userId,
+  userName,
+  currentBalance,
   onComplete
 }) => {
-  const [newBalance, setNewBalance] = useState(user.balance.toString());
+  // Use either user object properties or direct props
+  const actualUserId = user?.id || userId || 0;
+  const actualUserName = user?.name || userName || "";
+  const actualBalance = user?.balance || currentBalance || 0;
+  
+  const [newBalance, setNewBalance] = useState(actualBalance.toString());
   const [reason, setReason] = useState("");
 
   const handleSave = () => {
-    const previousBalance = user.balance;
+    const previousBalance = actualBalance;
     const newBalanceValue = parseInt(newBalance, 10);
 
     if (!isNaN(newBalanceValue)) {
-      onComplete(user.id, previousBalance, newBalanceValue, reason);
+      onComplete(actualUserId, previousBalance, newBalanceValue, reason);
       onOpenChange(false);
     } else {
       alert("Por favor, insira um valor numérico válido para o saldo.");
@@ -47,7 +60,7 @@ const EditUserBalanceDialog: React.FC<EditUserBalanceDialogProps> = ({
             <Label htmlFor="name" className="text-right">
               Nome
             </Label>
-            <Input id="name" value={user.name} className="col-span-3" disabled />
+            <Input id="name" value={actualUserName} className="col-span-3" disabled />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="balance" className="text-right">
