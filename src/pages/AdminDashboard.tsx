@@ -20,41 +20,47 @@ import RewardConfigModal, { RewardItem } from '@/components/RewardConfigModal';
 import { Tooltip as UITooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import EditUserDataDialog from '@/components/EditUserDataDialog';
 
-// Category data with types and colors for charts
-const categories = [{
+// Category data with types and colors for charts - using recognition categories
+const recognitionCategories = [{
   id: 1,
-  name: "Colaboração Excepcional",
-  value: 42,
-  color: "#8884d8",
+  name: "Fora da Caixa",
+  value: 25,
+  color: "#3B82F6",
   icon: Award
 }, {
   id: 2,
-  name: "Inovação Constante",
-  value: 28,
-  color: "#82ca9d",
+  name: "O Quebra Galho",
+  value: 30,
+  color: "#10B981",
   icon: Star
 }, {
   id: 3,
-  name: "Compromisso com Qualidade",
-  value: 35,
-  color: "#ffc658",
+  name: "Aqui é MedCof!",
+  value: 20,
+  color: "#EF4444",
   icon: CheckCircle
 }, {
   id: 4,
-  name: "Liderança Inspiradora",
-  value: 20,
-  color: "#ff8042",
+  name: "Mestre do Improviso",
+  value: 15,
+  color: "#F59E0B",
   icon: Users
 }, {
   id: 5,
-  name: "Aprendeu por si, falou por todos",
-  value: 15,
-  color: "#0088fe",
+  name: "Segurador de Rojão",
+  value: 18,
+  color: "#8B5CF6",
   icon: BookOpen
+}, {
+  id: 6,
+  name: "O Vidente",
+  value: 12,
+  color: "#06B6D4",
+  icon: Activity
 }];
 
 // Mock data for the approval items
-const approvalItems: Recognition[] = [{
+const approvalItems = [{
   id: 1,
   reporter: "Carolina Silva",
   recipient: "Lucas Mendes",
@@ -84,41 +90,6 @@ const approvalItems: Recognition[] = [{
   date: new Date(2023, 9, 13),
   status: "pending",
   icon: BookOpen
-}];
-
-// Mock data for reward requests
-const rewardRequestsData = [{
-  id: 1,
-  user: "Ana Oliveira",
-  title: "Vale Café",
-  value: 150,
-  status: "pendente",
-  requestDate: new Date("2025-04-15T14:25:00"),
-  description: "Gostaria de trocar meus CofCoins por um vale café para utilizar na cafeteria do prédio."
-}, {
-  id: 2,
-  user: "Carlos Mendes",
-  title: "Gift Card R$50",
-  value: 500,
-  status: "pendente",
-  requestDate: new Date("2025-04-14T09:30:00"),
-  description: "Quero utilizar meus CofCoins acumulados para um gift card da Amazon."
-}, {
-  id: 3,
-  user: "Juliana Lima",
-  title: "Vale Cinema",
-  value: 300,
-  status: "aprovado",
-  requestDate: new Date("2025-04-12T16:45:00"),
-  description: "Vou ao cinema com minha família e gostaria de usar meus CofCoins para isso."
-}, {
-  id: 4,
-  user: "Rodrigo Almeida",
-  title: "Vale Café",
-  value: 150,
-  status: "reprovado",
-  requestDate: new Date("2025-04-10T11:20:00"),
-  description: "Preciso de um café para me manter produtivo durante a tarde."
 }];
 
 // Mock data for user balances
@@ -375,6 +346,7 @@ const balanceEditHistory = [{
   date: new Date("2025-04-12T11:20:00"),
   reason: "Verificação de saldo"
 }];
+
 const AdminDashboard = () => {
   const {
     toast
@@ -915,7 +887,7 @@ const AdminDashboard = () => {
                 <CardHeader>
                   <CardTitle>Atividade Mensal</CardTitle>
                 </CardHeader>
-                <CardContent className="No gr\xE1fico de atividade mensal, altere os dados para Cofcoins Enviados e Cofcoins Aprovados">
+                <CardContent>
                   <div className="h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={monthlyActivity}>
@@ -933,19 +905,28 @@ const AdminDashboard = () => {
               
               <Card>
                 <CardHeader>
-                  <CardTitle>Categorias Mais Usadas</CardTitle>
+                  <CardTitle>Distribuição entre Categorias</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
-                        <Pie data={categories} cx="50%" cy="50%" labelLine={false} outerRadius={80} fill="#8884d8" dataKey="value" nameKey="name" label={({
-                        name,
-                        percent
-                      }) => `${name}: ${(percent * 100).toFixed(0)}%`}>
-                          {categories.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
+                        <Pie 
+                          data={recognitionCategories} 
+                          cx="50%" 
+                          cy="50%" 
+                          labelLine={false} 
+                          outerRadius={80} 
+                          fill="#8884d8" 
+                          dataKey="value" 
+                          nameKey="name" 
+                          label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                        >
+                          {recognitionCategories.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
                         </Pie>
-                        <Tooltip formatter={value => [`${value} CofCoins`, 'Valor']} />
+                        <Tooltip formatter={(value) => [`${value} reconhecimentos`, 'Quantidade']} />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
@@ -1076,16 +1057,18 @@ const AdminDashboard = () => {
       open
     })} title={confirmDialog.action === 'approve' ? "Aprovar Reconhecimento" : "Rejeitar Reconhecimento"} description={`Tem certeza que deseja ${confirmDialog.action === 'approve' ? 'aprovar' : 'rejeitar'} este reconhecimento?`} onConfirm={handleConfirmAction} />
       
-      <NewRecognitionDialog open={isNewRecognitionOpen} onOpenChange={setIsNewRecognitionOpen} onSave={recognitionData => {
-      console.log("New special recognition saved:", recognitionData);
-      toast({
-        title: "Reconhecimento criado",
-        description: "O reconhecimento especial foi criado com sucesso."
-      });
-      setIsNewRecognitionOpen(false);
-    }} />
+      <NewRecognitionDialog 
+        open={isNewRecognitionOpen} 
+        onOpenChange={setIsNewRecognitionOpen} 
+        isAdmin={true}
+      />
       
-      <EditUserBalanceDialog open={isEditBalanceOpen} onOpenChange={setIsEditBalanceOpen} user={selectedUser} onSave={handleBalanceEditComplete} />
+      <EditUserBalanceDialog 
+        open={isEditBalanceOpen} 
+        onOpenChange={setIsEditBalanceOpen} 
+        user={selectedUser} 
+        onBalanceEditComplete={handleBalanceEditComplete} 
+      />
       
       <RewardConfigModal open={isRewardModalOpen} onOpenChange={setIsRewardModalOpen} onSave={handleSaveReward} editingReward={editingReward} />
 
