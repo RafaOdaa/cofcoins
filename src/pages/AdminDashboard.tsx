@@ -18,6 +18,7 @@ import NewRecognitionDialog from '@/components/NewRecognitionDialog';
 import EditUserBalanceDialog from '@/components/EditUserBalanceDialog';
 import RewardConfigModal, { RewardItem } from '@/components/RewardConfigModal';
 import { Tooltip as UITooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
+import EditUserDataDialog from '@/components/EditUserDataDialog';
 
 // Category data with types and colors for charts
 const categories = [{
@@ -405,6 +406,9 @@ const AdminDashboard = () => {
   // Estado para controle do diálogo de novo reconhecimento especial
   const [isNewRecognitionOpen, setIsNewRecognitionOpen] = useState(false);
 
+  // Estado para controle do diálogo de edição de dados do usuário
+  const [isEditUserDataOpen, setIsEditUserDataOpen] = useState(false);
+
   // Função para aprovar um reconhecimento
   const handleApprove = (id: number) => {
     setConfirmDialog({
@@ -539,7 +543,23 @@ const AdminDashboard = () => {
     };
     return areaIds.map(id => areaMap[id] || id).join(", ");
   };
-  return <div className="min-h-screen bg-gray-50">
+
+  const handleEditUserData = (user: typeof userBalances[0]) => {
+    setSelectedUser(user);
+    setIsEditUserDataOpen(true);
+  };
+
+  const handleUserDataEditComplete = (userId: number, department: string, squad: string) => {
+    console.log(`User ${userId} data updated - Department: ${department}, Squad: ${squad}`);
+    toast({
+      title: "Dados atualizados",
+      description: "Os dados do usuário foram atualizados com sucesso."
+    });
+    setIsEditUserDataOpen(false);
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -984,10 +1004,24 @@ const AdminDashboard = () => {
                         <TableCell>{user.department}</TableCell>
                         <TableCell>{user.balance} CofCoins</TableCell>
                         <TableCell>
-                          <Button variant="ghost" size="sm" onClick={() => handleEditBalance(user)}>
-                            <Edit className="h-4 w-4 mr-1" />
-                            Editar Saldo
-                          </Button>
+                          <div className="flex gap-2">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => handleEditBalance(user)}
+                            >
+                              <Edit className="h-4 w-4 mr-1" />
+                              Editar Saldo
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => handleEditUserData(user)}
+                            >
+                              <Settings className="h-4 w-4 mr-1" />
+                              Editar Dados
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>)}
                   </TableBody>
@@ -1054,6 +1088,15 @@ const AdminDashboard = () => {
       <EditUserBalanceDialog open={isEditBalanceOpen} onOpenChange={setIsEditBalanceOpen} user={selectedUser} onSave={handleBalanceEditComplete} />
       
       <RewardConfigModal open={isRewardModalOpen} onOpenChange={setIsRewardModalOpen} onSave={handleSaveReward} editingReward={editingReward} />
-    </div>;
+
+      <EditUserDataDialog
+        open={isEditUserDataOpen}
+        onOpenChange={setIsEditUserDataOpen}
+        user={selectedUser}
+        onSave={handleUserDataEditComplete}
+      />
+    </div>
+  );
 };
+
 export default AdminDashboard;
