@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -312,7 +311,6 @@ const AdminDashboard = () => {
   const [isRecognitionDetailOpen, setIsRecognitionDetailOpen] = useState(false);
   const [isEditBalanceOpen, setIsEditBalanceOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<typeof userBalances[0] | null>(null);
-  const [newBalance, setNewBalance] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
   
@@ -373,18 +371,16 @@ const AdminDashboard = () => {
 
   const handleEditBalance = (user: typeof userBalances[0]) => {
     setSelectedUser(user);
-    setNewBalance(user.balance.toString());
     setIsEditBalanceOpen(true);
   };
 
-  const handleSaveBalance = () => {
-    if (selectedUser) {
-      toast({
-        title: "Saldo atualizado",
-        description: `O saldo de ${selectedUser.name} foi atualizado para ${newBalance} CofCoins.`,
-      });
-      setIsEditBalanceOpen(false);
-    }
+  const handleBalanceEditComplete = (userId: number, previousBalance: number, newBalanceValue: number, reason: string) => {
+    console.log(`User ${userId} balance updated from ${previousBalance} to ${newBalanceValue} due to: ${reason}`);
+    toast({
+      title: "Saldo atualizado",
+      description: `O saldo do usuário foi atualizado com sucesso.`,
+    });
+    setIsEditBalanceOpen(false);
   };
 
   const handleEditReward = (reward: RewardItem) => {
@@ -427,16 +423,6 @@ const AdminDashboard = () => {
       }
       return reward;
     }));
-  };
-
-  const handleBalanceEditComplete = (userId: number, previousBalance: number, newBalance: number, reason: string) => {
-    // Implement your logic here to update the user's balance
-    console.log(`User ${userId} balance updated from ${previousBalance} to ${newBalance} due to: ${reason}`);
-    // You might want to call an API to update the balance in your database
-    toast({
-      title: "Saldo atualizado",
-      description: `O saldo do usuário foi atualizado com sucesso.`,
-    });
   };
 
   // Filter rewards based on search term
@@ -1020,7 +1006,7 @@ const AdminDashboard = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredBalanceHistory.map(record => (
+                    {balanceEditHistory.map(record => (
                       <TableRow key={record.id}>
                         <TableCell>{format(record.date, 'dd/MM/yyyy HH:mm')}</TableCell>
                         <TableCell>{record.admin}</TableCell>
@@ -1061,11 +1047,13 @@ const AdminDashboard = () => {
       <NewRecognitionDialog
         open={isNewRecognitionOpen}
         onOpenChange={setIsNewRecognitionOpen}
-        onSuccess={() => {
+        onSave={(recognitionData) => {
+          console.log("New special recognition saved:", recognitionData);
           toast({
             title: "Reconhecimento criado",
-            description: "O reconhecimento foi criado com sucesso.",
+            description: "O reconhecimento especial foi criado com sucesso.",
           });
+          setIsNewRecognitionOpen(false);
         }}
       />
       
@@ -1073,7 +1061,7 @@ const AdminDashboard = () => {
         open={isEditBalanceOpen}
         onOpenChange={setIsEditBalanceOpen}
         user={selectedUser}
-        onComplete={handleBalanceEditComplete}
+        onSave={handleBalanceEditComplete}
       />
       
       <RewardConfigModal
