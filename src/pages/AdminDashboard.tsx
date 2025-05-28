@@ -599,9 +599,7 @@ const AdminDashboard = () => {
             <TabsTrigger value="ranking" className="px-3">
               Ranking
             </TabsTrigger>
-            <TabsTrigger value="balances" className="px-3">
-              Saldos
-            </TabsTrigger>
+            <TabsTrigger value="balances" className="px-3">Usuários</TabsTrigger>
           </TabsList>
 
           {/* Approvals Tab */}
