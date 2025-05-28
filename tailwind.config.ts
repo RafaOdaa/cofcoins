@@ -63,13 +63,14 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				cofcoin: {
-					purple: '#9b87f5',
-					'purple-dark': '#7E69AB',
-					'purple-light': '#D6BCFA',
-					orange: '#F97316',
-					gray: '#8E9196'
-				}
+        // Nova paleta de tema
+        themePalette: {
+          almostBlack: '#0A0908',    // Preto Suave
+          darkBlueGray: '#22333B',  // Cinza Azulado Escuro
+          lightGray: '#F2F4F3',     // Cinza Claro
+          mutedTan: '#A9927D',      // Bege Discreto
+          darkBrown: '#5E503F',     // Marrom Escuro
+        }
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -121,3 +122,4 @@ export default {
 	},
 	plugins: [require("tailwindcss-animate")],
 } satisfies Config;
+

@@ -7,82 +7,87 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Nova Paleta - Modo Claro */
+    --background: 150 11% 95%; /* lightGray (F2F4F3) */
+    --foreground: 205 30% 18%; /* darkBlueGray (22333B) */
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%; /* white */
+    --card-foreground: 205 30% 18%; /* darkBlueGray (22333B) */
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%; /* white */
+    --popover-foreground: 205 30% 18%; /* darkBlueGray (22333B) */
 
-    --primary: 258 80% 74%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 27 19% 31%; /* darkBrown (5E503F) */
+    --primary-foreground: 150 11% 95%; /* lightGray (F2F4F3) */
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 30 20% 58%; /* mutedTan (A9927D) */
+    --secondary-foreground: 30 8% 5%; /* almostBlack (0A0908) */
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 30 20% 58%; /* mutedTan (A9927D) (usado como base para muted) */
+    --muted-foreground: 27 19% 31%; /* darkBrown (5E503F) */
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 30 20% 58%; /* mutedTan (A9927D) (usado como accent) */
+    --accent-foreground: 30 8% 5%; /* almostBlack (0A0908) */
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84.2% 60.2%; /* Mantido o original para funcionalidade */
+    --destructive-foreground: 210 40% 98%; /* Mantido o original */
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 258 80% 74%;
+    --border: 30 20% 58%; /* mutedTan (A9927D) */
+    --input: 30 20% 58%; /* mutedTan (A9927D) */
+    --ring: 27 19% 31%; /* darkBrown (5E503F) */
 
     --radius: 0.8rem;
 
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Sidebar - Modo Claro */
+    --sidebar-background: 150 11% 98%; 
+    --sidebar-foreground: 205 30% 18%;
+    --sidebar-primary: 27 19% 31%;
+    --sidebar-primary-foreground: 150 11% 95%;
+    --sidebar-accent: 150 11% 92%;
+    --sidebar-accent-foreground: 27 19% 31%;
+    --sidebar-border: 30 20% 85%;
+    --sidebar-ring: 27 19% 31%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    /* Nova Paleta - Modo Escuro */
+    --background: 30 8% 5%; /* almostBlack (0A0908) */
+    --foreground: 150 11% 95%; /* lightGray (F2F4F3) */
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 205 30% 18%; /* darkBlueGray (22333B) */
+    --card-foreground: 150 11% 95%; /* lightGray (F2F4F3) */
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 205 30% 18%; /* darkBlueGray (22333B) */
+    --popover-foreground: 150 11% 95%; /* lightGray (F2F4F3) */
 
-    --primary: 258 80% 74%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 30 20% 58%; /* mutedTan (A9927D) */
+    --primary-foreground: 30 8% 5%; /* almostBlack (0A0908) */
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 27 19% 31%; /* darkBrown (5E503F) */
+    --secondary-foreground: 150 11% 95%; /* lightGray (F2F4F3) */
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 205 30% 18%; /* darkBlueGray (22333B) */
+    --muted-foreground: 30 20% 58%; /* mutedTan (A9927D) */
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 30 20% 58%; /* mutedTan (A9927D) */
+    --accent-foreground: 30 8% 5%; /* almostBlack (0A0908) */
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%; /* Mantido o original para funcionalidade */
+    --destructive-foreground: 210 40% 98%; /* Mantido o original */
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 27 19% 31%; /* darkBrown (5E503F) */
+    --input: 27 19% 31%; /* darkBrown (5E503F) */
+    --ring: 30 20% 58%; /* mutedTan (A9927D) */
+
+    /* Sidebar - Modo Escuro */
+    --sidebar-background: 30 8% 10%;
+    --sidebar-foreground: 150 11% 95%;
+    --sidebar-primary: 30 20% 58%;
+    --sidebar-primary-foreground: 30 8% 5%;
+    --sidebar-accent: 205 30% 15%;
+    --sidebar-accent-foreground: 150 11% 95%;
+    --sidebar-border: 27 19% 25%;
+    --sidebar-ring: 30 20% 58%;
   }
 }
 
@@ -98,19 +103,20 @@
 
 @layer components {
   .gradient-bg {
-    @apply bg-gradient-to-br from-cofcoin-purple/10 via-background to-cofcoin-orange/10;
+    @apply bg-gradient-to-br from-primary/10 via-background to-accent/10; /* Updated to use new theme colors */
   }
   
   .category-card {
-    @apply relative p-6 bg-white rounded-xl shadow-md border border-cofcoin-purple/20 hover:shadow-lg hover:border-cofcoin-purple/40 transition-all duration-300 overflow-hidden;
+    @apply relative p-6 bg-card rounded-xl shadow-md border-primary/20 hover:shadow-lg hover:border-primary/40 transition-all duration-300 overflow-hidden; /* Updated to use new theme colors */
   }
   
   .category-card::after {
     content: "";
-    @apply absolute bottom-0 left-0 h-1 bg-gradient-to-r from-cofcoin-purple to-cofcoin-orange w-0 transition-all duration-500;
+    @apply absolute bottom-0 left-0 h-1 bg-gradient-to-r from-primary to-accent w-0 transition-all duration-500; /* Updated to use new theme colors */
   }
   
   .category-card:hover::after {
     @apply w-full;
   }
 }
+

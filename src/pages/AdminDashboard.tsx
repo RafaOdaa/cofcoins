@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, Dispatch, SetStateAction } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useToast } from "@/hooks/use-toast";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { format } from 'date-fns';
-import { Activity, Award, BookOpen, CheckCircle, Edit, Gift, Home, Plus, Search, Settings, Star, ToggleLeft, ToggleRight, TrendingUp, Users, XCircle } from 'lucide-react';
+import { Activity, Award, BookOpen, CheckCircle, Edit, Gift, Home, Plus, Search, Settings, Star, ToggleLeft, ToggleRight, TrendingUp, Users, XCircle, LucideProps } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Switch } from "@/components/ui/switch";
 import RecognitionDetailDialog, { Recognition } from "@/components/RecognitionDetailDialog";
@@ -24,31 +24,31 @@ const categories = [{
   id: 1,
   name: "Colaboração Excepcional",
   value: 42,
-  color: "#8884d8",
+  color: "hsl(var(--primary))",
   icon: Award
 }, {
   id: 2,
   name: "Inovação Constante",
   value: 28,
-  color: "#82ca9d",
+  color: "hsl(var(--secondary))",
   icon: Star
 }, {
   id: 3,
   name: "Compromisso com Qualidade",
   value: 35,
-  color: "#ffc658",
+  color: "hsl(var(--accent))",
   icon: CheckCircle
 }, {
   id: 4,
   name: "Liderança Inspiradora",
   value: 20,
-  color: "#ff8042",
+  color: "hsl(var(--primary) / 0.7)",
   icon: Users
 }, {
   id: 5,
   name: "Aprendeu por si, falou por todos",
   value: 15,
-  color: "#0088fe",
+  color: "hsl(var(--secondary) / 0.7)",
   icon: BookOpen
 }];
 
@@ -261,52 +261,52 @@ const topRecipients = [{
 }];
 const monthlyActivity = [{
   name: "Jan",
-  aprovados: 65,
-  reprovados: 10
+  "CofCoins Enviados": 65,
+  "CofCoins Aprovados": 50
 }, {
   name: "Fev",
-  aprovados: 75,
-  reprovados: 15
+  "CofCoins Enviados": 75,
+  "CofCoins Aprovados": 60
 }, {
   name: "Mar",
-  aprovados: 85,
-  reprovados: 20
+  "CofCoins Enviados": 85,
+  "CofCoins Aprovados": 70
 }, {
   name: "Abr",
-  aprovados: 70,
-  reprovados: 12
+  "CofCoins Enviados": 70,
+  "CofCoins Aprovados": 55
 }, {
   name: "Mai",
-  aprovados: 80,
-  reprovados: 18
+  "CofCoins Enviados": 80,
+  "CofCoins Aprovados": 65
 }, {
   name: "Jun",
-  aprovados: 90,
-  reprovados: 25
+  "CofCoins Enviados": 90,
+  "CofCoins Aprovados": 75
 }, {
   name: "Jul",
-  aprovados: 75,
-  reprovados: 15
+  "CofCoins Enviados": 75,
+  "CofCoins Aprovados": 60
 }, {
   name: "Ago",
-  aprovados: 85,
-  reprovados: 20
+  "CofCoins Enviados": 85,
+  "CofCoins Aprovados": 70
 }, {
   name: "Set",
-  aprovados: 95,
-  reprovados: 30
+  "CofCoins Enviados": 95,
+  "CofCoins Aprovados": 80
 }, {
   name: "Out",
-  aprovados: 85,
-  reprovados: 22
+  "CofCoins Enviados": 85,
+  "CofCoins Aprovados": 68
 }, {
   name: "Nov",
-  aprovados: 0,
-  reprovados: 0
+  "CofCoins Enviados": 0,
+  "CofCoins Aprovados": 0
 }, {
   name: "Dez",
-  aprovados: 0,
-  reprovados: 0
+  "CofCoins Enviados": 0,
+  "CofCoins Aprovados": 0
 }];
 
 // Initial reward data for configuration
@@ -374,10 +374,9 @@ const balanceEditHistory = [{
   date: new Date("2025-04-12T11:20:00"),
   reason: "Verificação de saldo"
 }];
+
 const AdminDashboard = () => {
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
   const [selectedRecognition, setSelectedRecognition] = useState<Recognition | null>(null);
   const [isRecognitionDetailOpen, setIsRecognitionDetailOpen] = useState(false);
   const [isEditBalanceOpen, setIsEditBalanceOpen] = useState(false);
@@ -539,28 +538,28 @@ const AdminDashboard = () => {
     };
     return areaIds.map(id => areaMap[id] || id).join(", ");
   };
-  return <div className="min-h-screen bg-gray-50">
+  return <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
-      <header className="bg-white shadow-sm">
+      <header className="bg-card shadow-sm border-b border-border">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <div className="h-10 w-10 relative">
-                  <div className="absolute inset-0 bg-cofcoin-orange rounded-full opacity-20"></div>
-                  <div className="absolute inset-1 bg-cofcoin-purple rounded-full flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">C</span>
+                  <div className="absolute inset-0 bg-primary rounded-full opacity-20"></div>
+                  <div className="absolute inset-1 bg-accent rounded-full flex items-center justify-center">
+                    <span className="text-primary-foreground font-bold text-sm">A</span>
                   </div>
                 </div>
               </div>
-              <h1 className="ml-3 text-xl font-semibold text-gray-900">CofCoin Admin</h1>
+              <h1 className="ml-3 text-xl font-semibold text-foreground">Admin CofCoin</h1>
             </div>
             <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="sm" onClick={() => navigate('/home')} className="text-gray-600 hover:text-cofcoin-purple">
+              <Button variant="ghost" size="sm" onClick={() => navigate('/home')} className="text-foreground hover:text-primary">
                 <Home className="h-5 w-5 mr-1" />
                 <span>Home</span>
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => navigate('/rewards')} className="text-gray-600 hover:text-cofcoin-purple">
+              <Button variant="ghost" size="sm" onClick={() => navigate('/rewards')} className="text-foreground hover:text-primary">
                 <Gift className="h-5 w-5 mr-1" />
                 <span>Recompensas</span>
               </Button>
@@ -573,12 +572,12 @@ const AdminDashboard = () => {
       {/* Main content */}
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h2 className="text-2xl font-semibold text-gray-900">Painel de Administração</h2>
-          <p className="text-gray-600">Gerencie reconhecimentos, recompensas e visualize estatísticas.</p>
+          <h2 className="text-2xl font-semibold text-foreground">Painel de Administração</h2>
+          <p className="text-muted-foreground">Gerencie reconhecimentos, recompensas e visualize estatísticas.</p>
         </div>
 
         <div className="flex justify-end mb-4">
-          <Button onClick={() => setIsNewRecognitionOpen(true)} className="bg-cofcoin-purple hover:bg-cofcoin-purple-dark text-white">
+          <Button onClick={() => setIsNewRecognitionOpen(true)} className="bg-primary hover:bg-primary/90 text-primary-foreground">
             <Plus className="h-4 w-4 mr-1" />
             Reconhecimento Especial
           </Button>
@@ -586,20 +585,20 @@ const AdminDashboard = () => {
 
         {/* Tabs */}
         <Tabs defaultValue="approvals" className="space-y-8">
-          <TabsList className="inline-flex h-10 items-center justify-center rounded-md bg-white p-1">
-            <TabsTrigger value="approvals" className="px-3">
+          <TabsList className="inline-flex h-10 items-center justify-center rounded-md bg-card p-1 text-muted-foreground">
+            <TabsTrigger value="approvals" className="data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm px-3">
               Aprovações
             </TabsTrigger>
-            <TabsTrigger value="rewards" className="px-3">
-              Recompensas
+            <TabsTrigger value="rewards" className="data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm px-3">
+              Solicitações Recomp.
             </TabsTrigger>
-            <TabsTrigger value="rewardsConfig" className="px-3">
+            <TabsTrigger value="rewardsConfig" className="data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm px-3">
               Configurar Recompensas
             </TabsTrigger>
-            <TabsTrigger value="ranking" className="px-3">
+            <TabsTrigger value="ranking" className="data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm px-3">
               Ranking
             </TabsTrigger>
-            <TabsTrigger value="balances" className="px-3">
+            <TabsTrigger value="balances" className="data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm px-3">
               Saldos
             </TabsTrigger>
           </TabsList>
@@ -609,9 +608,9 @@ const AdminDashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-lg flex items-center">
+                  <CardTitle className="text-lg flex items-center text-foreground">
                     <CheckCircle className="h-5 w-5 text-green-600 mr-2" />
-                    Aprovações Concluídas
+                    Aprov. Concluídas
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -621,9 +620,9 @@ const AdminDashboard = () => {
               
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-lg flex items-center">
+                  <CardTitle className="text-lg flex items-center text-foreground">
                     <XCircle className="h-5 w-5 text-red-600 mr-2" />
-                    Aprovações Rejeitadas
+                    Aprov. Rejeitadas
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -633,7 +632,7 @@ const AdminDashboard = () => {
 
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-lg flex items-center">
+                  <CardTitle className="text-lg flex items-center text-foreground">
                     <Award className="h-5 w-5 text-yellow-600 mr-2" />
                     Aprovações Pendentes
                   </CardTitle>
@@ -649,45 +648,47 @@ const AdminDashboard = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Solicitante</TableHead>
-                      <TableHead>Destinatário</TableHead>
-                      <TableHead>Categoria</TableHead>
-                      <TableHead>Valor</TableHead>
-                      <TableHead>Data</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Ações</TableHead>
+                      <TableHead className="text-foreground">Solicitante</TableHead>
+                      <TableHead className="text-foreground">Destinatário</TableHead>
+                      <TableHead className="text-foreground">Categoria</TableHead>
+                      <TableHead className="text-foreground">Valor</TableHead>
+                      <TableHead className="text-foreground">Data</TableHead>
+                      <TableHead className="text-foreground">Status</TableHead>
+                      <TableHead className="text-right text-foreground">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {approvalItems.map(item => <TableRow key={item.id}>
-                        <TableCell>{item.reporter}</TableCell>
-                        <TableCell>{item.recipient}</TableCell>
-                        <TableCell>{item.category}</TableCell>
-                        <TableCell>{item.amount} CofCoins</TableCell>
-                        <TableCell>{format(item.date, 'dd/MM/yyyy')}</TableCell>
+                    {approvalItems.map(item => (
+                      <TableRow key={item.id}>
+                        <TableCell className="text-muted-foreground">{item.reporter}</TableCell>
+                        <TableCell className="text-muted-foreground">{item.recipient}</TableCell>
+                        <TableCell className="text-muted-foreground">{item.category}</TableCell>
+                        <TableCell className="text-muted-foreground">{item.amount} CofCoins</TableCell>
+                        <TableCell className="text-muted-foreground">{format(item.date, 'dd/MM/yyyy')}</TableCell>
                         <TableCell>
-                          <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-200">
-                            Pendente
+                          <Badge variant="outline" className={getStatusColor(item.status || "pendente")}>
+                            {item.status === "pending" ? "Pendente" : item.status}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button variant="ghost" size="sm" onClick={() => handleApprove(item.id)}>
+                          <Button variant="ghost" size="sm" onClick={() => { setSelectedRecognition(item); setIsRecognitionDetailOpen(true); }} className="text-primary hover:text-primary/80">
                             Avaliar
                           </Button>
                         </TableCell>
-                      </TableRow>)}
+                      </TableRow>
+                    ))}
                   </TableBody>
                 </Table>
               </CardContent>
             </Card>
           </TabsContent>
 
-          {/* Rewards Tab */}
+          {/* Rewards Tab - Solicitações de Recompensa */}
           <TabsContent value="rewards">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-lg flex items-center">
+                  <CardTitle className="text-lg flex items-center text-foreground">
                     <CheckCircle className="h-5 w-5 text-green-600 mr-2" />
                     Recompensas Aprovadas
                   </CardTitle>
@@ -699,7 +700,7 @@ const AdminDashboard = () => {
               
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-lg flex items-center">
+                  <CardTitle className="text-lg flex items-center text-foreground">
                     <XCircle className="h-5 w-5 text-red-600 mr-2" />
                     Recompensas Rejeitadas
                   </CardTitle>
@@ -711,7 +712,7 @@ const AdminDashboard = () => {
 
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-lg flex items-center">
+                  <CardTitle className="text-lg flex items-center text-foreground">
                     <Award className="h-5 w-5 text-yellow-600 mr-2" />
                     Recompensas Pendentes
                   </CardTitle>
@@ -721,67 +722,56 @@ const AdminDashboard = () => {
                 </CardContent>
               </Card>
             </div>
-
             <Card>
               <CardHeader>
-                <CardTitle>Recompensas</CardTitle>
+                <CardTitle className="text-foreground">Solicitações de Recompensa</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="relative flex-1 max-w-sm">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input placeholder="Buscar recompensa..." className="pl-10" onChange={e => setSearchTerm(e.target.value)} />
+                  <Input placeholder="Buscar solicitação..." className="pl-10 bg-card border-border text-foreground" onChange={e => setSearchTerm(e.target.value)} />
                 </div>
                 
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Nome</TableHead>
-                      <TableHead>Valor</TableHead>
-                      <TableHead>Disponibilidade</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Ações</TableHead>
+                      <TableHead className="text-foreground">Usuário</TableHead>
+                      <TableHead className="text-foreground">Recompensa</TableHead>
+                      <TableHead className="text-foreground">Valor</TableHead>
+                      <TableHead className="text-foreground">Data Solic.</TableHead>
+                      <TableHead className="text-foreground">Status</TableHead>
+                      <TableHead className="text-right text-foreground">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    <TableRow>
-                      <TableCell>Day Off</TableCell>
-                      <TableCell>100 CofCoins</TableCell>
-                      <TableCell>10 disponíveis</TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className={getStatusColor("aprovado")}>
-                          Aprovado
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Button variant="ghost" size="sm">Editar</Button>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>Vale Presente R$50</TableCell>
-                      <TableCell>50 CofCoins</TableCell>
-                      <TableCell>15 disponíveis</TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className={getStatusColor("pendente")}>
-                          Pendente
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Button variant="ghost" size="sm">Editar</Button>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>Home Office por 1 semana</TableCell>
-                      <TableCell>175 CofCoins</TableCell>
-                      <TableCell>5 disponíveis</TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className={getStatusColor("reprovado")}>
-                          Reprovado
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Button variant="ghost" size="sm">Editar</Button>
-                      </TableCell>
-                    </TableRow>
+                    {rewardRequestsData.filter(req => req.user.toLowerCase().includes(searchTerm.toLowerCase()) || req.title.toLowerCase().includes(searchTerm.toLowerCase())).map(request => (
+                      <TableRow key={request.id}>
+                        <TableCell className="text-muted-foreground">{request.user}</TableCell>
+                        <TableCell className="text-muted-foreground">{request.title}</TableCell>
+                        <TableCell className="text-muted-foreground">{request.value} CofCoins</TableCell>
+                        <TableCell className="text-muted-foreground">{format(request.requestDate, 'dd/MM/yyyy HH:mm')}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className={getStatusColor(request.status)}>
+                            {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {request.status === 'pendente' && (
+                            <>
+                              <Button variant="ghost" size="xs" onClick={() => handleApprove(request.id, 'reward', request)} className="text-green-600 hover:text-green-500 mr-1">
+                                Aprovar
+                              </Button>
+                              <Button variant="ghost" size="xs" onClick={() => handleReject(request.id, 'reward', request)} className="text-red-600 hover:text-red-500">
+                                Rejeitar
+                              </Button>
+                            </>
+                          )}
+                           {request.status !== 'pendente' && (
+                             <span className="text-xs text-muted-foreground italic">Processado</span>
+                           )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
                   </TableBody>
                 </Table>
               </CardContent>
@@ -792,8 +782,8 @@ const AdminDashboard = () => {
           <TabsContent value="rewardsConfig">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Configuração de Recompensas</CardTitle>
-                <Button onClick={handleAddNewReward} className="bg-cofcoin-purple hover:bg-cofcoin-purple-dark">
+                <CardTitle className="text-foreground">Configuração de Recompensas</CardTitle>
+                <Button onClick={handleAddNewReward} className="bg-primary hover:bg-primary/90 text-primary-foreground">
                   <Plus className="h-4 w-4 mr-1" />
                   Nova Recompensa
                 </Button>
@@ -801,88 +791,66 @@ const AdminDashboard = () => {
               <CardContent>
                 <div className="relative flex-1 max-w-sm mb-4">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input placeholder="Buscar recompensa..." className="pl-10" value={rewardSearchTerm} onChange={e => setRewardSearchTerm(e.target.value)} />
+                  <Input placeholder="Buscar recompensa..." className="pl-10 bg-card border-border text-foreground" value={rewardSearchTerm} onChange={e => setRewardSearchTerm(e.target.value)} />
                 </div>
                 
                 <TooltipProvider>
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Nome</TableHead>
-                        <TableHead>Descrição</TableHead>
-                        <TableHead>Valor</TableHead>
-                        <TableHead>Áreas</TableHead>
-                        <TableHead>Estoque</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Ações</TableHead>
+                        <TableHead className="text-foreground">Nome</TableHead>
+                        <TableHead className="text-foreground">Descrição</TableHead>
+                        <TableHead className="text-foreground">Valor</TableHead>
+                        <TableHead className="text-foreground">Áreas</TableHead>
+                        <TableHead className="text-foreground">Estoque</TableHead>
+                        <TableHead className="text-foreground">Status</TableHead>
+                        <TableHead className="text-right text-foreground">Ações</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredRewards.map(reward => <TableRow key={reward.id}>
+                      {filteredRewards.map(reward => (
+                        <TableRow key={reward.id}>
                           <TableCell>
                             <UITooltip>
-                              <TooltipTrigger asChild>
-                                <span className="cursor-help">{reward.name}</span>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>{reward.name}</p>
-                              </TooltipContent>
+                              <TooltipTrigger asChild><span className="cursor-help text-muted-foreground">{reward.name}</span></TooltipTrigger>
+                              <TooltipContent className="bg-popover text-popover-foreground border-border"><p>{reward.name}</p></TooltipContent>
                             </UITooltip>
                           </TableCell>
                           <TableCell>
                             <UITooltip>
-                              <TooltipTrigger asChild>
-                                <span className="cursor-help truncate max-w-[200px] inline-block">
-                                  {reward.description}
-                                </span>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>{reward.description}</p>
-                              </TooltipContent>
+                              <TooltipTrigger asChild><span className="cursor-help truncate max-w-[200px] inline-block text-muted-foreground">{reward.description}</span></TooltipTrigger>
+                              <TooltipContent className="bg-popover text-popover-foreground border-border"><p>{reward.description}</p></TooltipContent>
                             </UITooltip>
                           </TableCell>
                           <TableCell>
                             <UITooltip>
-                              <TooltipTrigger asChild>
-                                <span className="cursor-help">{reward.value} CofCoins</span>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>{reward.value} CofCoins</p>
-                              </TooltipContent>
+                              <TooltipTrigger asChild><span className="cursor-help text-muted-foreground">{reward.value} CofCoins</span></TooltipTrigger>
+                              <TooltipContent className="bg-popover text-popover-foreground border-border"><p>{reward.value} CofCoins</p></TooltipContent>
                             </UITooltip>
                           </TableCell>
                           <TableCell>
                             <UITooltip>
-                              <TooltipTrigger asChild>
-                                <span className="cursor-help truncate max-w-[150px] inline-block">
-                                  {getAreaNames(reward.areas)}
-                                </span>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>{getAreaNames(reward.areas)}</p>
-                              </TooltipContent>
+                              <TooltipTrigger asChild><span className="cursor-help truncate max-w-[150px] inline-block text-muted-foreground">{getAreaNames(reward.areas)}</span></TooltipTrigger>
+                              <TooltipContent className="bg-popover text-popover-foreground border-border"><p>{getAreaNames(reward.areas)}</p></TooltipContent>
                             </UITooltip>
                           </TableCell>
                           <TableCell>
                             <UITooltip>
-                              <TooltipTrigger asChild>
-                                <span className="cursor-help">{reward.stock}</span>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>Estoque atual: {reward.stock} unidades</p>
-                              </TooltipContent>
+                              <TooltipTrigger asChild><span className="cursor-help text-muted-foreground">{reward.stock}</span></TooltipTrigger>
+                              <TooltipContent className="bg-popover text-popover-foreground border-border"><p>Estoque atual: {reward.stock} unidades</p></TooltipContent>
                             </UITooltip>
                           </TableCell>
                           <TableCell>
-                            <Switch checked={reward.active} onCheckedChange={() => handleToggleRewardStatus(reward.id, reward.active)} className="data-[state=checked]:bg-cofcoin-purple" />
+                            <Switch checked={reward.active} onCheckedChange={() => handleToggleRewardStatus(reward.id, reward.active)} className="data-[state=checked]:bg-primary" />
                           </TableCell>
-                          <TableCell>
-                            <Button variant="ghost" size="sm" onClick={() => handleEditReward(reward)}>
+                          <TableCell className="text-right">
+                            <Button variant="ghost" size="sm" onClick={() => handleEditReward(reward)} className="text-primary hover:text-primary/80">
                               <Edit className="h-4 w-4 mr-1" />
                               Editar
                             </Button>
                           </TableCell>
-                        </TableRow>)}
+                        </TableRow>
+                      ))}
                     </TableBody>
                   </Table>
                 </TooltipProvider>
@@ -895,18 +863,18 @@ const AdminDashboard = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <Card className="lg:col-span-2">
                 <CardHeader>
-                  <CardTitle>Atividade Mensal</CardTitle>
+                  <CardTitle className="text-foreground">Atividade Mensal</CardTitle>
                 </CardHeader>
-                <CardContent className="No gr\xE1fico de atividade mensal, altere os dados para Cofcoins Enviados e Cofcoins Aprovados">
+                <CardContent>
                   <div className="h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={monthlyActivity}>
-                        <XAxis dataKey="name" />
-                        <YAxis />
-                        <Tooltip />
-                        <Legend />
-                        <Bar dataKey="aprovados" name="CofCoins Aprovados" fill="#8884d8" />
-                        <Bar dataKey="reprovados" name="CofCoins Reprovados" fill="#FF8042" />
+                        <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" />
+                        <YAxis stroke="hsl(var(--muted-foreground))" />
+                        <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))' }} itemStyle={{ color: 'hsl(var(--card-foreground))' }} />
+                        <Legend wrapperStyle={{ color: 'hsl(var(--foreground))' }} />
+                        <Bar dataKey="CofCoins Enviados" name="CofCoins Enviados" fill="hsl(var(--primary))" />
+                        <Bar dataKey="CofCoins Aprovados" name="CofCoins Aprovados" fill="hsl(var(--accent))" />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -915,19 +883,19 @@ const AdminDashboard = () => {
               
               <Card>
                 <CardHeader>
-                  <CardTitle>Categorias Mais Usadas</CardTitle>
+                  <CardTitle className="text-foreground">Categorias Mais Usadas</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
-                        <Pie data={categories} cx="50%" cy="50%" labelLine={false} outerRadius={80} fill="#8884d8" dataKey="value" nameKey="name" label={({
-                        name,
-                        percent
-                      }) => `${name}: ${(percent * 100).toFixed(0)}%`}>
-                          {categories.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
+                        <Pie data={categories} cx="50%" cy="50%" labelLine={false} outerRadius={80} fill="hsl(var(--primary))" dataKey="value" nameKey="name" label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`} legendType="circle">
+                          {categories.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
                         </Pie>
-                        <Tooltip formatter={value => [`${value} CofCoins`, 'Valor']} />
+                        <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))' }} itemStyle={{ color: 'hsl(var(--card-foreground))' }} formatter={(value: number, name: string) => [`${value} reconhecimentos`, name]} />
+                         <Legend wrapperStyle={{ color: 'hsl(var(--foreground))' }} />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
@@ -936,21 +904,16 @@ const AdminDashboard = () => {
               
               <Card>
                 <CardHeader>
-                  <CardTitle>Top 5 Recipientes</CardTitle>
+                  <CardTitle className="text-foreground">Top 5 Recipientes</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={topRecipients} layout="vertical" margin={{
-                      top: 5,
-                      right: 30,
-                      left: 20,
-                      bottom: 5
-                    }}>
-                        <XAxis type="number" />
-                        <YAxis dataKey="name" type="category" width={100} />
-                        <Tooltip />
-                        <Bar dataKey="value" name="CofCoins" fill="#82ca9d" />
+                      <BarChart data={topRecipients} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                        <XAxis type="number" stroke="hsl(var(--muted-foreground))" />
+                        <YAxis dataKey="name" type="category" width={100} stroke="hsl(var(--muted-foreground))" />
+                        <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))' }} itemStyle={{ color: 'hsl(var(--card-foreground))' }} />
+                        <Bar dataKey="value" name="CofCoins Recebidos" fill="hsl(var(--secondary))" />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -963,35 +926,37 @@ const AdminDashboard = () => {
           <TabsContent value="balances" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Saldos de Usuários</CardTitle>
+                <CardTitle className="text-foreground">Saldos de Usuários</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="relative flex-1 max-w-sm">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input placeholder="Buscar usuário..." className="pl-10" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+                  <Input placeholder="Buscar usuário..." className="pl-10 bg-card border-border text-foreground" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
                 </div>
                 
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Nome</TableHead>
-                      <TableHead>Departamento</TableHead>
-                      <TableHead>Saldo</TableHead>
-                      <TableHead>Ações</TableHead>
+                      <TableHead className="text-foreground">Nome</TableHead>
+                      <TableHead className="text-foreground">Departamento</TableHead>
+                      <TableHead className="text-foreground">Saldo</TableHead>
+                      <TableHead className="text-right text-foreground">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredUsers.map(user => <TableRow key={user.id}>
-                        <TableCell>{user.name}</TableCell>
-                        <TableCell>{user.department}</TableCell>
-                        <TableCell>{user.balance} CofCoins</TableCell>
-                        <TableCell>
-                          <Button variant="ghost" size="sm" onClick={() => handleEditBalance(user)}>
+                    {filteredUsers.map(user => (
+                      <TableRow key={user.id}>
+                        <TableCell className="text-muted-foreground">{user.name}</TableCell>
+                        <TableCell className="text-muted-foreground">{user.department}</TableCell>
+                        <TableCell className="text-muted-foreground">{user.balance} CofCoins</TableCell>
+                        <TableCell className="text-right">
+                          <Button variant="ghost" size="sm" onClick={() => handleEditBalance(user)} className="text-primary hover:text-primary/80">
                             <Edit className="h-4 w-4 mr-1" />
                             Editar Saldo
                           </Button>
                         </TableCell>
-                      </TableRow>)}
+                      </TableRow>
+                    ))}
                   </TableBody>
                 </Table>
               </CardContent>
@@ -999,35 +964,46 @@ const AdminDashboard = () => {
             
             <Card>
               <CardHeader>
-                <CardTitle>Histórico de Edições de Saldo</CardTitle>
+                <CardTitle className="text-foreground">Histórico de Edições de Saldo</CardTitle>
               </CardHeader>
               <CardContent>
+                <div className="relative flex-1 max-w-sm mb-4">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input placeholder="Buscar no histórico..." className="pl-10 bg-card border-border text-foreground" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+                </div>
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Data</TableHead>
-                      <TableHead>Admin</TableHead>
-                      <TableHead>Usuário</TableHead>
-                      <TableHead>Saldo Anterior</TableHead>
-                      <TableHead>Novo Saldo</TableHead>
-                      <TableHead>Diferença</TableHead>
-                      <TableHead>Motivo</TableHead>
+                      <TableHead className="text-foreground">Data</TableHead>
+                      <TableHead className="text-foreground">Admin</TableHead>
+                      <TableHead className="text-foreground">Usuário</TableHead>
+                      <TableHead className="text-foreground">Saldo Anterior</TableHead>
+                      <TableHead className="text-foreground">Novo Saldo</TableHead>
+                      <TableHead className="text-foreground">Diferença</TableHead>
+                      <TableHead className="text-foreground">Motivo</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {balanceEditHistory.map(record => <TableRow key={record.id}>
-                        <TableCell>{format(record.date, 'dd/MM/yyyy HH:mm')}</TableCell>
-                        <TableCell>{record.admin}</TableCell>
-                        <TableCell>{record.recipient}</TableCell>
-                        <TableCell>{record.previousBalance} CofCoins</TableCell>
-                        <TableCell>{record.newBalance} CofCoins</TableCell>
+                    {balanceEditHistory.map(record => (
+                      <TableRow key={record.id}>
+                        <TableCell className="text-muted-foreground">{format(record.date, 'dd/MM/yyyy HH:mm')}</TableCell>
+                        <TableCell className="text-muted-foreground">{record.admin}</TableCell>
+                        <TableCell className="text-muted-foreground">{record.recipient}</TableCell>
+                        <TableCell className="text-muted-foreground">{record.previousBalance} CofCoins</TableCell>
+                        <TableCell className="text-muted-foreground">{record.newBalance} CofCoins</TableCell>
                         <TableCell>
-                          <span className={record.difference > 0 ? 'text-green-600' : record.difference < 0 ? 'text-red-600' : 'text-gray-600'}>
+                          <span className={record.difference > 0 ? 'text-green-600' : record.difference < 0 ? 'text-red-600' : 'text-muted-foreground'}>
                             {record.difference > 0 ? '+' : ''}{record.difference}
                           </span>
                         </TableCell>
-                        <TableCell>{record.reason}</TableCell>
-                      </TableRow>)}
+                        <TableCell className="text-muted-foreground max-w-[200px] truncate">
+                          <UITooltip>
+                            <TooltipTrigger asChild><span className="cursor-help">{record.reason}</span></TooltipTrigger>
+                            <TooltipContent className="bg-popover text-popover-foreground border-border"><p>{record.reason}</p></TooltipContent>
+                          </UITooltip>
+                        </TableCell>
+                      </TableRow>
+                    ))}
                   </TableBody>
                 </Table>
               </CardContent>
@@ -1037,25 +1013,41 @@ const AdminDashboard = () => {
       </main>
 
       {/* Dialogs */}
-      <RecognitionDetailDialog open={isRecognitionDetailOpen} onOpenChange={setIsRecognitionDetailOpen} recognition={selectedRecognition} />
+      <RecognitionDetailDialog
+        open={isRecognitionDetailOpen}
+        onOpenChange={setIsRecognitionDetailOpen}
+        recognition={selectedRecognition}
+        onApprove={(id) => handleApprove(id)}
+        onReject={(id) => handleReject(id)}
+      />
       
-      <ConfirmationDialog open={confirmDialog.open} onOpenChange={open => setConfirmDialog({
-      ...confirmDialog,
-      open
-    })} title={confirmDialog.action === 'approve' ? "Aprovar Reconhecimento" : "Rejeitar Reconhecimento"} description={`Tem certeza que deseja ${confirmDialog.action === 'approve' ? 'aprovar' : 'rejeitar'} este reconhecimento?`} onConfirm={handleConfirmAction} />
+      <ConfirmationDialog
+        open={confirmDialog.open}
+        onOpenChange={(open) => setConfirmDialog({ ...confirmDialog, open })}
+        title={confirmDialog.action === 'approve' ? "Aprovar Item" : "Rejeitar Item"}
+        description={`Tem certeza que deseja ${confirmDialog.action === 'approve' ? 'aprovar' : 'rejeitar'} este item?`}
+        onConfirm={handleConfirmAction}
+      />
       
-      <NewRecognitionDialog open={isNewRecognitionOpen} onOpenChange={setIsNewRecognitionOpen} onSave={recognitionData => {
-      console.log("New special recognition saved:", recognitionData);
-      toast({
-        title: "Reconhecimento criado",
-        description: "O reconhecimento especial foi criado com sucesso."
-      });
-      setIsNewRecognitionOpen(false);
-    }} />
+      <NewRecognitionDialog
+        open={isNewRecognitionOpen}
+        onOpenChange={setIsNewRecognitionOpen}
+        onSaveNewRecognition={handleSaveNewRecognition}
+      />
       
-      <EditUserBalanceDialog open={isEditBalanceOpen} onOpenChange={setIsEditBalanceOpen} user={selectedUser} onSave={handleBalanceEditComplete} />
+      <EditUserBalanceDialog
+        open={isEditBalanceOpen}
+        onOpenChange={setIsEditBalanceOpen}
+        user={selectedUser}
+        onBalanceUpdate={handleBalanceEditComplete}
+      />
       
-      <RewardConfigModal open={isRewardModalOpen} onOpenChange={setIsRewardModalOpen} onSave={handleSaveReward} editingReward={editingReward} />
+      <RewardConfigModal
+        open={isRewardModalOpen}
+        onOpenChange={setIsRewardModalOpen}
+        onSave={handleSaveReward}
+        editingReward={editingReward}
+      />
     </div>;
 };
 export default AdminDashboard;
