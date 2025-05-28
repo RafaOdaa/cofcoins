@@ -59,6 +59,46 @@ const recognitionCategories = [{
   icon: Activity
 }];
 
+// Mock reward requests data for admin dashboard
+const rewardRequestsData = [
+  { 
+    id: 1, 
+    user: "Ana Oliveira",
+    title: "Vale Café", 
+    value: 150, 
+    status: "pendente",
+    requestDate: new Date("2025-04-15T14:25:00"),
+    description: "Gostaria de trocar meus CofCoins por um vale café para utilizar na cafeteria do prédio." 
+  },
+  { 
+    id: 2, 
+    user: "Carlos Mendes",
+    title: "Gift Card R$50", 
+    value: 500, 
+    status: "aprovado",
+    requestDate: new Date("2025-04-14T09:30:00"),
+    description: "Quero utilizar meus CofCoins acumulados para um gift card da Amazon." 
+  },
+  { 
+    id: 3, 
+    user: "Juliana Lima",
+    title: "Vale Cinema", 
+    value: 300, 
+    status: "aprovado",
+    requestDate: new Date("2025-04-12T16:45:00"),
+    description: "Vou ao cinema com minha família e gostaria de usar meus CofCoins para isso."
+  },
+  { 
+    id: 4, 
+    user: "Rodrigo Almeida",
+    title: "Vale Café", 
+    value: 150, 
+    status: "reprovado",
+    requestDate: new Date("2025-04-10T11:20:00"),
+    description: "Preciso de um café para me manter produtivo durante a tarde."
+  }
+];
+
 // Mock data for the approval items
 const approvalItems = [{
   id: 1,
