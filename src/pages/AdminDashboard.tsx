@@ -25,38 +25,83 @@ const recognitionCategories = [{
   id: 1,
   name: "Fora da Caixa",
   value: 25,
+  cofcoins: 625,
   color: "#3B82F6",
   icon: Award
 }, {
   id: 2,
   name: "O Quebra Galho",
   value: 30,
+  cofcoins: 750,
   color: "#10B981",
   icon: Star
 }, {
   id: 3,
   name: "Aqui é MedCof!",
   value: 20,
+  cofcoins: 500,
   color: "#EF4444",
   icon: CheckCircle
 }, {
   id: 4,
   name: "Mestre do Improviso",
   value: 15,
+  cofcoins: 375,
   color: "#F59E0B",
   icon: Users
 }, {
   id: 5,
   name: "Segurador de Rojão",
   value: 18,
+  cofcoins: 450,
   color: "#8B5CF6",
   icon: BookOpen
 }, {
   id: 6,
   name: "O Vidente",
   value: 12,
+  cofcoins: 300,
   color: "#06B6D4",
   icon: Activity
+}];
+
+// Teams data for the new pie chart
+const teamsData = [{
+  id: 1,
+  name: "PR Mafia",
+  recognitions: 45,
+  cofcoins: 1125,
+  color: "#FF6B6B",
+}, {
+  id: 2,
+  name: "TIP",
+  recognitions: 38,
+  cofcoins: 950,
+  color: "#4ECDC4",
+}, {
+  id: 3,
+  name: "DevOps Warriors",
+  recognitions: 32,
+  cofcoins: 800,
+  color: "#45B7D1",
+}, {
+  id: 4,
+  name: "UX Ninjas",
+  recognitions: 28,
+  cofcoins: 700,
+  color: "#96CEB4",
+}, {
+  id: 5,
+  name: "Backend Legends",
+  recognitions: 35,
+  cofcoins: 875,
+  color: "#FFEAA7",
+}, {
+  id: 6,
+  name: "Frontend Heroes",
+  recognitions: 42,
+  cofcoins: 1050,
+  color: "#DDA0DD",
 }];
 
 // Mock reward requests data for admin dashboard
@@ -570,52 +615,6 @@ const AdminDashboard = () => {
     setIsEditUserDataOpen(false);
   };
 
-  // Mock data for squad distribution based on recognition categories
-  const squadDistribution = [
-    {
-      id: 1,
-      name: "Fora da Caixa",
-      value: 25,
-      color: "#3B82F6",
-      icon: Award
-    },
-    {
-      id: 2,
-      name: "O Quebra Galho",
-      value: 30,
-      color: "#10B981",
-      icon: Star
-    },
-    {
-      id: 3,
-      name: "Aqui é MedCof!",
-      value: 20,
-      color: "#EF4444",
-      icon: CheckCircle
-    },
-    {
-      id: 4,
-      name: "Mestre do Improviso",
-      value: 15,
-      color: "#F59E0B",
-      icon: Users
-    },
-    {
-      id: 5,
-      name: "Segurador de Rojão",
-      value: 18,
-      color: "#8B5CF6",
-      icon: BookOpen
-    },
-    {
-      id: 6,
-      name: "O Vidente",
-      value: 12,
-      color: "#06B6D4",
-      icon: Activity
-    }
-  ];
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -1012,7 +1011,16 @@ const AdminDashboard = () => {
                             <Cell key={`cell-${index}`} fill={entry.color} />
                           ))}
                         </Pie>
-                        <Tooltip formatter={(value) => [`${value} reconhecimentos`, 'Quantidade']} />
+                        <Tooltip 
+                          formatter={(value, name, props) => {
+                            const entry = props.payload;
+                            return [
+                              `${value} reconhecimentos (${((Number(value) / recognitionCategories.reduce((acc, item) => acc + item.value, 0)) * 100).toFixed(1)}%)`,
+                              `${entry.cofcoins} CofCoins enviados`
+                            ];
+                          }}
+                          labelFormatter={(label) => `Categoria: ${label}`}
+                        />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
@@ -1021,29 +1029,36 @@ const AdminDashboard = () => {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Distribuição entre Squads</CardTitle>
+                  <CardTitle>Distribuição entre Equipes</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie 
-                          data={squadDistribution} 
+                          data={teamsData} 
                           cx="50%" 
                           cy="50%" 
                           labelLine={false} 
                           outerRadius={80} 
                           fill="#8884d8" 
-                          dataKey="value" 
+                          dataKey="recognitions" 
                           nameKey="name" 
                           label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
                         >
-                          {squadDistribution.map((entry, index) => (
+                          {teamsData.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={entry.color} />
                           ))}
                         </Pie>
                         <Tooltip 
-                          formatter={(value, name) => [`${value} usuários (${((value / squadDistribution.reduce((acc, item) => acc + item.value, 0)) * 100).toFixed(1)}%)`, name]}
+                          formatter={(value, name, props) => {
+                            const entry = props.payload;
+                            return [
+                              `${value} reconhecimentos (${((Number(value) / teamsData.reduce((acc, item) => acc + item.recognitions, 0)) * 100).toFixed(1)}%)`,
+                              `${entry.cofcoins} CofCoins enviados`
+                            ];
+                          }}
+                          labelFormatter={(label) => `Equipe: ${label}`}
                         />
                       </PieChart>
                     </ResponsiveContainer>
