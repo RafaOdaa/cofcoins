@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Listbox, ListboxItem, ListboxContent, ListboxTrigger } from "@/components/ui/listbox";
 import { useToast } from "@/hooks/use-toast";
 import { Activity, Award, BookOpen, CheckCircle, Gift, Home, Plus, Search, Settings, Star, ToggleLeft, ToggleRight, TrendingUp, Users } from 'lucide-react';
 import UserMenu from '@/components/UserMenu';
@@ -181,16 +180,14 @@ const HomeDashboard = () => {
                 </div>
                 <div>
                   <Label htmlFor="category">Categoria</Label>
-                  <Select>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Selecione a Categoria" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="fora-da-caixa">Fora da Caixa</SelectItem>
-                      <SelectItem value="quebra-galho">O Quebra Galho</SelectItem>
-                      <SelectItem value="medcof">Aqui é MedCof!</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Listbox>
+                    <ListboxTrigger className="w-full">Selecione a Categoria</ListboxTrigger>
+                    <ListboxContent>
+                      <ListboxItem>Fora da Caixa</ListboxItem>
+                      <ListboxItem>O Quebra Galho</ListboxItem>
+                      <ListboxItem>Aqui é MedCof!</ListboxItem>
+                    </ListboxContent>
+                  </Listbox>
                 </div>
               </div>
 
