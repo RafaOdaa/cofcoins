@@ -570,52 +570,6 @@ const AdminDashboard = () => {
     setIsEditUserDataOpen(false);
   };
 
-  // Mock data for squad distribution based on recognition categories
-  const squadDistribution = [
-    {
-      id: 1,
-      name: "Fora da Caixa",
-      value: 25,
-      color: "#3B82F6",
-      icon: Award
-    },
-    {
-      id: 2,
-      name: "O Quebra Galho",
-      value: 30,
-      color: "#10B981",
-      icon: Star
-    },
-    {
-      id: 3,
-      name: "Aqui é MedCof!",
-      value: 20,
-      color: "#EF4444",
-      icon: CheckCircle
-    },
-    {
-      id: 4,
-      name: "Mestre do Improviso",
-      value: 15,
-      color: "#F59E0B",
-      icon: Users
-    },
-    {
-      id: 5,
-      name: "Segurador de Rojão",
-      value: 18,
-      color: "#8B5CF6",
-      icon: BookOpen
-    },
-    {
-      id: 6,
-      name: "O Vidente",
-      value: 12,
-      color: "#06B6D4",
-      icon: Activity
-    }
-  ];
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -1012,47 +966,7 @@ const AdminDashboard = () => {
                             <Cell key={`cell-${index}`} fill={entry.color} />
                           ))}
                         </Pie>
-                        <Tooltip formatter={(value: number, name: string) => {
-                          const total = recognitionCategories.reduce((acc, item) => acc + (item.value || 0), 0);
-                          const cofcoins = (value || 0) * 5; // Assuming 5 CofCoins per recognition
-                          return [`${value} reconhecimentos, ${cofcoins} CofCoins`, name];
-                        }} />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Distribuição entre Squads</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie 
-                          data={squadDistribution} 
-                          cx="50%" 
-                          cy="50%" 
-                          labelLine={false} 
-                          outerRadius={80} 
-                          fill="#8884d8" 
-                          dataKey="value" 
-                          nameKey="name" 
-                          label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                        >
-                          {squadDistribution.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Pie>
-                        <Tooltip 
-                          formatter={(value: number, name: string) => {
-                            const total = squadDistribution.reduce((acc, item) => acc + (item.value || 0), 0);
-                            const percentage = total > 0 ? (((value || 0) / total) * 100).toFixed(1) : '0.0';
-                            return [`${value} usuários (${percentage}%)`, name];
-                          }}
-                        />
+                        <Tooltip formatter={(value) => [`${value} reconhecimentos`, 'Quantidade']} />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
