@@ -1,178 +1,162 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Award, Coins, Gift, Send, Trash2, Users, Lightbulb, Eye, Shield, Sparkles, BookOpen } from 'lucide-react';
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useToast } from "@/hooks/use-toast";
-import { Badge } from "@/components/ui/badge";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import NewRecognitionDialog from '@/components/NewRecognitionDialog';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import { Activity, Award, BookOpen, CheckCircle, Gift, Plus, Star, TrendingUp, Users } from 'lucide-react';
 import UserMenu from '@/components/UserMenu';
-import RecognitionDetailDialog from '@/components/RecognitionDetailDialog';
-import AnimatedCoinBalance from '@/components/AnimatedCoinBalance';
-import ConfirmationDialog from '@/components/ConfirmationDialog';
+import NewRecognitionDialog from "@/components/NewRecognitionDialog";
 
-// Mock data for demonstration
-const myRecognitions = [
+// Mock data for recognition categories
+const recognitionData = [
+  { name: "Fora da Caixa", value: 25, count: 8, cofcoins: 800, color: "#3B82F6" },
+  { name: "O Quebra Galho", value: 30, count: 12, cofcoins: 600, color: "#10B981" },
+  { name: "Aqui é MedCof!", value: 20, count: 6, cofcoins: 1000, color: "#EF4444" },
+  { name: "Mestre do Improviso", value: 15, count: 5, cofcoins: 750, color: "#F59E0B" },
+  { name: "Segurador de Rojão", value: 18, count: 9, cofcoins: 540, color: "#8B5CF6" },
+  { name: "O Vidente", value: 12, count: 4, cofcoins: 600, color: "#06B6D4" }
+];
+
+// Mock data for team/squad distribution
+const teamData = [
+  { name: "PR Mafia", recognitions: 15, cofcoins: 1200, color: "#3B82F6" },
+  { name: "Tip Squad", recognitions: 12, cofcoins: 950, color: "#10B981" },
+  { name: "Dev Warriors", recognitions: 18, cofcoins: 1450, color: "#EF4444" },
+  { name: "Design Ninjas", recognitions: 8, cofcoins: 640, color: "#F59E0B" },
+  { name: "QA Heroes", recognitions: 11, cofcoins: 880, color: "#8B5CF6" },
+  { name: "Product Gurus", recognitions: 6, cofcoins: 480, color: "#06B6D4" }
+];
+
+// Monthly data for trending chart
+const monthlyData = [
+  { month: 'Jan', reconhecimentos: 45, cofcoins: 2250 },
+  { month: 'Fev', reconhecimentos: 52, cofcoins: 2600 },
+  { month: 'Mar', reconhecimentos: 48, cofcoins: 2400 },
+  { month: 'Abr', reconhecimentos: 61, cofcoins: 3050 },
+  { month: 'Mai', reconhecimentos: 58, cofcoins: 2900 },
+  { month: 'Jun', reconhecimentos: 67, cofcoins: 3350 }
+];
+
+// Recognition categories with icons
+const categories = [
   { 
     id: 1, 
-    reporter: "Ana Silva", 
-    amount: 100, 
-    category: "Fora da Caixa", 
-    description: "Implementação de nova solução de automação",
-    status: "concluída" as const,
-    date: new Date("2025-04-10T14:30:00"),
-    icon: <Award className="h-4 w-4 text-blue-600" /> 
+    name: "Fora da Caixa", 
+    description: "Pra quem sempre surpreende com soluções e ideias que ninguém tinha pensado.",
+    icon: Award
   },
   { 
     id: 2, 
-    reporter: "Carlos Mendes", 
-    amount: 50, 
-    category: "O Quebra Galho", 
-    description: "Auxílio na resolução de problemas técnicos",
-    status: "concluída" as const,
-    date: new Date("2025-04-08T09:15:00"),
-    icon: <Award className="h-4 w-4 text-green-600" /> 
+    name: "O Quebra Galho", 
+    description: "Praquele parceiro que aparece rapidinho e resolve o problema sem enrolação.",
+    icon: Star
   },
   { 
     id: 3, 
-    reporter: "Maria Oliveira", 
-    amount: 100, 
-    category: "Segurador de Rojão", 
-    description: "Gestão de crise no projeto XYZ",
-    status: "concluída" as const,
-    date: new Date("2025-04-05T16:45:00"),
-    icon: <Award className="h-4 w-4 text-purple-600" /> 
-  },
-];
-
-const sentRecognitions = [
-  { 
-    id: 1, 
-    recipient: "Pedro Santos", 
-    amount: 50, 
-    category: "O Vidente", 
-    description: "Antecipação de problema no servidor",
-    status: "pendente" as const,
-    date: new Date("2025-04-15T10:30:00"),
-    icon: <Award className="h-4 w-4 text-indigo-600" /> 
+    name: "Aqui é MedCof!", 
+    description: "Pra quem age como se a empresa fosse sua casa.",
+    icon: CheckCircle
   },
   { 
-    id: 2, 
-    recipient: "Juliana Costa", 
-    amount: 100, 
-    category: "Mestre do Improviso", 
-    description: "Apresentação excelente sem preparação",
-    status: "concluída" as const,
-    date: new Date("2025-04-12T13:20:00"),
-    icon: <Award className="h-4 w-4 text-amber-600" /> 
+    id: 4, 
+    name: "Mestre do Improviso", 
+    description: "Pra aquele que, mesmo sem planejar, sempre acha um jeito de resolver.",
+    icon: Users
   },
-];
-
-// Updated categories with proper icon type
-const categories = [
-  { id: 1, name: "Fora da Caixa", description: "Ideias inovadoras que mudam o jogo", icon: Lightbulb },
-  { id: 2, name: "O Quebra Galho", description: "Resolve tudo com agilidade", icon: Send },
-  { id: 3, name: "Aqui é MedCof!", description: "Age com sentimento de dono", icon: Users },
-  { id: 4, name: "Mestre do Improviso", description: "Brilha sem planejamento", icon: Gift },
-  { id: 5, name: "Segurador de Rojão", description: "Traz calma e resolve crises", icon: Shield },
-  { id: 6, name: "O Vidente", description: "Antecipação de problemas", icon: Eye },
-  { id: 7, name: "Toque de Midas", description: "Uma dica de leitura, uma reflexão de curso ou uma simples conversa que muda o dia de alguém. Está sempre lapidando o que toca.", icon: Sparkles },
-  { id: 8, name: "Resenha de Livro ou Curso", description: "Transforma capítulos em insights e ideias em ação. A mente curiosa que lê por todos nós. A leitura é individual, mas o impacto é coletivo.", icon: BookOpen },
+  { 
+    id: 5, 
+    name: "Segurador de Rojão", 
+    description: "Para aquele(a) colega que chega na hora certa para domar situações explosivas.",
+    icon: BookOpen
+  },
+  { 
+    id: 6, 
+    name: "O Vidente", 
+    description: "Praquele que identifica e resolve perrengues antes mesmo de acontecerem.",
+    icon: Activity
+  }
 ];
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedRecognition, setSelectedRecognition] = useState<null | any>(null);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [mySentRecognitions, setMySentRecognitions] = useState(sentRecognitions);
-  
-  // State for delete confirmation dialog
-  const [confirmDeleteDialog, setConfirmDeleteDialog] = useState({
-    open: false,
-    recognitionId: 0,
-  });
+  const [isNewRecognitionOpen, setIsNewRecognitionOpen] = useState(false);
 
-  const handleRowClick = (recognition: any, isSent: boolean) => {
-    const formattedRecognition = isSent 
-      ? { ...recognition, reporter: "Você", recipient: recognition.recipient } 
-      : { ...recognition, reporter: recognition.reporter, recipient: "Você" };
-      
-    setSelectedRecognition(formattedRecognition);
-    setIsDetailModalOpen(true);
-  };
-  
-  // Add a function to handle the delete confirmation
-  const handleDeleteClick = (id: number, e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent row click event
-    setConfirmDeleteDialog({
-      open: true,
-      recognitionId: id,
-    });
-  };
-  
-  // Function to actually delete the recognition
-  const handleConfirmDelete = () => {
-    const updatedSentRecognitions = mySentRecognitions.filter(
-      (recognition) => recognition.id !== confirmDeleteDialog.recognitionId
-    );
-    
-    setMySentRecognitions(updatedSentRecognitions);
-    
-    toast({
-      title: "Reconhecimento excluído",
-      description: "O reconhecimento foi excluído com sucesso.",
-    });
-    
-    setConfirmDeleteDialog({
-      open: false,
-      recognitionId: 0,
-    });
-  };
-  
-  // Helper function to get status color
-  const getStatusColor = (status: "pendente" | "concluída" | "cancelada") => {
-    switch(status) {
-      case "pendente": return "bg-yellow-100 text-yellow-800";
-      case "concluída": return "bg-green-100 text-green-800";
-      case "cancelada": return "bg-red-100 text-red-800";
-      default: return "bg-gray-100 text-gray-800";
+  // Calculate totals for categories
+  const totalCategoryRecognitions = recognitionData.reduce((sum, item) => sum + item.count, 0);
+  const totalCategoryCofcoins = recognitionData.reduce((sum, item) => sum + item.cofcoins, 0);
+
+  // Calculate totals for teams
+  const totalTeamRecognitions = teamData.reduce((sum, item) => sum + item.recognitions, 0);
+  const totalTeamCofcoins = teamData.reduce((sum, item) => sum + item.cofcoins, 0);
+
+  const CustomTooltipCategories = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
+          <p className="font-semibold">{data.name}</p>
+          <p className="text-sm text-gray-600">
+            Reconhecimentos: {data.count} ({((data.count / totalCategoryRecognitions) * 100).toFixed(1)}%)
+          </p>
+          <p className="text-sm text-gray-600">
+            CofCoins: {data.cofcoins} ({((data.cofcoins / totalCategoryCofcoins) * 100).toFixed(1)}%)
+          </p>
+        </div>
+      );
     }
+    return null;
+  };
+
+  const CustomTooltipTeams = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
+          <p className="font-semibold">{data.name}</p>
+          <p className="text-sm text-gray-600">
+            Reconhecimentos: {data.recognitions} ({((data.recognitions / totalTeamRecognitions) * 100).toFixed(1)}%)
+          </p>
+          <p className="text-sm text-gray-600">
+            CofCoins: {data.cofcoins} ({((data.cofcoins / totalTeamCofcoins) * 100).toFixed(1)}%)
+          </p>
+        </div>
+      );
+    }
+    return null;
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
+      <header className="bg-white shadow-sm">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex justify-between items-center py-4">
             <div className="flex items-center">
-              <div className="relative h-10 w-10 mr-2">
-                <div className="absolute inset-0 bg-cofcoin-orange rounded-full opacity-20"></div>
-                <div className="absolute inset-1 bg-cofcoin-purple rounded-full flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">C</span>
+              <div className="flex-shrink-0">
+                <div className="h-10 w-10 relative">
+                  <div className="absolute inset-0 bg-cofcoin-orange rounded-full opacity-20"></div>
+                  <div className="absolute inset-1 bg-cofcoin-purple rounded-full flex items-center justify-center">
+                    <span className="text-white font-bold text-sm">C</span>
+                  </div>
                 </div>
               </div>
-              <span className="text-xl font-bold text-gray-900">CofCoin</span>
+              <h1 className="ml-3 text-xl font-semibold text-gray-900">CofCoin Dashboard</h1>
             </div>
             
-            <div className="flex items-center">
+            <div className="flex items-center space-x-4">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate('/rewards')}
-                className="text-gray-600 hover:text-cofcoin-purple mr-2 transition-colors duration-300"
+                className="text-gray-600 hover:text-cofcoin-purple"
               >
                 <Gift className="h-5 w-5 mr-1" />
-                <span className="hidden sm:inline">Recompensas</span>
+                <span>Recompensas</span>
               </Button>
-              
-              {/* Added user menu component */}
-              <UserMenu userName="João Silva" isAdmin={true} />
+              <UserMenu userName="Admin User" isAdmin={true} />
             </div>
           </div>
         </div>
@@ -180,202 +164,161 @@ const Dashboard = () => {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Painel do Colaborador</h1>
-            <p className="text-gray-600">Gerencie seus reconhecimentos e recompensas</p>
-          </div>
-          
-          {/* Updated with AnimatedCoinBalance component */}
-          <AnimatedCoinBalance balance={500} />
-        </div>
-
-        {/* New Recognition Button - Always visible */}
-        <div className="mb-6">
+        {/* Quick Actions */}
+        <div className="mb-8">
           <Button 
-            onClick={() => setIsDialogOpen(true)}
+            onClick={() => setIsNewRecognitionOpen(true)}
             className="bg-cofcoin-purple hover:bg-cofcoin-purple-dark text-white"
           >
-            <Send className="mr-2 h-5 w-5" />
+            <Plus className="mr-2 h-5 w-5" />
             Novo Reconhecimento
           </Button>
         </div>
 
-        {/* Main Dashboard Tabs */}
-        <Tabs defaultValue="received" className="w-full">
-          <TabsList className="grid w-full max-w-md grid-cols-2 mb-4">
-            <TabsTrigger value="received">Meus Reconhecimentos</TabsTrigger>
-            <TabsTrigger value="sent">Reconhecimentos Enviados</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="received">
-            <Card>
-              <CardHeader>
-                <CardTitle>Meus Reconhecimentos</CardTitle>
-                <CardDescription>Reconhecimentos recebidos dos colegas</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Relator</TableHead>
-                        <TableHead>Quantidade</TableHead>
-                        <TableHead className="hidden md:table-cell">Categoria</TableHead>
-                        <TableHead className="hidden lg:table-cell">Descrição</TableHead>
-                        <TableHead>Status</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {myRecognitions.map((recognition) => (
-                        <TableRow 
-                          key={recognition.id} 
-                          className="cursor-pointer hover:bg-gray-50"
-                          onClick={() => handleRowClick(recognition, false)}
-                        >
-                          <TableCell className="font-medium">{recognition.reporter}</TableCell>
-                          <TableCell className="text-cofcoin-orange font-medium">{recognition.amount}</TableCell>
-                          <TableCell className="hidden md:table-cell">{recognition.category}</TableCell>
-                          <TableCell className="hidden lg:table-cell">
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <span>
-                                    {recognition.description.length > 40
-                                      ? `${recognition.description.substring(0, 40)}...`
-                                      : recognition.description}
-                                  </span>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p className="max-w-xs">{recognition.description}</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline" className={getStatusColor(recognition.status)}>
-                              {recognition.status}
-                            </Badge>
-                          </TableCell>
-                        </TableRow>
+        {/* Dashboard Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          {/* Category Distribution Chart */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Distribuição entre Categorias</CardTitle>
+              <CardDescription>
+                Reconhecimentos por categoria de comportamento
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={recognitionData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={120}
+                      paddingAngle={2}
+                      dataKey="count"
+                    >
+                      {recognitionData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
-                      {myRecognitions.length === 0 && (
-                        <TableRow>
-                          <TableCell colSpan={5} className="text-center py-6 text-gray-500">
-                            Você ainda não recebeu reconhecimentos.
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="sent">
-            <Card>
-              <CardHeader>
-                <CardTitle>Reconhecimentos Enviados</CardTitle>
-                <CardDescription>Reconhecimentos que você enviou para seus colegas</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Destinatário</TableHead>
-                        <TableHead>Quantidade</TableHead>
-                        <TableHead className="hidden md:table-cell">Categoria</TableHead>
-                        <TableHead className="hidden lg:table-cell">Descrição</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead className="text-right">Ações</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {mySentRecognitions.map((recognition) => (
-                        <TableRow 
-                          key={recognition.id} 
-                          className="cursor-pointer hover:bg-gray-50"
-                          onClick={() => handleRowClick(recognition, true)}
-                        >
-                          <TableCell className="font-medium">{recognition.recipient}</TableCell>
-                          <TableCell className="text-cofcoin-orange font-medium">{recognition.amount}</TableCell>
-                          <TableCell className="hidden md:table-cell">{recognition.category}</TableCell>
-                          <TableCell className="hidden lg:table-cell">
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <span>
-                                    {recognition.description.length > 40
-                                      ? `${recognition.description.substring(0, 40)}...`
-                                      : recognition.description}
-                                  </span>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p className="max-w-xs">{recognition.description}</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline" className={getStatusColor(recognition.status)}>
-                              {recognition.status}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
-                            {recognition.status !== "pendente" && (
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={(e) => handleDeleteClick(recognition.id, e)}
-                                className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            )}
-                          </TableCell>
-                        </TableRow>
+                    </Pie>
+                    <Tooltip content={<CustomTooltipCategories />} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Team Distribution Chart */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Distribuição entre Equipes</CardTitle>
+              <CardDescription>
+                Reconhecimentos por equipe/squad
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={teamData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={120}
+                      paddingAngle={2}
+                      dataKey="recognitions"
+                    >
+                      {teamData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
-                      {mySentRecognitions.length === 0 && (
-                        <TableRow>
-                          <TableCell colSpan={6} className="text-center py-6 text-gray-500">
-                            Você ainda não enviou reconhecimentos.
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+                    </Pie>
+                    <Tooltip content={<CustomTooltipTeams />} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Monthly Trends */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <TrendingUp className="mr-2 h-5 w-5" />
+              Tendências Mensais
+            </CardTitle>
+            <CardDescription>
+              Evolução dos reconhecimentos e CofCoins ao longo do tempo
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={monthlyData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="month" />
+                  <YAxis yAxisId="left" />
+                  <YAxis yAxisId="right" orientation="right" />
+                  <Tooltip />
+                  <Legend />
+                  <Bar yAxisId="left" dataKey="reconhecimentos" fill="#3B82F6" name="Reconhecimentos" />
+                  <Bar yAxisId="right" dataKey="cofcoins" fill="#F59E0B" name="CofCoins" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Statistics Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total de Reconhecimentos</CardTitle>
+              <Award className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{totalCategoryRecognitions + totalTeamRecognitions}</div>
+              <p className="text-xs text-muted-foreground">
+                +12% em relação ao mês anterior
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">CofCoins Distribuídos</CardTitle>
+              <Activity className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{totalCategoryCofcoins + totalTeamCofcoins}</div>
+              <p className="text-xs text-muted-foreground">
+                +8% em relação ao mês anterior
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Colaboradores Ativos</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">48</div>
+              <p className="text-xs text-muted-foreground">
+                +4 novos colaboradores este mês
+              </p>
+            </CardContent>
+          </Card>
+        </div>
       </main>
 
       {/* New Recognition Dialog */}
       <NewRecognitionDialog 
-        open={isDialogOpen} 
-        onOpenChange={setIsDialogOpen} 
+        open={isNewRecognitionOpen} 
+        onOpenChange={setIsNewRecognitionOpen} 
         categories={categories}
-      />
-
-      {/* Recognition Details Dialog */}
-      <RecognitionDetailDialog
-        open={isDetailModalOpen}
-        onOpenChange={setIsDetailModalOpen}
-        recognition={selectedRecognition}
-      />
-      
-      {/* Delete Confirmation Dialog */}
-      <ConfirmationDialog
-        open={confirmDeleteDialog.open}
-        onOpenChange={(open) => setConfirmDeleteDialog({ ...confirmDeleteDialog, open })}
-        onConfirm={handleConfirmDelete}
-        title="Confirmar Exclusão"
-        description="Tem certeza que deseja excluir este reconhecimento? Esta ação não pode ser desfeita."
-        confirmText="Excluir"
-        variant="destructive"
       />
     </div>
   );
