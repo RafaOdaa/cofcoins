@@ -1012,7 +1012,11 @@ const AdminDashboard = () => {
                             <Cell key={`cell-${index}`} fill={entry.color} />
                           ))}
                         </Pie>
-                        <Tooltip formatter={(value) => [`${value} reconhecimentos`, 'Quantidade']} />
+                        <Tooltip formatter={(value: number, name: string) => {
+                          const total = recognitionCategories.reduce((acc, item) => acc + (item.value || 0), 0);
+                          const cofcoins = (value || 0) * 5; // Assuming 5 CofCoins per recognition
+                          return [`${value} reconhecimentos, ${cofcoins} CofCoins`, name];
+                        }} />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
@@ -1043,7 +1047,11 @@ const AdminDashboard = () => {
                           ))}
                         </Pie>
                         <Tooltip 
-                          formatter={(value, name) => [`${value} usuários (${((value / squadDistribution.reduce((acc, item) => acc + item.value, 0)) * 100).toFixed(1)}%)`, name]}
+                          formatter={(value: number, name: string) => {
+                            const total = squadDistribution.reduce((acc, item) => acc + (item.value || 0), 0);
+                            const percentage = total > 0 ? (((value || 0) / total) * 100).toFixed(1) : '0.0';
+                            return [`${value} usuários (${percentage}%)`, name];
+                          }}
                         />
                       </PieChart>
                     </ResponsiveContainer>
