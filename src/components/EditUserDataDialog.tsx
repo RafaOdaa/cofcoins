@@ -4,6 +4,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { X } from "lucide-react";
 
 interface EditUserDataDialogProps {
   open: boolean;
@@ -13,7 +15,7 @@ interface EditUserDataDialogProps {
     name: string;
     department: string;
   } | null;
-  onSave: (userId: number, department: string, squad: string) => void;
+  onSave: (userId: number, department: string, squad: string, approvalLeaders: string[]) => void;
 }
 
 const departments = [
@@ -36,20 +38,45 @@ const squads = [
   "Intranetando"
 ];
 
+const approvalLeaders = [
+  "Ana Silva",
+  "Carlos Mendes", 
+  "Maria Oliveira",
+  "Pedro Santos",
+  "Juliana Costa",
+  "Bruno Almeida",
+  "Fernanda Lima",
+  "Gabriel Costa",
+  "Mariana Santos",
+  "Ricardo Pereira"
+];
+
 const EditUserDataDialog = ({ open, onOpenChange, user, onSave }: EditUserDataDialogProps) => {
   const [selectedDepartment, setSelectedDepartment] = useState('');
   const [selectedSquad, setSelectedSquad] = useState('');
+  const [selectedApprovalLeaders, setSelectedApprovalLeaders] = useState<string[]>([]);
 
   useEffect(() => {
     if (user && open) {
       setSelectedDepartment(user.department);
       setSelectedSquad('Nenhum'); // Default squad
+      setSelectedApprovalLeaders([]); // Default empty approval leaders
     }
   }, [user, open]);
 
+  const handleAddApprovalLeader = (leader: string) => {
+    if (!selectedApprovalLeaders.includes(leader)) {
+      setSelectedApprovalLeaders([...selectedApprovalLeaders, leader]);
+    }
+  };
+
+  const handleRemoveApprovalLeader = (leader: string) => {
+    setSelectedApprovalLeaders(selectedApprovalLeaders.filter(l => l !== leader));
+  };
+
   const handleSave = () => {
     if (user && selectedDepartment && selectedSquad) {
-      onSave(user.id, selectedDepartment, selectedSquad);
+      onSave(user.id, selectedDepartment, selectedSquad, selectedApprovalLeaders);
       onOpenChange(false);
     }
   };
@@ -107,6 +134,44 @@ const EditUserDataDialog = ({ open, onOpenChange, user, onSave }: EditUserDataDi
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="approvalLeaders" className="text-sm font-medium text-gray-700">
+              Líder de Aprovação
+            </Label>
+            <Select onValueChange={handleAddApprovalLeader}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione os líderes de aprovação" />
+              </SelectTrigger>
+              <SelectContent>
+                {approvalLeaders
+                  .filter(leader => !selectedApprovalLeaders.includes(leader))
+                  .map((leader) => (
+                    <SelectItem key={leader} value={leader}>
+                      {leader}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
+            
+            {selectedApprovalLeaders.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-2">
+                {selectedApprovalLeaders.map((leader) => (
+                  <Badge 
+                    key={leader} 
+                    variant="secondary" 
+                    className="flex items-center gap-1"
+                  >
+                    {leader}
+                    <X 
+                      className="h-3 w-3 cursor-pointer hover:text-red-500" 
+                      onClick={() => handleRemoveApprovalLeader(leader)}
+                    />
+                  </Badge>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 

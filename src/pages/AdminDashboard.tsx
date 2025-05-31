@@ -600,8 +600,8 @@ const AdminDashboard = () => {
     setIsEditUserDataOpen(true);
   };
 
-  const handleUserDataEditComplete = (userId: number, department: string, squad: string) => {
-    console.log(`User ${userId} data updated - Department: ${department}, Squad: ${squad}`);
+  const handleUserDataEditComplete = (userId: number, department: string, squad: string, approvalLeaders: string[]) => {
+    console.log(`User ${userId} data updated - Department: ${department}, Squad: ${squad}, Approval Leaders: ${approvalLeaders.join(', ')}`);
     toast({
       title: "Dados atualizados",
       description: "Os dados do usuário foram atualizados com sucesso."
