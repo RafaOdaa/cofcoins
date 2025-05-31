@@ -338,7 +338,6 @@ const Home = () => {
       <NewRecognitionDialog 
         open={isDialogOpen} 
         onOpenChange={setIsDialogOpen} 
-        categories={categories}
       />
       
       {/* Recognition Detail Dialog */}

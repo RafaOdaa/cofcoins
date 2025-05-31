@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useToast } from "@/hooks/use-toast";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { format } from 'date-fns';
-import { Activity, Award, BookOpen, CheckCircle, Edit, Gift, Home, Plus, Search, Settings, Star, ToggleLeft, ToggleRight, TrendingUp, Users, XCircle } from 'lucide-react';
+import { Activity, Award, BookOpen, CheckCircle, Edit, Gift, Home, Plus, Search, Settings, Star, Users, XCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Switch } from "@/components/ui/switch";
 import RecognitionDetailDialog, { Recognition } from "@/components/RecognitionDetailDialog";
@@ -57,6 +57,45 @@ const recognitionCategories = [{
   value: 12,
   color: "#06B6D4",
   icon: Activity
+}];
+
+// Teams data for the new pie chart
+const teamsData = [{
+  id: 1,
+  name: "PR Mafia",
+  recognitions: 45,
+  cofcoins: 1250,
+  color: "#FF6B6B"
+}, {
+  id: 2,
+  name: "TIP",
+  recognitions: 38,
+  cofcoins: 980,
+  color: "#4ECDC4"
+}, {
+  id: 3,
+  name: "DevOps Warriors",
+  recognitions: 32,
+  cofcoins: 850,
+  color: "#45B7D1"
+}, {
+  id: 4,
+  name: "UX Champions",
+  recognitions: 28,
+  cofcoins: 720,
+  color: "#96CEB4"
+}, {
+  id: 5,
+  name: "Backend Ninjas",
+  recognitions: 35,
+  cofcoins: 920,
+  color: "#FFEAA7"
+}, {
+  id: 6,
+  name: "QA Masters",
+  recognitions: 22,
+  cofcoins: 580,
+  color: "#DDA0DD"
 }];
 
 // Mock reward requests data for admin dashboard
@@ -967,6 +1006,47 @@ const AdminDashboard = () => {
                           ))}
                         </Pie>
                         <Tooltip formatter={(value) => [`${value} reconhecimentos`, 'Quantidade']} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Distribuição entre Equipes</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie 
+                          data={teamsData} 
+                          cx="50%" 
+                          cy="50%" 
+                          labelLine={false} 
+                          outerRadius={80} 
+                          fill="#8884d8" 
+                          dataKey="recognitions" 
+                          nameKey="name" 
+                          label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                        >
+                          {teamsData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip 
+                          formatter={(value, name, props) => {
+                            const data = props.payload;
+                            return [
+                              <div key="tooltip">
+                                <div>{`Reconhecimentos: ${data.recognitions}`}</div>
+                                <div>{`CofCoins: ${data.cofcoins}`}</div>
+                              </div>,
+                              'Estatísticas'
+                            ];
+                          }}
+                        />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
