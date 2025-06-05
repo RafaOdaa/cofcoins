@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Radio } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import UserMenu from "./UserMenu";
 
@@ -47,6 +47,13 @@ const Navbar = () => {
             <a href="#rewards" className="text-gray-700 hover:text-cofcoin-purple transition-colors">
               Recompensas
             </a>
+            <div className="relative flex items-center opacity-50 cursor-not-allowed">
+              <Radio className="mr-2 h-4 w-4 text-gray-500" />
+              <span className="text-gray-500">Pulso</span>
+              <span className="ml-2 bg-cofcoin-orange text-white text-xs px-2 py-1 rounded-full animate-pulse">
+                Em breve
+              </span>
+            </div>
             <div className="ml-4 flex items-center">
               <Button
                 size="sm"
@@ -115,6 +122,13 @@ const Navbar = () => {
             >
               Recompensas
             </a>
+            <div className="flex items-center opacity-50 cursor-not-allowed">
+              <Radio className="mr-2 h-4 w-4 text-gray-500" />
+              <span className="text-gray-500">Pulso</span>
+              <span className="ml-2 bg-cofcoin-orange text-white text-xs px-2 py-1 rounded-full animate-pulse">
+                Em breve
+              </span>
+            </div>
             <Button
               size="sm"
               className="w-full bg-cofcoin-purple hover:bg-cofcoin-purple-dark text-white"
