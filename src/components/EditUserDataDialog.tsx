@@ -185,13 +185,14 @@ const EditUserDataDialog = ({ open, onOpenChange, user, onSave }: EditUserDataDi
               id="weeklyCoins"
               type="number"
               min="0"
+              max="500"
               value={weeklyCoins}
-              onChange={(e) => setWeeklyCoins(Number(e.target.value))}
+              onChange={(e) => setWeeklyCoins(Math.min(500, Number(e.target.value)))}
               placeholder="Digite a quantidade de CofCoins semanais"
               className="w-full"
             />
             <p className="text-xs text-gray-500">
-              Quantidade de CofCoins que o usuário receberá semanalmente
+              Quantidade de CofCoins que o usuário receberá semanalmente (máximo: 500)
             </p>
           </div>
         </div>
