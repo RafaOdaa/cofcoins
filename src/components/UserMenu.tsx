@@ -15,7 +15,8 @@ import {
   LogOut, 
   Settings, 
   User as UserIcon, 
-  Bell
+  Bell,
+  Radio
 } from 'lucide-react';
 
 interface UserMenuProps {
@@ -76,6 +77,14 @@ const UserMenu: React.FC<UserMenuProps> = ({
           <span>Notificações</span>
           <span className="ml-auto bg-cofcoin-purple text-white w-5 h-5 rounded-full flex items-center justify-center text-xs">
             3
+          </span>
+        </DropdownMenuItem>
+
+        <DropdownMenuItem className="flex items-center opacity-50 cursor-not-allowed" disabled>
+          <Radio className="mr-2 h-4 w-4 text-gray-500" />
+          <span className="text-gray-500">Pulso</span>
+          <span className="ml-auto bg-cofcoin-orange text-white text-xs px-2 py-1 rounded-full animate-pulse">
+            Em breve
           </span>
         </DropdownMenuItem>
         
