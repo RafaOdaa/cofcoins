@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
@@ -15,7 +16,7 @@ interface EditUserDataDialogProps {
     name: string;
     department: string;
   } | null;
-  onSave: (userId: number, department: string, squad: string, approvalLeaders: string[]) => void;
+  onSave: (userId: number, department: string, squad: string, approvalLeaders: string[], weeklyCoins: number) => void;
 }
 
 const departments = [
@@ -55,12 +56,14 @@ const EditUserDataDialog = ({ open, onOpenChange, user, onSave }: EditUserDataDi
   const [selectedDepartment, setSelectedDepartment] = useState('');
   const [selectedSquad, setSelectedSquad] = useState('');
   const [selectedApprovalLeaders, setSelectedApprovalLeaders] = useState<string[]>([]);
+  const [weeklyCoins, setWeeklyCoins] = useState<number>(100);
 
   useEffect(() => {
     if (user && open) {
       setSelectedDepartment(user.department);
       setSelectedSquad('Nenhum'); // Default squad
       setSelectedApprovalLeaders([]); // Default empty approval leaders
+      setWeeklyCoins(100); // Default weekly coins
     }
   }, [user, open]);
 
@@ -76,7 +79,7 @@ const EditUserDataDialog = ({ open, onOpenChange, user, onSave }: EditUserDataDi
 
   const handleSave = () => {
     if (user && selectedDepartment && selectedSquad) {
-      onSave(user.id, selectedDepartment, selectedSquad, selectedApprovalLeaders);
+      onSave(user.id, selectedDepartment, selectedSquad, selectedApprovalLeaders, weeklyCoins);
       onOpenChange(false);
     }
   };
@@ -172,6 +175,24 @@ const EditUserDataDialog = ({ open, onOpenChange, user, onSave }: EditUserDataDi
                 ))}
               </div>
             )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="weeklyCoins" className="text-sm font-medium text-gray-700">
+              CofCoins Semanais
+            </Label>
+            <Input
+              id="weeklyCoins"
+              type="number"
+              min="0"
+              value={weeklyCoins}
+              onChange={(e) => setWeeklyCoins(Number(e.target.value))}
+              placeholder="Digite a quantidade de CofCoins semanais"
+              className="w-full"
+            />
+            <p className="text-xs text-gray-500">
+              Quantidade de CofCoins que o usuário receberá semanalmente
+            </p>
           </div>
         </div>
 
