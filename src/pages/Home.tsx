@@ -47,7 +47,8 @@ const sentRecognitions = [
     amount: 50, 
     category: "O Vidente", 
     description: "Antecipação de problema no servidor",
-    date: new Date('2025-04-10T16:20:00')
+    date: new Date('2025-04-10T16:20:00'),
+    status: "aprovado"
   },
   { 
     id: 2, 
@@ -55,7 +56,8 @@ const sentRecognitions = [
     amount: 100, 
     category: "Mestre do Improviso", 
     description: "Apresentação excelente sem preparação",
-    date: new Date('2025-04-08T11:05:00')
+    date: new Date('2025-04-08T11:05:00'),
+    status: "pending"
   },
 ];
 
@@ -288,6 +290,7 @@ const Home = () => {
                         <TableHead>Quantidade</TableHead>
                         <TableHead className="hidden md:table-cell">Categoria</TableHead>
                         <TableHead className="hidden lg:table-cell">Descrição</TableHead>
+                        <TableHead>Status</TableHead>
                         <TableHead>Data/Hora</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -305,7 +308,8 @@ const Home = () => {
                               amount: recognition.amount,
                               category: recognition.category,
                               description: recognition.description,
-                              date: recognition.date
+                              date: recognition.date,
+                              status: recognition.status
                             };
                             setSelectedRecognition(dialogRecognition);
                             setDetailDialogOpen(true);
@@ -315,12 +319,27 @@ const Home = () => {
                           <TableCell className="text-cofcoin-orange font-medium">{recognition.amount}</TableCell>
                           <TableCell className="hidden md:table-cell">{recognition.category}</TableCell>
                           <TableCell className="hidden lg:table-cell">{recognition.description}</TableCell>
+                          <TableCell>
+                            <span className={`text-sm font-medium ${
+                              recognition.status === 'aprovado' 
+                                ? 'text-green-600' 
+                                : recognition.status === 'rejeitado' 
+                                ? 'text-red-600' 
+                                : 'text-amber-600'
+                            }`}>
+                              {recognition.status === 'aprovado' 
+                                ? 'Aprovado' 
+                                : recognition.status === 'rejeitado' 
+                                ? 'Rejeitado' 
+                                : 'Pendente'}
+                            </span>
+                          </TableCell>
                           <TableCell>{format(recognition.date, 'dd/MM/yyyy HH:mm')}</TableCell>
                         </TableRow>
                       ))}
                       {sentRecognitions.length === 0 && (
                         <TableRow>
-                          <TableCell colSpan={5} className="text-center py-6 text-gray-500">
+                          <TableCell colSpan={6} className="text-center py-6 text-gray-500">
                             Você ainda não enviou reconhecimentos.
                           </TableCell>
                         </TableRow>
