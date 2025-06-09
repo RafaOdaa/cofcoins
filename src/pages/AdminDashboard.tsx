@@ -427,9 +427,7 @@ const balanceEditHistory = [{
 }];
 
 const AdminDashboard = () => {
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
   const [selectedRecognition, setSelectedRecognition] = useState<Recognition | null>(null);
   const [isRecognitionDetailOpen, setIsRecognitionDetailOpen] = useState(false);
   const [isEditBalanceOpen, setIsEditBalanceOpen] = useState(false);
@@ -460,21 +458,36 @@ const AdminDashboard = () => {
   // Estado para controle do diálogo de edição de dados do usuário
   const [isEditUserDataOpen, setIsEditUserDataOpen] = useState(false);
 
+  // Função para avaliar um reconhecimento (abrir modal com detalhes)
+  const handleEvaluateRecognition = (item: any) => {
+    const formattedRecognition: Recognition = {
+      id: item.id,
+      reporter: item.reporter,
+      recipient: item.recipient,
+      amount: item.amount,
+      category: item.category,
+      description: item.description,
+      date: item.date,
+      status: 'pending'
+    };
+    setSelectedRecognition(formattedRecognition);
+    setIsRecognitionDetailOpen(true);
+  };
+
   // Função para aprovar um reconhecimento
   const handleApprove = (id: number) => {
-    setConfirmDialog({
-      open: true,
-      id,
-      action: 'approve'
+    toast({
+      title: "Reconhecimento aprovado",
+      description: `O reconhecimento #${id} foi aprovado com sucesso.`
     });
   };
 
   // Função para rejeitar um reconhecimento
   const handleReject = (id: number) => {
-    setConfirmDialog({
-      open: true,
-      id,
-      action: 'reject'
+    toast({
+      title: "Reconhecimento rejeitado",
+      description: `O reconhecimento #${id} foi rejeitado.`,
+      variant: "destructive"
     });
   };
 
@@ -497,10 +510,12 @@ const AdminDashboard = () => {
       open: false
     });
   };
+
   const handleEditBalance = (user: typeof userBalances[0]) => {
     setSelectedUser(user);
     setIsEditBalanceOpen(true);
   };
+
   const handleBalanceEditComplete = (userId: number, previousBalance: number, newBalanceValue: number, reason: string) => {
     console.log(`User ${userId} balance updated from ${previousBalance} to ${newBalanceValue} due to: ${reason}`);
     toast({
@@ -509,14 +524,17 @@ const AdminDashboard = () => {
     });
     setIsEditBalanceOpen(false);
   };
+
   const handleEditReward = (reward: RewardItem) => {
     setEditingReward(reward);
     setIsRewardModalOpen(true);
   };
+
   const handleAddNewReward = () => {
     setEditingReward(null);
     setIsRewardModalOpen(true);
   };
+
   const handleSaveReward = (rewardData: RewardItem) => {
     if (rewardData.id && rewards.find(r => r.id === rewardData.id)) {
       // Update existing reward
@@ -534,6 +552,7 @@ const AdminDashboard = () => {
       });
     }
   };
+
   const handleToggleRewardStatus = (id: number, currentStatus: boolean) => {
     setRewards(rewards.map(reward => {
       if (reward.id === id) {
@@ -552,10 +571,16 @@ const AdminDashboard = () => {
   };
 
   // Filter rewards based on search term
-  const filteredRewards = rewards.filter(reward => reward.name.toLowerCase().includes(rewardSearchTerm.toLowerCase()) || reward.description.toLowerCase().includes(rewardSearchTerm.toLowerCase()));
+  const filteredRewards = rewards.filter(reward => 
+    reward.name.toLowerCase().includes(rewardSearchTerm.toLowerCase()) || 
+    reward.description.toLowerCase().includes(rewardSearchTerm.toLowerCase())
+  );
 
   // Filtrar usuários com base no termo de pesquisa
-  const filteredUsers = userBalances.filter(user => user.name.toLowerCase().includes(searchTerm.toLowerCase()) || user.department.toLowerCase().includes(searchTerm.toLowerCase()));
+  const filteredUsers = userBalances.filter(user => 
+    user.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    user.department.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   // Contar estatísticas para os cards
   const approvedCount = recognitionHistory.filter(record => record.status === "aprovado").length;
@@ -585,7 +610,7 @@ const AdminDashboard = () => {
   const getAreaNames = (areaIds: string[]) => {
     const areaMap: Record<string, string> = {
       "tech": "Tecnologia",
-      "marketing": "Marketing",
+      "marketing": "Marketing", 
       "product": "Produto",
       "hr": "RH",
       "sales": "Vendas",
@@ -728,7 +753,8 @@ const AdminDashboard = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {approvalItems.map(item => <TableRow key={item.id}>
+                    {approvalItems.map(item => (
+                      <TableRow key={item.id}>
                         <TableCell>{item.reporter}</TableCell>
                         <TableCell>{item.recipient}</TableCell>
                         <TableCell>{item.category}</TableCell>
@@ -740,11 +766,12 @@ const AdminDashboard = () => {
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button variant="ghost" size="sm" onClick={() => handleApprove(item.id)}>
+                          <Button variant="ghost" size="sm" onClick={() => handleEvaluateRecognition(item)}>
                             Avaliar
                           </Button>
                         </TableCell>
-                      </TableRow>)}
+                      </TableRow>
+                    ))}
                   </TableBody>
                 </Table>
               </CardContent>
@@ -1170,12 +1197,22 @@ const AdminDashboard = () => {
       </main>
 
       {/* Dialogs */}
-      <RecognitionDetailDialog open={isRecognitionDetailOpen} onOpenChange={setIsRecognitionDetailOpen} recognition={selectedRecognition} />
+      <RecognitionDetailDialog 
+        open={isRecognitionDetailOpen} 
+        onOpenChange={setIsRecognitionDetailOpen} 
+        recognition={selectedRecognition}
+        showActions={true}
+        onApprove={handleApprove}
+        onReject={handleReject}
+      />
       
-      <ConfirmationDialog open={confirmDialog.open} onOpenChange={open => setConfirmDialog({
-      ...confirmDialog,
-      open
-    })} title={confirmDialog.action === 'approve' ? "Aprovar Reconhecimento" : "Rejeitar Reconhecimento"} description={`Tem certeza que deseja ${confirmDialog.action === 'approve' ? 'aprovar' : 'rejeitar'} este reconhecimento?`} onConfirm={handleConfirmAction} />
+      <ConfirmationDialog 
+        open={confirmDialog.open} 
+        onOpenChange={(open) => setConfirmDialog({ ...confirmDialog, open })} 
+        title={confirmDialog.action === 'approve' ? "Aprovar Reconhecimento" : "Rejeitar Reconhecimento"} 
+        description={`Tem certeza que deseja ${confirmDialog.action === 'approve' ? 'aprovar' : 'rejeitar'} este reconhecimento?`} 
+        onConfirm={handleConfirmAction} 
+      />
       
       <NewRecognitionDialog 
         open={isNewRecognitionOpen} 
@@ -1190,7 +1227,12 @@ const AdminDashboard = () => {
         onBalanceEditComplete={handleBalanceEditComplete} 
       />
       
-      <RewardConfigModal open={isRewardModalOpen} onOpenChange={setIsRewardModalOpen} onSave={handleSaveReward} editingReward={editingReward} />
+      <RewardConfigModal 
+        open={isRewardModalOpen} 
+        onOpenChange={setIsRewardModalOpen} 
+        onSave={handleSaveReward} 
+        editingReward={editingReward} 
+      />
 
       <EditUserDataDialog
         open={isEditUserDataOpen}

@@ -1,353 +1,467 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Award, Coins, Gift, LogOut, Send, Settings, User, Users, Shield, Eye, Lightbulb, Sparkles, BookOpen } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useToast } from "@/hooks/use-toast";
-import NewRecognitionDialog from '@/components/NewRecognitionDialog';
-import AnimatedCoinBalance from '@/components/AnimatedCoinBalance';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { format } from 'date-fns';
+import { Activity, Award, BookOpen, CheckCircle, Gift, Home, Star, Users, Eye } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import RecognitionDetailDialog, { Recognition } from "@/components/RecognitionDetailDialog";
 import UserMenu from '@/components/UserMenu';
-import RecognitionDetailDialog from '@/components/RecognitionDetailDialog';
-
-// Mock data for demonstration with added dates
-const myRecognitions = [
-  { 
-    id: 1, 
-    reporter: "Ana Silva", 
-    amount: 100, 
-    category: "Fora da Caixa", 
-    description: "Implementação de nova solução de automação",
-    date: new Date('2025-04-15T10:30:00')
-  },
-  { 
-    id: 2, 
-    reporter: "Carlos Mendes", 
-    amount: 50, 
-    category: "O Quebra Galho", 
-    description: "Auxílio na resolução de problemas técnicos",
-    date: new Date('2025-04-14T14:45:00')
-  },
-  { 
-    id: 3, 
-    reporter: "Maria Oliveira", 
-    amount: 100, 
-    category: "Segurador de Rojão", 
-    description: "Gestão de crise no projeto XYZ",
-    date: new Date('2025-04-12T09:15:00')
-  },
-];
+import AnimatedCoinBalance from '@/components/AnimatedCoinBalance';
 
 const sentRecognitions = [
-  { 
-    id: 1, 
-    recipient: "Pedro Santos", 
-    amount: 50, 
-    category: "O Vidente", 
-    description: "Antecipação de problema no servidor",
-    date: new Date('2025-04-10T16:20:00')
-  },
-  { 
-    id: 2, 
-    recipient: "Juliana Costa", 
-    amount: 100, 
-    category: "Mestre do Improviso", 
-    description: "Apresentação excelente sem preparação",
-    date: new Date('2025-04-08T11:05:00')
-  },
-];
-
-// Updated category definitions with the correct icon type
-const categories = [
-  { 
-    id: 1, 
-    name: "Fora da Caixa", 
-    description: "Pra quem sempre surpreende com soluções e ideias que ninguém tinha pensado, mudando o jogo e dando aquele toque criativo que faz toda a diferença.",
-    icon: Lightbulb
-  },
-  { 
-    id: 2, 
-    name: "O Quebra Galho", 
-    description: "Praquele parceiro que aparece rapidinho e resolve o problema sem enrolação. Quando você precisa, ele tá lá para fazer tudo se ajeitar.",
-    icon: Send
-  },
-  { 
-    id: 3, 
-    name: "Aqui é MedCof!", 
-    description: "Pra quem age como se a empresa fosse sua casa: cuida, propõe melhorias e não deixa nada no 'deixa pra depois'. É aquele sentimento de 'se eu não fizer, ninguém faz'.",
-    icon: User
-  },
-  { 
-    id: 4, 
-    name: "Mestre do Improviso", 
-    description: "Pra aquele que, mesmo sem planejar, sempre acha um jeito de resolver a situação e sair da enrascada.",
-    icon: Gift
-  },
-  { 
-    id: 5, 
-    name: "Segurador de Rojão", 
-    description: "Para aquele(a) colega que chega na hora certa para domar situações explosivas e manter a paz com muita habilidade e leveza.",
-    icon: Shield
-  },
-  { 
-    id: 6, 
-    name: "O Vidente", 
-    description: "Praquele que, com uma visão quase sobrenatural, identifica e resolve perrengues antes mesmo de acontecerem.",
-    icon: Eye
+  {
+    id: 1,
+    recipient: "Ana Silva",
+    amount: 25,
+    category: "Colaboração Excepcional",
+    description: "Ana demonstrou excelente trabalho em equipe durante o projeto de migração do sistema.",
+    date: new Date(2023, 9, 15),
+    status: "aprovado"
   },
   {
-    id: 7,
-    name: "Aprendeu por si, falou por todos",
-    description: "Leu, refletiu, conectou com a realidade e compartilhou algo que virou aprendizado coletivo.",
-    icon: BookOpen
+    id: 2,
+    recipient: "Pedro Santos",
+    amount: 10,
+    category: "Inovação Constante",
+    description: "Pedro sugeriu uma otimização que melhorou significativamente a performance da aplicação.",
+    date: new Date(2023, 9, 14),
+    status: "pendente"
+  },
+  {
+    id: 3,
+    recipient: "Carla Oliveira",
+    amount: 15,
+    category: "Aprendeu por si, falou por todos",
+    description: "Carla compartilhou conhecimentos valiosos sobre as novas ferramentas de desenvolvimento.",
+    date: new Date(2023, 9, 13),
+    status: "rejeitado"
+  },
+  {
+    id: 4,
+    recipient: "Roberto Lima",
+    amount: 20,
+    category: "Liderança Inspiradora",
+    description: "Roberto mostrou grande liderança ao conduzir a equipe durante a crise do servidor.",
+    date: new Date(2023, 9, 12),
+    status: "aprovado"
   }
 ];
 
-const Home = () => {
+const receivedRecognitions = [
+  {
+    id: 5,
+    sender: "Maria Costa",
+    amount: 30,
+    category: "Fora da Caixa",
+    description: "Solução criativa para o problema de integração com o sistema legado.",
+    date: new Date(2023, 9, 10),
+    status: "aprovado"
+  },
+  {
+    id: 6,
+    sender: "João Ferreira",
+    amount: 15,
+    category: "O Quebra Galho",
+    description: "Sempre disponível para ajudar colegas com dúvidas técnicas.",
+    date: new Date(2023, 9, 8),
+    status: "aprovado"
+  },
+  {
+    id: 7,
+    sender: "Lucas Almeida",
+    amount: 25,
+    category: "Aqui é MedCof!",
+    description: "Demonstrou os valores da empresa ao atender um cliente insatisfeito.",
+    date: new Date(2023, 9, 5),
+    status: "aprovado"
+  }
+];
+
+const userBalance = 180;
+
+const monthlyActivity = [
+  { name: "Jan", enviados: 8, recebidos: 12 },
+  { name: "Fev", enviados: 12, recebidos: 15 },
+  { name: "Mar", enviados: 10, recebidos: 18 },
+  { name: "Abr", enviados: 15, recebidos: 22 },
+  { name: "Mai", enviados: 18, recebidos: 25 },
+  { name: "Jun", enviados: 14, recebidos: 20 },
+  { name: "Jul", enviados: 16, recebidos: 23 },
+  { name: "Ago", enviados: 20, recebidos: 28 },
+  { name: "Set", enviados: 22, recebidos: 30 },
+  { name: "Out", enviados: 18, recebidos: 25 }
+];
+
+const categoryData = [
+  { name: "Fora da Caixa", value: 8, color: "#3B82F6" },
+  { name: "O Quebra Galho", value: 12, color: "#10B981" },
+  { name: "Aqui é MedCof!", value: 6, color: "#EF4444" },
+  { name: "Mestre do Improviso", value: 4, color: "#F59E0B" },
+  { name: "Segurador de Rojão", value: 7, color: "#8B5CF6" },
+  { name: "O Vidente", value: 3, color: "#06B6D4" }
+];
+
+const recentRewards = [
+  {
+    id: 1,
+    title: "Vale Café",
+    description: "Desconto na cafeteria",
+    cost: 50,
+    claimed: new Date(2023, 9, 10)
+  },
+  {
+    id: 2,
+    title: "Day Off",
+    description: "Dia de folga extra",
+    cost: 200,
+    claimed: new Date(2023, 8, 25)
+  }
+];
+
+const Dashboard = () => {
+  const [selectedRecognition, setSelectedRecognition] = useState<Recognition | null>(null);
+  const [isRecognitionDetailOpen, setIsRecognitionDetailOpen] = useState(false);
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedRecognition, setSelectedRecognition] = useState<typeof myRecognitions[0] | null>(null);
-  const [detailDialogOpen, setDetailDialogOpen] = useState(false);
 
-  // Calculate total received coins and count
-  const totalReceivedCoins = myRecognitions.reduce((sum, item) => sum + item.amount, 0);
-  const totalReceivedCount = myRecognitions.length;
+  const handleViewDetails = (recognition: any, isSent: boolean = false) => {
+    const formattedRecognition: Recognition = {
+      id: recognition.id,
+      reporter: isSent ? "Você" : recognition.sender,
+      recipient: isSent ? recognition.recipient : "Você",
+      amount: recognition.amount,
+      category: recognition.category,
+      description: recognition.description,
+      date: recognition.date,
+      status: recognition.status
+    };
+    setSelectedRecognition(formattedRecognition);
+    setIsRecognitionDetailOpen(true);
+  };
 
-  // Calculate total sent coins and count
-  const totalSentCoins = sentRecognitions.reduce((sum, item) => sum + item.amount, 0);
-  const totalSentCount = sentRecognitions.length;
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "aprovado":
+        return "bg-green-100 text-green-800 border-green-200";
+      case "pendente":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      case "rejeitado":
+        return "bg-red-100 text-red-800 border-red-200";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200";
+    }
+  };
 
-  const handleLogout = () => {
-    toast({
-      title: "Logout realizado",
-      description: "Você saiu da plataforma com sucesso.",
-    });
-    navigate('/');
+  const getStatusText = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "aprovado":
+        return "Aprovado";
+      case "pendente":
+        return "Pendente";
+      case "rejeitado":
+        return "Rejeitado";
+      default:
+        return status;
+    }
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
+      <header className="bg-white shadow-sm">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex justify-between items-center py-4">
             <div className="flex items-center">
-              <div className="relative h-10 w-10 mr-2">
-                <div className="absolute inset-0 bg-cofcoin-orange rounded-full opacity-20"></div>
-                <div className="absolute inset-1 bg-cofcoin-purple rounded-full flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">C</span>
+              <div className="flex-shrink-0">
+                <div className="h-10 w-10 relative">
+                  <div className="absolute inset-0 bg-cofcoin-orange rounded-full opacity-20"></div>
+                  <div className="absolute inset-1 bg-cofcoin-purple rounded-full flex items-center justify-center">
+                    <span className="text-white font-bold text-sm">C</span>
+                  </div>
                 </div>
               </div>
-              <span className="text-xl font-bold text-gray-900">CofCoins</span>
+              <h1 className="ml-3 text-xl font-semibold text-gray-900">CofCoin</h1>
             </div>
-            
             <div className="flex items-center space-x-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate('/rewards')}
-                className="text-gray-600 hover:text-cofcoin-purple"
-              >
+              <AnimatedCoinBalance balance={userBalance} />
+              <Button variant="ghost" size="sm" onClick={() => navigate('/home')} className="text-gray-600 hover:text-cofcoin-purple">
+                <Home className="h-5 w-5 mr-1" />
+                <span>Home</span>
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => navigate('/rewards')} className="text-gray-600 hover:text-cofcoin-purple">
                 <Gift className="h-5 w-5 mr-1" />
-                <span className="hidden sm:inline">Recompensas</span>
+                <span>Recompensas</span>
               </Button>
-              
-              {/* Admin links would be conditionally shown based on user role */}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate('/admin/dashboard')}
-                className="text-gray-600 hover:text-cofcoin-purple"
-              >
-                <Settings className="h-5 w-5 mr-1" />
-                <span className="hidden sm:inline">Admin</span>
-              </Button>
-              
-              <UserMenu userName="João Silva" />
+              <UserMenu userName="Lucas Mendes" />
             </div>
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
+      {/* Main content */}
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Painel do Colaborador</h1>
-            <p className="text-gray-600">Gerencie seus reconhecimentos e recompensas</p>
-          </div>
+        <div className="mb-8">
+          <h2 className="text-2xl font-semibold text-gray-900">Meu Dashboard</h2>
+          <p className="text-gray-600">Acompanhe seus reconhecimentos e estatísticas.</p>
+        </div>
+
+        {/* Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center">
+                <Award className="h-5 w-5 text-cofcoin-purple mr-2" />
+                CofCoins Total
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-cofcoin-purple">{userBalance}</div>
+            </CardContent>
+          </Card>
           
-          {/* Updated coin balance display */}
-          <AnimatedCoinBalance balance={500} />
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center">
+                <CheckCircle className="h-5 w-5 text-green-600 mr-2" />
+                Reconhecimentos Enviados
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-green-600">{sentRecognitions.length}</div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center">
+                <Star className="h-5 w-5 text-yellow-600 mr-2" />
+                Reconhecimentos Recebidos
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-yellow-600">{receivedRecognitions.length}</div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center">
+                <Gift className="h-5 w-5 text-cofcoin-orange mr-2" />
+                Recompensas Resgatadas
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-cofcoin-orange">{recentRewards.length}</div>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* New Recognition Button - Always visible */}
-        <div className="mb-6">
-          <Button 
-            onClick={() => setIsDialogOpen(true)}
-            className="bg-cofcoin-purple hover:bg-cofcoin-purple-dark text-white"
-          >
-            <Send className="mr-2 h-5 w-5" />
-            Novo Reconhecimento
-          </Button>
-        </div>
-
-        {/* Main Dashboard Tabs */}
-        <Tabs defaultValue="received" className="w-full">
-          <TabsList className="grid w-full max-w-md grid-cols-2 mb-4">
-            <TabsTrigger value="received">Meus Reconhecimentos</TabsTrigger>
-            <TabsTrigger value="sent">Reconhecimentos Enviados</TabsTrigger>
+        {/* Tabs */}
+        <Tabs defaultValue="sent" className="space-y-8">
+          <TabsList className="inline-flex h-10 items-center justify-center rounded-md bg-white p-1">
+            <TabsTrigger value="sent" className="px-3">
+              Reconhecimentos Enviados
+            </TabsTrigger>
+            <TabsTrigger value="received" className="px-3">
+              Reconhecimentos Recebidos
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="px-3">
+              Analytics
+            </TabsTrigger>
+            <TabsTrigger value="rewards" className="px-3">
+              Minhas Recompensas
+            </TabsTrigger>
           </TabsList>
-          
-          <TabsContent value="received">
-            <Card>
-              <CardHeader>
-                <CardTitle>Meus Reconhecimentos</CardTitle>
-                <CardDescription className="flex justify-between items-center">
-                  <span>Reconhecimentos recebidos dos colegas</span>
-                  <div className="flex items-center gap-4">
-                    <div className="text-sm bg-gray-100 px-3 py-1 rounded-full">
-                      <span className="font-semibold">{totalReceivedCount}</span> reconhecimento(s)
-                    </div>
-                    <div className="text-sm bg-cofcoin-orange/20 text-cofcoin-orange px-3 py-1 rounded-full flex items-center">
-                      <Coins className="h-4 w-4 mr-1" />
-                      <span className="font-semibold">{totalReceivedCoins}</span> CofCoins
-                    </div>
-                  </div>
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Relator</TableHead>
-                        <TableHead>Quantidade</TableHead>
-                        <TableHead className="hidden md:table-cell">Categoria</TableHead>
-                        <TableHead className="hidden lg:table-cell">Descrição</TableHead>
-                        <TableHead>Data/Hora</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {myRecognitions.map((recognition) => (
-                        <TableRow 
-                          key={recognition.id} 
-                          className="cursor-pointer hover:bg-gray-50"
-                          onClick={() => {
-                            setSelectedRecognition(recognition);
-                            setDetailDialogOpen(true);
-                          }}
-                        >
-                          <TableCell className="font-medium">{recognition.reporter}</TableCell>
-                          <TableCell className="text-cofcoin-orange font-medium">{recognition.amount}</TableCell>
-                          <TableCell className="hidden md:table-cell">{recognition.category}</TableCell>
-                          <TableCell className="hidden lg:table-cell">{recognition.description}</TableCell>
-                          <TableCell>{format(recognition.date, 'dd/MM/yyyy HH:mm')}</TableCell>
-                        </TableRow>
-                      ))}
-                      {myRecognitions.length === 0 && (
-                        <TableRow>
-                          <TableCell colSpan={5} className="text-center py-6 text-gray-500">
-                            Você ainda não recebeu reconhecimentos.
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
+
+          {/* Sent Recognitions Tab */}
           <TabsContent value="sent">
             <Card>
               <CardHeader>
                 <CardTitle>Reconhecimentos Enviados</CardTitle>
-                <CardDescription className="flex justify-between items-center">
-                  <span>Reconhecimentos que você enviou para seus colegas</span>
-                  <div className="flex items-center gap-4">
-                    <div className="text-sm bg-gray-100 px-3 py-1 rounded-full">
-                      <span className="font-semibold">{totalSentCount}</span> reconhecimento(s)
-                    </div>
-                    <div className="text-sm bg-cofcoin-orange/20 text-cofcoin-orange px-3 py-1 rounded-full flex items-center">
-                      <Coins className="h-4 w-4 mr-1" />
-                      <span className="font-semibold">{totalSentCoins}</span> CofCoins
-                    </div>
-                  </div>
-                </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Destinatário</TableHead>
-                        <TableHead>Quantidade</TableHead>
-                        <TableHead className="hidden md:table-cell">Categoria</TableHead>
-                        <TableHead className="hidden lg:table-cell">Descrição</TableHead>
-                        <TableHead>Data/Hora</TableHead>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Destinatário</TableHead>
+                      <TableHead>Categoria</TableHead>
+                      <TableHead>Valor</TableHead>
+                      <TableHead>Data</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Ações</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {sentRecognitions.map((recognition) => (
+                      <TableRow key={recognition.id}>
+                        <TableCell>{recognition.recipient}</TableCell>
+                        <TableCell>{recognition.category}</TableCell>
+                        <TableCell>{recognition.amount} CofCoins</TableCell>
+                        <TableCell>{format(recognition.date, 'dd/MM/yyyy')}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className={getStatusColor(recognition.status)}>
+                            {getStatusText(recognition.status)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => handleViewDetails(recognition, true)}
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            Ver Detalhes
+                          </Button>
+                        </TableCell>
                       </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {sentRecognitions.map((recognition) => (
-                        <TableRow 
-                          key={recognition.id}
-                          className="cursor-pointer hover:bg-gray-50"
-                          onClick={() => {
-                            // Convert to the format expected by the dialog
-                            const dialogRecognition = {
-                              id: recognition.id,
-                              reporter: "Você",
-                              recipient: recognition.recipient,
-                              amount: recognition.amount,
-                              category: recognition.category,
-                              description: recognition.description,
-                              date: recognition.date
-                            };
-                            setSelectedRecognition(dialogRecognition);
-                            setDetailDialogOpen(true);
-                          }}
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Received Recognitions Tab */}
+          <TabsContent value="received">
+            <Card>
+              <CardHeader>
+                <CardTitle>Reconhecimentos Recebidos</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Remetente</TableHead>
+                      <TableHead>Categoria</TableHead>
+                      <TableHead>Valor</TableHead>
+                      <TableHead>Data</TableHead>
+                      <TableHead>Ações</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {receivedRecognitions.map((recognition) => (
+                      <TableRow key={recognition.id}>
+                        <TableCell>{recognition.sender}</TableCell>
+                        <TableCell>{recognition.category}</TableCell>
+                        <TableCell>{recognition.amount} CofCoins</TableCell>
+                        <TableCell>{format(recognition.date, 'dd/MM/yyyy')}</TableCell>
+                        <TableCell>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => handleViewDetails(recognition, false)}
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            Ver Detalhes
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Analytics Tab */}
+          <TabsContent value="analytics" className="space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Atividade Mensal</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={monthlyActivity}>
+                        <XAxis dataKey="name" />
+                        <YAxis />
+                        <Tooltip />
+                        <Legend />
+                        <Bar dataKey="enviados" name="Enviados" fill="#8884d8" />
+                        <Bar dataKey="recebidos" name="Recebidos" fill="#82ca9d" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle>Distribuição por Categoria</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie 
+                          data={categoryData} 
+                          cx="50%" 
+                          cy="50%" 
+                          labelLine={false} 
+                          outerRadius={80} 
+                          fill="#8884d8" 
+                          dataKey="value" 
+                          nameKey="name" 
+                          label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
                         >
-                          <TableCell className="font-medium">{recognition.recipient}</TableCell>
-                          <TableCell className="text-cofcoin-orange font-medium">{recognition.amount}</TableCell>
-                          <TableCell className="hidden md:table-cell">{recognition.category}</TableCell>
-                          <TableCell className="hidden lg:table-cell">{recognition.description}</TableCell>
-                          <TableCell>{format(recognition.date, 'dd/MM/yyyy HH:mm')}</TableCell>
-                        </TableRow>
-                      ))}
-                      {sentRecognitions.length === 0 && (
-                        <TableRow>
-                          <TableCell colSpan={5} className="text-center py-6 text-gray-500">
-                            Você ainda não enviou reconhecimentos.
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
+                          {categoryData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Rewards Tab */}
+          <TabsContent value="rewards">
+            <Card>
+              <CardHeader>
+                <CardTitle>Minhas Recompensas Resgatadas</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Recompensa</TableHead>
+                      <TableHead>Descrição</TableHead>
+                      <TableHead>Custo</TableHead>
+                      <TableHead>Data do Resgate</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {recentRewards.map((reward) => (
+                      <TableRow key={reward.id}>
+                        <TableCell>{reward.title}</TableCell>
+                        <TableCell>{reward.description}</TableCell>
+                        <TableCell>{reward.cost} CofCoins</TableCell>
+                        <TableCell>{format(reward.claimed, 'dd/MM/yyyy')}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
       </main>
 
-      {/* New Recognition Dialog */}
-      <NewRecognitionDialog 
-        open={isDialogOpen} 
-        onOpenChange={setIsDialogOpen} 
-      />
-      
-      {/* Recognition Detail Dialog */}
+      {/* Dialog */}
       <RecognitionDetailDialog 
+        open={isRecognitionDetailOpen}
+        onOpenChange={setIsRecognitionDetailOpen}
         recognition={selectedRecognition}
-        open={detailDialogOpen}
-        onOpenChange={setDetailDialogOpen}
       />
     </div>
   );
 };
 
-export default Home;
+export default Dashboard;

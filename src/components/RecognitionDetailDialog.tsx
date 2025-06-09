@@ -15,7 +15,7 @@ export interface Recognition {
   description: string;
   date: Date;
   status?: string;
-  icon?: LucideIcon;  // Add icon as an optional property
+  icon?: LucideIcon;
 }
 
 interface RecognitionDetailDialogProps {
@@ -36,6 +36,20 @@ const RecognitionDetailDialog = ({
   onReject
 }: RecognitionDetailDialogProps) => {
   if (!recognition) return null;
+
+  const handleApprove = () => {
+    if (onApprove) {
+      onApprove(recognition.id);
+      onOpenChange(false);
+    }
+  };
+
+  const handleReject = () => {
+    if (onReject) {
+      onReject(recognition.id);
+      onOpenChange(false);
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -85,15 +99,15 @@ const RecognitionDetailDialog = ({
             <div>
               <h4 className="text-sm font-medium mb-2">Status</h4>
               <p className={`text-sm font-medium ${
-                recognition.status === 'approved' 
+                recognition.status === 'aprovado' 
                   ? 'text-green-600' 
-                  : recognition.status === 'rejected' 
+                  : recognition.status === 'rejeitado' 
                   ? 'text-red-600' 
                   : 'text-amber-600'
               }`}>
-                {recognition.status === 'approved' 
+                {recognition.status === 'aprovado' 
                   ? 'Aprovado' 
-                  : recognition.status === 'rejected' 
+                  : recognition.status === 'rejeitado' 
                   ? 'Rejeitado' 
                   : 'Pendente'}
               </p>
@@ -101,17 +115,17 @@ const RecognitionDetailDialog = ({
           )}
         </div>
 
-        {showActions && onApprove && onReject && (
+        {showActions && onApprove && onReject && recognition.status === 'pending' && (
           <DialogFooter className="flex justify-end gap-2 mt-6">
             <Button
               variant="outline"
-              onClick={() => onReject(recognition.id)}
+              onClick={handleReject}
               className="border-red-200 text-red-600 hover:bg-red-50"
             >
               Rejeitar
             </Button>
             <Button
-              onClick={() => onApprove(recognition.id)}
+              onClick={handleApprove}
               className="bg-cofcoin-purple hover:bg-cofcoin-purple-dark"
             >
               Aprovar
