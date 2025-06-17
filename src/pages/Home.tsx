@@ -182,8 +182,8 @@ const Home = () => {
             <p className="text-gray-600">Gerencie seus reconhecimentos e recompensas</p>
           </div>
           
-          {/* Updated coin balance display */}
-          <AnimatedCoinBalance balance={500} />
+          {/* Updated coin balance display with available to send */}
+          <AnimatedCoinBalance balance={500} availableToSend={350} />
         </div>
 
         {/* New Recognition Button - Always visible */}
