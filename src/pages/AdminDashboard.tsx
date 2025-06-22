@@ -19,6 +19,7 @@ import EditUserBalanceDialog from '@/components/EditUserBalanceDialog';
 import RewardConfigModal, { RewardItem } from '@/components/RewardConfigModal';
 import { Tooltip as UITooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import EditUserDataDialog from '@/components/EditUserDataDialog';
+import RewardEvaluationDialog from '@/components/RewardEvaluationDialog';
 
 // Category data with types and colors for charts - using recognition categories
 const recognitionCategories = [{
@@ -454,6 +455,19 @@ const AdminDashboard = () => {
   // Estado para controle do diálogo de edição de dados do usuário
   const [isEditUserDataOpen, setIsEditUserDataOpen] = useState(false);
 
+  // Estados para avaliação de recompensas
+  const [selectedReward, setSelectedReward] = useState<typeof rewardRequestsData[0] | null>(null);
+  const [isRewardEvaluationOpen, setIsRewardEvaluationOpen] = useState(false);
+  const [rewardConfirmDialog, setRewardConfirmDialog] = useState<{
+    open: boolean;
+    id: number;
+    action: 'approve' | 'reject';
+  }>({
+    open: false,
+    id: 0,
+    action: 'approve'
+  });
+
   // Função para avaliar um reconhecimento (abrir modal com detalhes)
   const handleEvaluateRecognition = (item: any) => {
     const formattedRecognition: Recognition = {
@@ -506,10 +520,12 @@ const AdminDashboard = () => {
       open: false
     });
   };
+
   const handleEditBalance = (user: typeof userBalances[0]) => {
     setSelectedUser(user);
     setIsEditBalanceOpen(true);
   };
+
   const handleBalanceEditComplete = (userId: number, previousBalance: number, newBalanceValue: number, reason: string) => {
     console.log(`User ${userId} balance updated from ${previousBalance} to ${newBalanceValue} due to: ${reason}`);
     toast({
@@ -518,14 +534,17 @@ const AdminDashboard = () => {
     });
     setIsEditBalanceOpen(false);
   };
+
   const handleEditReward = (reward: RewardItem) => {
     setEditingReward(reward);
     setIsRewardModalOpen(true);
   };
+
   const handleAddNewReward = () => {
     setEditingReward(null);
     setIsRewardModalOpen(true);
   };
+
   const handleSaveReward = (rewardData: RewardItem) => {
     if (rewardData.id && rewards.find(r => r.id === rewardData.id)) {
       // Update existing reward
@@ -543,6 +562,7 @@ const AdminDashboard = () => {
       });
     }
   };
+
   const handleToggleRewardStatus = (id: number, currentStatus: boolean) => {
     setRewards(rewards.map(reward => {
       if (reward.id === id) {
@@ -603,10 +623,12 @@ const AdminDashboard = () => {
     };
     return areaIds.map(id => areaMap[id] || id).join(", ");
   };
+
   const handleEditUserData = (user: typeof userBalances[0]) => {
     setSelectedUser(user);
     setIsEditUserDataOpen(true);
   };
+
   const handleUserDataEditComplete = (userId: number, department: string, squad: string, approvalLeaders: string[]) => {
     console.log(`User ${userId} data updated - Department: ${department}, Squad: ${squad}, Approval Leaders: ${approvalLeaders.join(', ')}`);
     toast({
@@ -615,6 +637,52 @@ const AdminDashboard = () => {
     });
     setIsEditUserDataOpen(false);
   };
+
+  // Função para avaliar uma recompensa
+  const handleEvaluateReward = (reward: typeof rewardRequestsData[0]) => {
+    setSelectedReward(reward);
+    setIsRewardEvaluationOpen(true);
+  };
+
+  // Função para aprovar uma recompensa
+  const handleApproveReward = (id: number) => {
+    setRewardConfirmDialog({
+      open: true,
+      id,
+      action: 'approve'
+    });
+  };
+
+  // Função para recusar uma recompensa
+  const handleRejectReward = (id: number) => {
+    setRewardConfirmDialog({
+      open: true,
+      id,
+      action: 'reject'
+    });
+  };
+
+  // Função para confirmar a ação da recompensa
+  const handleConfirmRewardAction = () => {
+    if (rewardConfirmDialog.action === 'approve') {
+      toast({
+        title: "Recompensa aprovada",
+        description: `A solicitação de recompensa #${rewardConfirmDialog.id} foi aprovada com sucesso.`
+      });
+    } else {
+      toast({
+        title: "Recompensa recusada",
+        description: `A solicitação de recompensa #${rewardConfirmDialog.id} foi recusada.`,
+        variant: "destructive"
+      });
+    }
+    setRewardConfirmDialog({
+      ...rewardConfirmDialog,
+      open: false
+    });
+    setIsRewardEvaluationOpen(false);
+  };
+
   return <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white shadow-sm">
@@ -809,53 +877,42 @@ const AdminDashboard = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Nome</TableHead>
+                      <TableHead>Usuário</TableHead>
+                      <TableHead>Recompensa</TableHead>
                       <TableHead>Valor</TableHead>
-                      <TableHead>Disponibilidade</TableHead>
                       <TableHead>Status</TableHead>
+                      <TableHead>Data</TableHead>
                       <TableHead>Ações</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    <TableRow>
-                      <TableCell>Day Off</TableCell>
-                      <TableCell>100 CofCoins</TableCell>
-                      <TableCell>10 disponíveis</TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className={getStatusColor("aprovado")}>
-                          Aprovado
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Button variant="ghost" size="sm">Avaliar</Button>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>Vale Presente R$50</TableCell>
-                      <TableCell>50 CofCoins</TableCell>
-                      <TableCell>15 disponíveis</TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className={getStatusColor("pendente")}>
-                          Pendente
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Button variant="ghost" size="sm">Avaliar</Button>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>Home Office por 1 semana</TableCell>
-                      <TableCell>175 CofCoins</TableCell>
-                      <TableCell>5 disponíveis</TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className={getStatusColor("reprovado")}>
-                          Reprovado
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Button variant="ghost" size="sm">Avaliar</Button>
-                      </TableCell>
-                    </TableRow>
+                    {rewardRequestsData.map(reward => (
+                      <TableRow key={reward.id}>
+                        <TableCell>{reward.user}</TableCell>
+                        <TableCell>{reward.title}</TableCell>
+                        <TableCell>{reward.value} CofCoins</TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className={getStatusColor(reward.status)}>
+                            {reward.status === 'aprovado' 
+                              ? 'Aprovado' 
+                              : reward.status === 'pendente' 
+                              ? 'Pendente' 
+                              : 'Reprovado'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{format(reward.requestDate, 'dd/MM/yyyy')}</TableCell>
+                        <TableCell>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleEvaluateReward(reward)}
+                            disabled={reward.status !== 'pendente'}
+                          >
+                            Avaliar
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
                   </TableBody>
                 </Table>
               </CardContent>
@@ -1150,6 +1207,26 @@ const AdminDashboard = () => {
       ...confirmDialog,
       open
     })} title={confirmDialog.action === 'approve' ? "Aprovar Reconhecimento" : "Rejeitar Reconhecimento"} description={`Tem certeza que deseja ${confirmDialog.action === 'approve' ? 'aprovar' : 'rejeitar'} este reconhecimento?`} onConfirm={handleConfirmAction} />
+      
+      <RewardEvaluationDialog 
+        open={isRewardEvaluationOpen} 
+        onOpenChange={setIsRewardEvaluationOpen} 
+        reward={selectedReward} 
+        onApprove={handleApproveReward} 
+        onReject={handleRejectReward} 
+      />
+
+      <ConfirmationDialog 
+        open={rewardConfirmDialog.open} 
+        onOpenChange={open => setRewardConfirmDialog({
+          ...rewardConfirmDialog,
+          open
+        })} 
+        title={rewardConfirmDialog.action === 'approve' ? "Aprovar Recompensa" : "Recusar Recompensa"} 
+        description={`Tem certeza que deseja ${rewardConfirmDialog.action === 'approve' ? 'aprovar' : 'recusar'} esta solicitação de recompensa?`} 
+        onConfirm={handleConfirmRewardAction}
+        variant={rewardConfirmDialog.action === 'reject' ? 'destructive' : 'default'}
+      />
       
       <NewRecognitionDialog open={isNewRecognitionOpen} onOpenChange={setIsNewRecognitionOpen} isAdmin={true} />
       
