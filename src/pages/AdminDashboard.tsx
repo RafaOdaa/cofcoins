@@ -849,7 +849,7 @@ const AdminDashboard = () => {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <Button variant="ghost" size="sm">Editar</Button>
+                        <Button variant="ghost" size="sm">Avaliar</Button>
                       </TableCell>
                     </TableRow>
                     <TableRow>
@@ -862,7 +862,7 @@ const AdminDashboard = () => {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <Button variant="ghost" size="sm">Editar</Button>
+                        <Button variant="ghost" size="sm">Avaliar</Button>
                       </TableCell>
                     </TableRow>
                     <TableRow>
@@ -875,7 +875,7 @@ const AdminDashboard = () => {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <Button variant="ghost" size="sm">Editar</Button>
+                        <Button variant="ghost" size="sm">Avaliar</Button>
                       </TableCell>
                     </TableRow>
                   </TableBody>
