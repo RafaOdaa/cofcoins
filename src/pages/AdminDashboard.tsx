@@ -99,44 +99,39 @@ const teamsData = [{
 }];
 
 // Mock reward requests data for admin dashboard
-const rewardRequestsData = [
-  { 
-    id: 1, 
-    user: "Ana Oliveira",
-    title: "Vale Café", 
-    value: 150, 
-    status: "pendente",
-    requestDate: new Date("2025-04-15T14:25:00"),
-    description: "Gostaria de trocar meus CofCoins por um vale café para utilizar na cafeteria do prédio." 
-  },
-  { 
-    id: 2, 
-    user: "Carlos Mendes",
-    title: "Gift Card R$50", 
-    value: 500, 
-    status: "aprovado",
-    requestDate: new Date("2025-04-14T09:30:00"),
-    description: "Quero utilizar meus CofCoins acumulados para um gift card da Amazon." 
-  },
-  { 
-    id: 3, 
-    user: "Juliana Lima",
-    title: "Vale Cinema", 
-    value: 300, 
-    status: "aprovado",
-    requestDate: new Date("2025-04-12T16:45:00"),
-    description: "Vou ao cinema com minha família e gostaria de usar meus CofCoins para isso."
-  },
-  { 
-    id: 4, 
-    user: "Rodrigo Almeida",
-    title: "Vale Café", 
-    value: 150, 
-    status: "reprovado",
-    requestDate: new Date("2025-04-10T11:20:00"),
-    description: "Preciso de um café para me manter produtivo durante a tarde."
-  }
-];
+const rewardRequestsData = [{
+  id: 1,
+  user: "Ana Oliveira",
+  title: "Vale Café",
+  value: 150,
+  status: "pendente",
+  requestDate: new Date("2025-04-15T14:25:00"),
+  description: "Gostaria de trocar meus CofCoins por um vale café para utilizar na cafeteria do prédio."
+}, {
+  id: 2,
+  user: "Carlos Mendes",
+  title: "Gift Card R$50",
+  value: 500,
+  status: "aprovado",
+  requestDate: new Date("2025-04-14T09:30:00"),
+  description: "Quero utilizar meus CofCoins acumulados para um gift card da Amazon."
+}, {
+  id: 3,
+  user: "Juliana Lima",
+  title: "Vale Cinema",
+  value: 300,
+  status: "aprovado",
+  requestDate: new Date("2025-04-12T16:45:00"),
+  description: "Vou ao cinema com minha família e gostaria de usar meus CofCoins para isso."
+}, {
+  id: 4,
+  user: "Rodrigo Almeida",
+  title: "Vale Café",
+  value: 150,
+  status: "reprovado",
+  requestDate: new Date("2025-04-10T11:20:00"),
+  description: "Preciso de um café para me manter produtivo durante a tarde."
+}];
 
 // Mock data for the approval items
 const approvalItems = [{
@@ -425,9 +420,10 @@ const balanceEditHistory = [{
   date: new Date("2025-04-12T11:20:00"),
   reason: "Verificação de saldo"
 }];
-
 const AdminDashboard = () => {
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const [selectedRecognition, setSelectedRecognition] = useState<Recognition | null>(null);
   const [isRecognitionDetailOpen, setIsRecognitionDetailOpen] = useState(false);
   const [isEditBalanceOpen, setIsEditBalanceOpen] = useState(false);
@@ -510,12 +506,10 @@ const AdminDashboard = () => {
       open: false
     });
   };
-
   const handleEditBalance = (user: typeof userBalances[0]) => {
     setSelectedUser(user);
     setIsEditBalanceOpen(true);
   };
-
   const handleBalanceEditComplete = (userId: number, previousBalance: number, newBalanceValue: number, reason: string) => {
     console.log(`User ${userId} balance updated from ${previousBalance} to ${newBalanceValue} due to: ${reason}`);
     toast({
@@ -524,17 +518,14 @@ const AdminDashboard = () => {
     });
     setIsEditBalanceOpen(false);
   };
-
   const handleEditReward = (reward: RewardItem) => {
     setEditingReward(reward);
     setIsRewardModalOpen(true);
   };
-
   const handleAddNewReward = () => {
     setEditingReward(null);
     setIsRewardModalOpen(true);
   };
-
   const handleSaveReward = (rewardData: RewardItem) => {
     if (rewardData.id && rewards.find(r => r.id === rewardData.id)) {
       // Update existing reward
@@ -552,7 +543,6 @@ const AdminDashboard = () => {
       });
     }
   };
-
   const handleToggleRewardStatus = (id: number, currentStatus: boolean) => {
     setRewards(rewards.map(reward => {
       if (reward.id === id) {
@@ -571,16 +561,10 @@ const AdminDashboard = () => {
   };
 
   // Filter rewards based on search term
-  const filteredRewards = rewards.filter(reward => 
-    reward.name.toLowerCase().includes(rewardSearchTerm.toLowerCase()) || 
-    reward.description.toLowerCase().includes(rewardSearchTerm.toLowerCase())
-  );
+  const filteredRewards = rewards.filter(reward => reward.name.toLowerCase().includes(rewardSearchTerm.toLowerCase()) || reward.description.toLowerCase().includes(rewardSearchTerm.toLowerCase()));
 
   // Filtrar usuários com base no termo de pesquisa
-  const filteredUsers = userBalances.filter(user => 
-    user.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    user.department.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredUsers = userBalances.filter(user => user.name.toLowerCase().includes(searchTerm.toLowerCase()) || user.department.toLowerCase().includes(searchTerm.toLowerCase()));
 
   // Contar estatísticas para os cards
   const approvedCount = recognitionHistory.filter(record => record.status === "aprovado").length;
@@ -610,7 +594,7 @@ const AdminDashboard = () => {
   const getAreaNames = (areaIds: string[]) => {
     const areaMap: Record<string, string> = {
       "tech": "Tecnologia",
-      "marketing": "Marketing", 
+      "marketing": "Marketing",
       "product": "Produto",
       "hr": "RH",
       "sales": "Vendas",
@@ -619,12 +603,10 @@ const AdminDashboard = () => {
     };
     return areaIds.map(id => areaMap[id] || id).join(", ");
   };
-
   const handleEditUserData = (user: typeof userBalances[0]) => {
     setSelectedUser(user);
     setIsEditUserDataOpen(true);
   };
-
   const handleUserDataEditComplete = (userId: number, department: string, squad: string, approvalLeaders: string[]) => {
     console.log(`User ${userId} data updated - Department: ${department}, Squad: ${squad}, Approval Leaders: ${approvalLeaders.join(', ')}`);
     toast({
@@ -633,9 +615,7 @@ const AdminDashboard = () => {
     });
     setIsEditUserDataOpen(false);
   };
-
-  return (
-    <div className="min-h-screen bg-gray-50">
+  return <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -753,8 +733,7 @@ const AdminDashboard = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {approvalItems.map(item => (
-                      <TableRow key={item.id}>
+                    {approvalItems.map(item => <TableRow key={item.id}>
                         <TableCell>{item.reporter}</TableCell>
                         <TableCell>{item.recipient}</TableCell>
                         <TableCell>{item.category}</TableCell>
@@ -770,8 +749,7 @@ const AdminDashboard = () => {
                             Avaliar
                           </Button>
                         </TableCell>
-                      </TableRow>
-                    ))}
+                      </TableRow>)}
                   </TableBody>
                 </Table>
               </CardContent>
@@ -1017,22 +995,13 @@ const AdminDashboard = () => {
                   <div className="h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
-                        <Pie 
-                          data={recognitionCategories} 
-                          cx="50%" 
-                          cy="50%" 
-                          labelLine={false} 
-                          outerRadius={80} 
-                          fill="#8884d8" 
-                          dataKey="value" 
-                          nameKey="name" 
-                          label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                        >
-                          {recognitionCategories.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
+                        <Pie data={recognitionCategories} cx="50%" cy="50%" labelLine={false} outerRadius={80} fill="#8884d8" dataKey="value" nameKey="name" label={({
+                        name,
+                        percent
+                      }) => `${name}: ${(percent * 100).toFixed(0)}%`}>
+                          {recognitionCategories.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
                         </Pie>
-                        <Tooltip formatter={(value) => [`${value} reconhecimentos`, 'Quantidade']} />
+                        <Tooltip formatter={value => [`${value} reconhecimentos`, 'Quantidade']} />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
@@ -1047,33 +1016,19 @@ const AdminDashboard = () => {
                   <div className="h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
-                        <Pie 
-                          data={teamsData} 
-                          cx="50%" 
-                          cy="50%" 
-                          labelLine={false} 
-                          outerRadius={80} 
-                          fill="#8884d8" 
-                          dataKey="recognitions" 
-                          nameKey="name" 
-                          label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                        >
-                          {teamsData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
+                        <Pie data={teamsData} cx="50%" cy="50%" labelLine={false} outerRadius={80} fill="#8884d8" dataKey="recognitions" nameKey="name" label={({
+                        name,
+                        percent
+                      }) => `${name}: ${(percent * 100).toFixed(0)}%`}>
+                          {teamsData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
                         </Pie>
-                        <Tooltip 
-                          formatter={(value, name, props) => {
-                            const data = props.payload;
-                            return [
-                              <div key="tooltip">
+                        <Tooltip formatter={(value, name, props) => {
+                        const data = props.payload;
+                        return [<div key="tooltip">
                                 <div>{`Reconhecimentos: ${data.recognitions}`}</div>
                                 <div>{`CofCoins: ${data.cofcoins}`}</div>
-                              </div>,
-                              'Estatísticas'
-                            ];
-                          }}
-                        />
+                              </div>, 'Estatísticas'];
+                      }} />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
@@ -1133,19 +1088,11 @@ const AdminDashboard = () => {
                         <TableCell>{user.balance} CofCoins</TableCell>
                         <TableCell>
                           <div className="flex gap-2">
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              onClick={() => handleEditBalance(user)}
-                            >
+                            <Button variant="ghost" size="sm" onClick={() => handleEditBalance(user)}>
                               <Edit className="h-4 w-4 mr-1" />
                               Editar Saldo
                             </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              onClick={() => handleEditUserData(user)}
-                            >
+                            <Button variant="ghost" size="sm" onClick={() => handleEditUserData(user)}>
                               <Settings className="h-4 w-4 mr-1" />
                               Editar Dados
                             </Button>
@@ -1197,51 +1144,20 @@ const AdminDashboard = () => {
       </main>
 
       {/* Dialogs */}
-      <RecognitionDetailDialog 
-        open={isRecognitionDetailOpen} 
-        onOpenChange={setIsRecognitionDetailOpen} 
-        recognition={selectedRecognition}
-        showActions={true}
-        onApprove={handleApprove}
-        onReject={handleReject}
-      />
+      <RecognitionDetailDialog open={isRecognitionDetailOpen} onOpenChange={setIsRecognitionDetailOpen} recognition={selectedRecognition} showActions={true} onApprove={handleApprove} onReject={handleReject} />
       
-      <ConfirmationDialog 
-        open={confirmDialog.open} 
-        onOpenChange={(open) => setConfirmDialog({ ...confirmDialog, open })} 
-        title={confirmDialog.action === 'approve' ? "Aprovar Reconhecimento" : "Rejeitar Reconhecimento"} 
-        description={`Tem certeza que deseja ${confirmDialog.action === 'approve' ? 'aprovar' : 'rejeitar'} este reconhecimento?`} 
-        onConfirm={handleConfirmAction} 
-      />
+      <ConfirmationDialog open={confirmDialog.open} onOpenChange={open => setConfirmDialog({
+      ...confirmDialog,
+      open
+    })} title={confirmDialog.action === 'approve' ? "Aprovar Reconhecimento" : "Rejeitar Reconhecimento"} description={`Tem certeza que deseja ${confirmDialog.action === 'approve' ? 'aprovar' : 'rejeitar'} este reconhecimento?`} onConfirm={handleConfirmAction} />
       
-      <NewRecognitionDialog 
-        open={isNewRecognitionOpen} 
-        onOpenChange={setIsNewRecognitionOpen} 
-        isAdmin={true}
-      />
+      <NewRecognitionDialog open={isNewRecognitionOpen} onOpenChange={setIsNewRecognitionOpen} isAdmin={true} />
       
-      <EditUserBalanceDialog 
-        open={isEditBalanceOpen} 
-        onOpenChange={setIsEditBalanceOpen} 
-        user={selectedUser} 
-        onBalanceEditComplete={handleBalanceEditComplete} 
-      />
+      <EditUserBalanceDialog open={isEditBalanceOpen} onOpenChange={setIsEditBalanceOpen} user={selectedUser} onBalanceEditComplete={handleBalanceEditComplete} />
       
-      <RewardConfigModal 
-        open={isRewardModalOpen} 
-        onOpenChange={setIsRewardModalOpen} 
-        onSave={handleSaveReward} 
-        editingReward={editingReward} 
-      />
+      <RewardConfigModal open={isRewardModalOpen} onOpenChange={setIsRewardModalOpen} onSave={handleSaveReward} editingReward={editingReward} />
 
-      <EditUserDataDialog
-        open={isEditUserDataOpen}
-        onOpenChange={setIsEditUserDataOpen}
-        user={selectedUser}
-        onSave={handleUserDataEditComplete}
-      />
-    </div>
-  );
+      <EditUserDataDialog open={isEditUserDataOpen} onOpenChange={setIsEditUserDataOpen} user={selectedUser} onSave={handleUserDataEditComplete} />
+    </div>;
 };
-
 export default AdminDashboard;
