@@ -461,187 +461,32 @@ const AdminDashboard = () => {
   const [rewardConfirmDialog, setRewardConfirmDialog] = useState<{
     open: boolean;
     id: number;
-    action: 'approve' | 'reject';
+    action: 'approve' | 'reject' | 'pending';
   }>({
     open: false,
     id: 0,
     action: 'approve'
   });
 
-  // Função para avaliar um reconhecimento (abrir modal com detalhes)
-  const handleEvaluateRecognition = (item: any) => {
-    const formattedRecognition: Recognition = {
-      id: item.id,
-      reporter: item.reporter,
-      recipient: item.recipient,
-      amount: item.amount,
-      category: item.category,
-      description: item.description,
-      date: item.date,
-      status: 'pending'
-    };
-    setSelectedRecognition(formattedRecognition);
-    setIsRecognitionDetailOpen(true);
-  };
-
-  // Função para aprovar um reconhecimento
-  const handleApprove = (id: number) => {
-    toast({
-      title: "Reconhecimento aprovado",
-      description: `O reconhecimento #${id} foi aprovado com sucesso.`
-    });
-  };
-
-  // Função para rejeitar um reconhecimento
-  const handleReject = (id: number) => {
-    toast({
-      title: "Reconhecimento rejeitado",
-      description: `O reconhecimento #${id} foi rejeitado.`,
-      variant: "destructive"
-    });
-  };
-
-  // Função para confirmar a ação (aprovar/rejeitar)
-  const handleConfirmAction = () => {
-    if (confirmDialog.action === 'approve') {
-      toast({
-        title: "Reconhecimento aprovado",
-        description: `O reconhecimento #${confirmDialog.id} foi aprovado com sucesso.`
-      });
-    } else {
-      toast({
-        title: "Reconhecimento rejeitado",
-        description: `O reconhecimento #${confirmDialog.id} foi rejeitado.`,
-        variant: "destructive"
-      });
-    }
-    setConfirmDialog({
-      ...confirmDialog,
-      open: false
-    });
-  };
-
-  const handleEditBalance = (user: typeof userBalances[0]) => {
-    setSelectedUser(user);
-    setIsEditBalanceOpen(true);
-  };
-
-  const handleBalanceEditComplete = (userId: number, previousBalance: number, newBalanceValue: number, reason: string) => {
-    console.log(`User ${userId} balance updated from ${previousBalance} to ${newBalanceValue} due to: ${reason}`);
-    toast({
-      title: "Saldo atualizado",
-      description: `O saldo do usuário foi atualizado com sucesso.`
-    });
-    setIsEditBalanceOpen(false);
-  };
-
-  const handleEditReward = (reward: RewardItem) => {
-    setEditingReward(reward);
-    setIsRewardModalOpen(true);
-  };
-
-  const handleAddNewReward = () => {
-    setEditingReward(null);
-    setIsRewardModalOpen(true);
-  };
-
-  const handleSaveReward = (rewardData: RewardItem) => {
-    if (rewardData.id && rewards.find(r => r.id === rewardData.id)) {
-      // Update existing reward
-      setRewards(rewards.map(r => r.id === rewardData.id ? rewardData : r));
-      toast({
-        title: "Recompensa atualizada",
-        description: `A recompensa "${rewardData.name}" foi atualizada com sucesso.`
-      });
-    } else {
-      // Add new reward
-      setRewards([...rewards, rewardData]);
-      toast({
-        title: "Recompensa adicionada",
-        description: `A recompensa "${rewardData.name}" foi adicionada com sucesso.`
-      });
-    }
-  };
-
-  const handleToggleRewardStatus = (id: number, currentStatus: boolean) => {
-    setRewards(rewards.map(reward => {
-      if (reward.id === id) {
-        const newStatus = !currentStatus;
-        toast({
-          title: newStatus ? "Recompensa ativada" : "Recompensa desativada",
-          description: `A recompensa foi ${newStatus ? "ativada" : "desativada"} com sucesso.`
-        });
-        return {
-          ...reward,
-          active: newStatus
-        };
-      }
-      return reward;
-    }));
-  };
-
-  // Filter rewards based on search term
-  const filteredRewards = rewards.filter(reward => reward.name.toLowerCase().includes(rewardSearchTerm.toLowerCase()) || reward.description.toLowerCase().includes(rewardSearchTerm.toLowerCase()));
-
-  // Filtrar usuários com base no termo de pesquisa
-  const filteredUsers = userBalances.filter(user => user.name.toLowerCase().includes(searchTerm.toLowerCase()) || user.department.toLowerCase().includes(searchTerm.toLowerCase()));
-
-  // Contar estatísticas para os cards
-  const approvedCount = recognitionHistory.filter(record => record.status === "aprovado").length;
-  const rejectedCount = recognitionHistory.filter(record => record.status === "reprovado").length;
-  const pendingCount = recognitionHistory.filter(record => record.status === "pendente").length;
-
-  // Contar estatísticas para recompensas
-  const approvedRewards = rewardRequestsData.filter(reward => reward.status === "aprovado").length;
-  const pendingRewards = rewardRequestsData.filter(reward => reward.status === "pendente").length;
-  const rejectedRewards = rewardRequestsData.filter(reward => reward.status === "reprovado").length;
-
-  // Função para obter a cor baseada no status
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "aprovado":
-        return "bg-green-100 text-green-800 border-green-200";
-      case "pendente":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
-      case "reprovado":
-        return "bg-red-100 text-red-800 border-red-200";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
-    }
-  };
-
-  // Get areas names from IDs
-  const getAreaNames = (areaIds: string[]) => {
-    const areaMap: Record<string, string> = {
-      "tech": "Tecnologia",
-      "marketing": "Marketing",
-      "product": "Produto",
-      "hr": "RH",
-      "sales": "Vendas",
-      "finance": "Financeiro",
-      "ops": "Operações"
-    };
-    return areaIds.map(id => areaMap[id] || id).join(", ");
-  };
-
-  const handleEditUserData = (user: typeof userBalances[0]) => {
-    setSelectedUser(user);
-    setIsEditUserDataOpen(true);
-  };
-
-  const handleUserDataEditComplete = (userId: number, department: string, squad: string, approvalLeaders: string[]) => {
-    console.log(`User ${userId} data updated - Department: ${department}, Squad: ${squad}, Approval Leaders: ${approvalLeaders.join(', ')}`);
-    toast({
-      title: "Dados atualizados",
-      description: "Os dados do usuário foram atualizados com sucesso."
-    });
-    setIsEditUserDataOpen(false);
-  };
-
   // Função para avaliar uma recompensa
   const handleEvaluateReward = (reward: typeof rewardRequestsData[0]) => {
     setSelectedReward(reward);
     setIsRewardEvaluationOpen(true);
+  };
+
+  // Nova função para editar uma recompensa
+  const handleEditReward = (reward: typeof rewardRequestsData[0]) => {
+    setSelectedReward(reward);
+    setIsRewardEvaluationOpen(true);
+  };
+
+  // Função para alterar status para pendente
+  const handleSetPendingReward = (id: number) => {
+    setRewardConfirmDialog({
+      open: true,
+      id,
+      action: 'pending'
+    });
   };
 
   // Função para aprovar uma recompensa
@@ -662,26 +507,47 @@ const AdminDashboard = () => {
     });
   };
 
-  // Função para confirmar a ação da recompensa
+  // Função para confirmar a ação da recompensa - atualizada
   const handleConfirmRewardAction = () => {
-    if (rewardConfirmDialog.action === 'approve') {
-      toast({
-        title: "Recompensa aprovada",
-        description: `A solicitação de recompensa #${rewardConfirmDialog.id} foi aprovada com sucesso.`
-      });
-    } else {
-      toast({
-        title: "Recompensa recusada",
-        description: `A solicitação de recompensa #${rewardConfirmDialog.id} foi recusada.`,
-        variant: "destructive"
-      });
-    }
+    const actionText = rewardConfirmDialog.action === 'approve' 
+      ? 'aprovada' 
+      : rewardConfirmDialog.action === 'reject' 
+      ? 'recusada' 
+      : 'alterada para pendente';
+
+    toast({
+      title: `Recompensa ${actionText}`,
+      description: `A solicitação de recompensa #${rewardConfirmDialog.id} foi ${actionText} com sucesso.`,
+      variant: rewardConfirmDialog.action === 'reject' ? 'destructive' : 'default'
+    });
+
     setRewardConfirmDialog({
       ...rewardConfirmDialog,
       open: false
     });
     setIsRewardEvaluationOpen(false);
   };
+
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "aprovado":
+        return "bg-green-100 text-green-800 border-green-200";
+      case "pendente":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      case "reprovado":
+        return "bg-red-100 text-red-800 border-red-200";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200";
+    }
+  };
+
+  // Filtrar usuários com base no termo de pesquisa
+  const filteredUsers = userBalances.filter(user => user.name.toLowerCase().includes(searchTerm.toLowerCase()) || user.department.toLowerCase().includes(searchTerm.toLowerCase()));
+
+  // Contar estatísticas para os cards
+  const approvedCount = recognitionHistory.filter(record => record.status === "aprovado").length;
+  const rejectedCount = recognitionHistory.filter(record => record.status === "reprovado").length;
+  const pendingCount = recognitionHistory.filter(record => record.status === "pendente").length;
 
   return <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -835,7 +701,7 @@ const AdminDashboard = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-green-600">{approvedRewards}</div>
+                  <div className="text-3xl font-bold text-green-600">{approvedCount}</div>
                 </CardContent>
               </Card>
               
@@ -847,7 +713,7 @@ const AdminDashboard = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-red-600">{rejectedRewards}</div>
+                  <div className="text-3xl font-bold text-red-600">{rejectedCount}</div>
                 </CardContent>
               </Card>
 
@@ -859,7 +725,7 @@ const AdminDashboard = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-yellow-600">{pendingRewards}</div>
+                  <div className="text-3xl font-bold text-yellow-600">{pendingCount}</div>
                 </CardContent>
               </Card>
             </div>
@@ -905,10 +771,15 @@ const AdminDashboard = () => {
                           <Button 
                             variant="ghost" 
                             size="sm"
-                            onClick={() => handleEvaluateReward(reward)}
-                            disabled={reward.status !== 'pendente'}
+                            onClick={() => {
+                              if (reward.status === 'pendente') {
+                                handleEvaluateReward(reward);
+                              } else {
+                                handleEditReward(reward);
+                              }
+                            }}
                           >
-                            Avaliar
+                            {reward.status === 'pendente' ? 'Avaliar' : 'Editar'}
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -1214,6 +1085,8 @@ const AdminDashboard = () => {
         reward={selectedReward} 
         onApprove={handleApproveReward} 
         onReject={handleRejectReward} 
+        onPending={handleSetPendingReward}
+        isEditing={selectedReward?.status !== 'pendente'}
       />
 
       <ConfirmationDialog 
@@ -1222,8 +1095,20 @@ const AdminDashboard = () => {
           ...rewardConfirmDialog,
           open
         })} 
-        title={rewardConfirmDialog.action === 'approve' ? "Aprovar Recompensa" : "Recusar Recompensa"} 
-        description={`Tem certeza que deseja ${rewardConfirmDialog.action === 'approve' ? 'aprovar' : 'recusar'} esta solicitação de recompensa?`} 
+        title={
+          rewardConfirmDialog.action === 'approve' 
+            ? "Aprovar Recompensa" 
+            : rewardConfirmDialog.action === 'reject' 
+            ? "Recusar Recompensa"
+            : "Alterar para Pendente"
+        } 
+        description={`Tem certeza que deseja ${
+          rewardConfirmDialog.action === 'approve' 
+            ? 'aprovar' 
+            : rewardConfirmDialog.action === 'reject' 
+            ? 'recusar' 
+            : 'alterar para pendente'
+        } esta solicitação de recompensa?`} 
         onConfirm={handleConfirmRewardAction}
         variant={rewardConfirmDialog.action === 'reject' ? 'destructive' : 'default'}
       />
