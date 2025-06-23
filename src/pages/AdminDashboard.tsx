@@ -422,9 +422,7 @@ const balanceEditHistory = [{
   reason: "Verificação de saldo"
 }];
 const AdminDashboard = () => {
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
   const [selectedRecognition, setSelectedRecognition] = useState<Recognition | null>(null);
   const [isRecognitionDetailOpen, setIsRecognitionDetailOpen] = useState(false);
   const [isEditBalanceOpen, setIsEditBalanceOpen] = useState(false);
@@ -467,6 +465,131 @@ const AdminDashboard = () => {
     id: 0,
     action: 'approve'
   });
+
+  // Handler functions that were missing
+  const handleEvaluateRecognition = (item: typeof approvalItems[0]) => {
+    const recognition: Recognition = {
+      id: item.id,
+      sender: item.reporter,
+      recipient: item.recipient,
+      category: item.category,
+      amount: item.amount,
+      description: item.description,
+      date: item.date,
+      status: item.status
+    };
+    setSelectedRecognition(recognition);
+    setIsRecognitionDetailOpen(true);
+  };
+
+  const handleApprove = (id: number) => {
+    setConfirmDialog({
+      open: true,
+      id,
+      action: 'approve'
+    });
+  };
+
+  const handleReject = (id: number) => {
+    setConfirmDialog({
+      open: true,
+      id,
+      action: 'reject'
+    });
+  };
+
+  const handleConfirmAction = () => {
+    const actionText = confirmDialog.action === 'approve' ? 'aprovado' : 'rejeitado';
+    toast({
+      title: `Reconhecimento ${actionText}`,
+      description: `O reconhecimento #${confirmDialog.id} foi ${actionText} com sucesso.`,
+      variant: confirmDialog.action === 'reject' ? 'destructive' : 'default'
+    });
+
+    setConfirmDialog({
+      ...confirmDialog,
+      open: false
+    });
+    setIsRecognitionDetailOpen(false);
+  };
+
+  const handleEditBalance = (user: typeof userBalances[0]) => {
+    setSelectedUser(user);
+    setIsEditBalanceOpen(true);
+  };
+
+  const handleEditUserData = (user: typeof userBalances[0]) => {
+    setSelectedUser(user);
+    setIsEditUserDataOpen(true);
+  };
+
+  const handleBalanceEditComplete = () => {
+    toast({
+      title: "Saldo atualizado",
+      description: "O saldo do usuário foi atualizado com sucesso."
+    });
+    setIsEditBalanceOpen(false);
+  };
+
+  const handleUserDataEditComplete = () => {
+    toast({
+      title: "Dados atualizados",
+      description: "Os dados do usuário foram atualizados com sucesso."
+    });
+    setIsEditUserDataOpen(false);
+  };
+
+  const handleAddNewReward = () => {
+    setEditingReward(null);
+    setIsRewardModalOpen(true);
+  };
+
+  const handleEditRewardConfig = (reward: RewardItem) => {
+    setEditingReward(reward);
+    setIsRewardModalOpen(true);
+  };
+
+  const handleSaveReward = (reward: RewardItem) => {
+    if (editingReward) {
+      setRewards(rewards.map(r => r.id === reward.id ? reward : r));
+      toast({
+        title: "Recompensa atualizada",
+        description: "A recompensa foi atualizada com sucesso."
+      });
+    } else {
+      const newReward = { ...reward, id: Math.max(...rewards.map(r => r.id)) + 1 };
+      setRewards([...rewards, newReward]);
+      toast({
+        title: "Recompensa criada",
+        description: "A nova recompensa foi criada com sucesso."
+      });
+    }
+    setIsRewardModalOpen(false);
+    setEditingReward(null);
+  };
+
+  const handleToggleRewardStatus = (id: number, currentStatus: boolean) => {
+    setRewards(rewards.map(reward => 
+      reward.id === id ? { ...reward, active: !currentStatus } : reward
+    ));
+    toast({
+      title: currentStatus ? "Recompensa desativada" : "Recompensa ativada",
+      description: `A recompensa foi ${currentStatus ? 'desativada' : 'ativada'} com sucesso.`
+    });
+  };
+
+  const getAreaNames = (areas: string[]) => {
+    const areaMap: { [key: string]: string } = {
+      tech: "Tecnologia",
+      marketing: "Marketing", 
+      product: "Produto",
+      hr: "RH",
+      sales: "Vendas",
+      finance: "Financeiro",
+      ops: "Operações"
+    };
+    return areas.map(area => areaMap[area] || area).join(", ");
+  };
 
   // Função para avaliar uma recompensa
   const handleEvaluateReward = (reward: typeof rewardRequestsData[0]) => {
@@ -542,14 +665,24 @@ const AdminDashboard = () => {
   };
 
   // Filtrar usuários com base no termo de pesquisa
-  const filteredUsers = userBalances.filter(user => user.name.toLowerCase().includes(searchTerm.toLowerCase()) || user.department.toLowerCase().includes(searchTerm.toLowerCase()));
+  const filteredUsers = userBalances.filter(user => 
+    user.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    user.department.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Filtrar recompensas com base no termo de pesquisa
+  const filteredRewards = rewards.filter(reward =>
+    reward.name.toLowerCase().includes(rewardSearchTerm.toLowerCase()) ||
+    reward.description.toLowerCase().includes(rewardSearchTerm.toLowerCase())
+  );
 
   // Contar estatísticas para os cards
   const approvedCount = recognitionHistory.filter(record => record.status === "aprovado").length;
   const rejectedCount = recognitionHistory.filter(record => record.status === "reprovado").length;
   const pendingCount = recognitionHistory.filter(record => record.status === "pendente").length;
 
-  return <div className="min-h-screen bg-gray-50">
+  return (
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -667,7 +800,8 @@ const AdminDashboard = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {approvalItems.map(item => <TableRow key={item.id}>
+                    {approvalItems.map(item => (
+                      <TableRow key={item.id}>
                         <TableCell>{item.reporter}</TableCell>
                         <TableCell>{item.recipient}</TableCell>
                         <TableCell>{item.category}</TableCell>
@@ -683,7 +817,8 @@ const AdminDashboard = () => {
                             Avaliar
                           </Button>
                         </TableCell>
-                      </TableRow>)}
+                      </TableRow>
+                    ))}
                   </TableBody>
                 </Table>
               </CardContent>
@@ -820,7 +955,8 @@ const AdminDashboard = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredRewards.map(reward => <TableRow key={reward.id}>
+                      {filteredRewards.map(reward => (
+                        <TableRow key={reward.id}>
                           <TableCell>
                             <UITooltip>
                               <TooltipTrigger asChild>
@@ -879,12 +1015,13 @@ const AdminDashboard = () => {
                             <Switch checked={reward.active} onCheckedChange={() => handleToggleRewardStatus(reward.id, reward.active)} className="data-[state=checked]:bg-cofcoin-purple" />
                           </TableCell>
                           <TableCell>
-                            <Button variant="ghost" size="sm" onClick={() => handleEditReward(reward)}>
+                            <Button variant="ghost" size="sm" onClick={() => handleEditRewardConfig(reward)}>
                               <Edit className="h-4 w-4 mr-1" />
                               Editar
                             </Button>
                           </TableCell>
-                        </TableRow>)}
+                        </TableRow>
+                      ))}
                     </TableBody>
                   </Table>
                 </TooltipProvider>
@@ -1010,7 +1147,8 @@ const AdminDashboard = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredUsers.map(user => <TableRow key={user.id}>
+                    {filteredUsers.map(user => (
+                      <TableRow key={user.id}>
                         <TableCell>{user.name}</TableCell>
                         <TableCell>{user.department}</TableCell>
                         <TableCell>{user.balance} CofCoins</TableCell>
@@ -1026,7 +1164,8 @@ const AdminDashboard = () => {
                             </Button>
                           </div>
                         </TableCell>
-                      </TableRow>)}
+                      </TableRow>
+                    ))}
                   </TableBody>
                 </Table>
               </CardContent>
@@ -1050,7 +1189,8 @@ const AdminDashboard = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {balanceEditHistory.map(record => <TableRow key={record.id}>
+                    {balanceEditHistory.map(record => (
+                      <TableRow key={record.id}>
                         <TableCell>{format(record.date, 'dd/MM/yyyy HH:mm')}</TableCell>
                         <TableCell>{record.admin}</TableCell>
                         <TableCell>{record.recipient}</TableCell>
@@ -1062,7 +1202,8 @@ const AdminDashboard = () => {
                           </span>
                         </TableCell>
                         <TableCell>{record.reason}</TableCell>
-                      </TableRow>)}
+                      </TableRow>
+                    ))}
                   </TableBody>
                 </Table>
               </CardContent>
@@ -1120,6 +1261,8 @@ const AdminDashboard = () => {
       <RewardConfigModal open={isRewardModalOpen} onOpenChange={setIsRewardModalOpen} onSave={handleSaveReward} editingReward={editingReward} />
 
       <EditUserDataDialog open={isEditUserDataOpen} onOpenChange={setIsEditUserDataOpen} user={selectedUser} onSave={handleUserDataEditComplete} />
-    </div>;
+    </div>
+  );
 };
+
 export default AdminDashboard;
