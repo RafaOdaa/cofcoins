@@ -20,6 +20,19 @@ import RewardConfigModal, { RewardItem } from '@/components/RewardConfigModal';
 import { Tooltip as UITooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import EditUserDataDialog from '@/components/EditUserDataDialog';
 import RewardEvaluationDialog from '@/components/RewardEvaluationDialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 // Category data with types and colors for charts - using recognition categories
 const recognitionCategories = [{
@@ -421,6 +434,18 @@ const balanceEditHistory = [{
   date: new Date("2025-04-12T11:20:00"),
   reason: "Verificação de saldo"
 }];
+
+// Areas definition for the filter
+const areas = [
+  { id: "tech", name: "Tecnologia" },
+  { id: "marketing", name: "Marketing" },
+  { id: "product", name: "Produto" },
+  { id: "hr", name: "RH" },
+  { id: "sales", name: "Vendas" },
+  { id: "finance", name: "Financeiro" },
+  { id: "ops", name: "Operações" },
+];
+
 const AdminDashboard = () => {
   const { toast } = useToast();
   const [selectedRecognition, setSelectedRecognition] = useState<Recognition | null>(null);
@@ -435,6 +460,9 @@ const AdminDashboard = () => {
   const [isRewardModalOpen, setIsRewardModalOpen] = useState(false);
   const [editingReward, setEditingReward] = useState<RewardItem | null>(null);
   const [rewardSearchTerm, setRewardSearchTerm] = useState("");
+  
+  // State for area filter
+  const [selectedAreas, setSelectedAreas] = useState<string[]>([]);
 
   // Estado para controle do diálogo de ação (aprovar/rejeitar)
   const [confirmDialog, setConfirmDialog] = useState<{
@@ -470,7 +498,7 @@ const AdminDashboard = () => {
   const handleEvaluateRecognition = (item: typeof approvalItems[0]) => {
     const recognition: Recognition = {
       id: item.id,
-      sender: item.reporter,
+      reporter: item.reporter,
       recipient: item.recipient,
       category: item.category,
       amount: item.amount,
@@ -670,11 +698,30 @@ const AdminDashboard = () => {
     user.department.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Filtrar recompensas com base no termo de pesquisa
-  const filteredRewards = rewards.filter(reward =>
-    reward.name.toLowerCase().includes(rewardSearchTerm.toLowerCase()) ||
-    reward.description.toLowerCase().includes(rewardSearchTerm.toLowerCase())
-  );
+  // Filtrar recompensas com base no termo de pesquisa e áreas selecionadas
+  const filteredRewards = rewards.filter(reward => {
+    const matchesSearch = reward.name.toLowerCase().includes(rewardSearchTerm.toLowerCase()) ||
+      reward.description.toLowerCase().includes(rewardSearchTerm.toLowerCase());
+    
+    const matchesArea = selectedAreas.length === 0 || 
+      selectedAreas.some(selectedArea => reward.areas.includes(selectedArea));
+    
+    return matchesSearch && matchesArea;
+  });
+
+  // Handler for area filter
+  const handleAreaToggle = (areaId: string) => {
+    setSelectedAreas(prev => 
+      prev.includes(areaId)
+        ? prev.filter(id => id !== areaId)
+        : [...prev, areaId]
+    );
+  };
+
+  // Clear area filters
+  const clearAreaFilters = () => {
+    setSelectedAreas([]);
+  };
 
   // Contar estatísticas para os cards
   const approvedCount = recognitionHistory.filter(record => record.status === "aprovado").length;
@@ -936,9 +983,51 @@ const AdminDashboard = () => {
                 </Button>
               </CardHeader>
               <CardContent>
-                <div className="relative flex-1 max-w-sm mb-4">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input placeholder="Buscar recompensa..." className="pl-10" value={rewardSearchTerm} onChange={e => setRewardSearchTerm(e.target.value)} />
+                <div className="flex gap-4 mb-4">
+                  <div className="relative flex-1 max-w-sm">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Input 
+                      placeholder="Buscar recompensa..." 
+                      className="pl-10" 
+                      value={rewardSearchTerm} 
+                      onChange={e => setRewardSearchTerm(e.target.value)} 
+                    />
+                  </div>
+                  
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" className="min-w-[200px] justify-start">
+                        <Settings className="h-4 w-4 mr-2" />
+                        {selectedAreas.length > 0 
+                          ? `${selectedAreas.length} área(s) selecionada(s)`
+                          : "Filtrar por áreas"
+                        }
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56 bg-white">
+                      {areas.map((area) => (
+                        <DropdownMenuCheckboxItem
+                          key={area.id}
+                          checked={selectedAreas.includes(area.id)}
+                          onCheckedChange={() => handleAreaToggle(area.id)}
+                        >
+                          {area.name}
+                        </DropdownMenuCheckboxItem>
+                      ))}
+                      {selectedAreas.length > 0 && (
+                        <>
+                          <div className="h-px bg-gray-200 my-1" />
+                          <DropdownMenuCheckboxItem
+                            checked={false}
+                            onCheckedChange={clearAreaFilters}
+                            className="text-red-600"
+                          >
+                            Limpar filtros
+                          </DropdownMenuCheckboxItem>
+                        </>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
                 
                 <TooltipProvider>
