@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useToast } from "@/hooks/use-toast";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { format } from 'date-fns';
-import { Activity, Award, BookOpen, CheckCircle, Edit, Gift, Home, Plus, Search, Settings, Star, Users, XCircle } from 'lucide-react';
+import { Activity, Award, BookOpen, CheckCircle, Edit, Gift, Home, Plus, Search, Settings, Star, Users, XCircle, ChevronUp, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Switch } from "@/components/ui/switch";
 import RecognitionDetailDialog, { Recognition } from "@/components/RecognitionDetailDialog";
@@ -169,67 +169,97 @@ const approvalItems = [{
   icon: BookOpen
 }];
 
-// Mock data for user balances
+// Mock data for user balances - updated with new fields
 const userBalances = [{
   id: 1,
   name: "Lucas Mendes",
   balance: 135,
   department: "Tecnologia",
-  spent: 20
+  area: "tech",
+  spent: 20,
+  totalReceived: 155,
+  totalSent: 45
 }, {
   id: 2,
   name: "Amanda Oliveira",
   balance: 120,
   department: "Marketing",
-  spent: 30
+  area: "marketing",
+  spent: 30,
+  totalReceived: 150,
+  totalSent: 35
 }, {
   id: 3,
   name: "Pedro Henrique",
   balance: 95,
   department: "Produto",
-  spent: 10
+  area: "product",
+  spent: 10,
+  totalReceived: 105,
+  totalSent: 60
 }, {
   id: 4,
   name: "Carolina Silva",
   balance: 85,
   department: "RH",
-  spent: 5
+  area: "hr",
+  spent: 5,
+  totalReceived: 90,
+  totalSent: 80
 }, {
   id: 5,
   name: "Rafael Costa",
   balance: 75,
   department: "Vendas",
-  spent: 15
+  area: "sales",
+  spent: 15,
+  totalReceived: 90,
+  totalSent: 70
 }, {
   id: 6,
   name: "Juliana Santos",
   balance: 65,
   department: "Financeiro",
-  spent: 25
+  area: "finance",
+  spent: 25,
+  totalReceived: 90,
+  totalSent: 55
 }, {
   id: 7,
   name: "Bruno Almeida",
   balance: 60,
   department: "Atendimento",
-  spent: 0
+  area: "ops",
+  spent: 0,
+  totalReceived: 60,
+  totalSent: 40
 }, {
   id: 8,
   name: "Mariana Lima",
   balance: 55,
   department: "Operações",
-  spent: 35
+  area: "ops",
+  spent: 35,
+  totalReceived: 90,
+  totalSent: 25
 }, {
   id: 9,
   name: "Fernando Gomes",
   balance: 50,
   department: "Tecnologia",
-  spent: 40
+  area: "tech",
+  spent: 40,
+  totalReceived: 90,
+  totalSent: 30
 }, {
   id: 10,
   name: "Isabela Martins",
   balance: 45,
   department: "Marketing",
-  spent: 50
+  area: "marketing",
+  spent: 50,
+  totalReceived: 95,
+  totalSent: 20
 }];
 
 // Mock data for recognition history
@@ -447,6 +477,10 @@ const areas = [{
   id: "ops",
   name: "Operações"
 }];
+
+type SortField = 'name' | 'department' | 'balance' | 'totalReceived' | 'totalSent';
+type SortOrder = 'asc' | 'desc';
+
 const AdminDashboard = () => {
   const {
     toast
@@ -464,8 +498,15 @@ const AdminDashboard = () => {
   const [editingReward, setEditingReward] = useState<RewardItem | null>(null);
   const [rewardSearchTerm, setRewardSearchTerm] = useState("");
 
-  // State for area filter
+  // State for area filter (rewards)
   const [selectedAreas, setSelectedAreas] = useState<string[]>([]);
+
+  // State for user area filter
+  const [selectedUserAreas, setSelectedUserAreas] = useState<string[]>([]);
+
+  // State for user sorting
+  const [sortField, setSortField] = useState<SortField>('name');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
 
   // Estado para controle do diálogo de ação (aprovar/rejeitar)
   const [confirmDialog, setConfirmDialog] = useState<{
@@ -681,24 +722,97 @@ const AdminDashboard = () => {
     }
   };
 
-  // Filtrar usuários com base no termo de pesquisa
-  const filteredUsers = userBalances.filter(user => user.name.toLowerCase().includes(searchTerm.toLowerCase()) || user.department.toLowerCase().includes(searchTerm.toLowerCase()));
+  // Filter users based on search term and selected areas
+  const filteredUsers = userBalances.filter(user => {
+    const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                         user.department.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesArea = selectedUserAreas.length === 0 || selectedUserAreas.includes(user.area);
+    return matchesSearch && matchesArea;
+  });
 
-  // Filtrar recompensas com base no termo de pesquisa e áreas selecionadas
+  // Sort users
+  const sortedUsers = [...filteredUsers].sort((a, b) => {
+    let aValue: string | number;
+    let bValue: string | number;
+
+    switch (sortField) {
+      case 'name':
+        aValue = a.name;
+        bValue = b.name;
+        break;
+      case 'department':
+        aValue = a.department;
+        bValue = b.department;
+        break;
+      case 'balance':
+        aValue = a.balance;
+        bValue = b.balance;
+        break;
+      case 'totalReceived':
+        aValue = a.totalReceived;
+        bValue = b.totalReceived;
+        break;
+      case 'totalSent':
+        aValue = a.totalSent;
+        bValue = b.totalSent;
+        break;
+      default:
+        aValue = a.name;
+        bValue = b.name;
+    }
+
+    if (typeof aValue === 'string' && typeof bValue === 'string') {
+      return sortOrder === 'asc' 
+        ? aValue.localeCompare(bValue)
+        : bValue.localeCompare(aValue);
+    } else {
+      return sortOrder === 'asc' 
+        ? (aValue as number) - (bValue as number)
+        : (bValue as number) - (aValue as number);
+    }
+  });
+
+  // Filter rewards based on search term and selected areas
   const filteredRewards = rewards.filter(reward => {
     const matchesSearch = reward.name.toLowerCase().includes(rewardSearchTerm.toLowerCase()) || reward.description.toLowerCase().includes(rewardSearchTerm.toLowerCase());
     const matchesArea = selectedAreas.length === 0 || selectedAreas.some(selectedArea => reward.areas.includes(selectedArea));
     return matchesSearch && matchesArea;
   });
 
-  // Handler for area filter
+  // Handler for area filter (rewards)
   const handleAreaToggle = (areaId: string) => {
     setSelectedAreas(prev => prev.includes(areaId) ? prev.filter(id => id !== areaId) : [...prev, areaId]);
   };
 
-  // Clear area filters
+  // Handler for user area filter
+  const handleUserAreaToggle = (areaId: string) => {
+    setSelectedUserAreas(prev => prev.includes(areaId) ? prev.filter(id => id !== areaId) : [...prev, areaId]);
+  };
+
+  // Clear area filters (rewards)
   const clearAreaFilters = () => {
     setSelectedAreas([]);
+  };
+
+  // Clear user area filters
+  const clearUserAreaFilters = () => {
+    setSelectedUserAreas([]);
+  };
+
+  // Handle sorting
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
+  };
+
+  // Render sort icon
+  const renderSortIcon = (field: SortField) => {
+    if (sortField !== field) return null;
+    return sortOrder === 'asc' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />;
   };
 
   // Contar estatísticas para os cards
@@ -1163,25 +1277,91 @@ const AdminDashboard = () => {
                 <CardTitle>Usuários</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="relative flex-1 max-w-sm">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input placeholder="Buscar usuário..." className="pl-10" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+                <div className="flex gap-4">
+                  <div className="relative flex-1 max-w-sm">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Input placeholder="Buscar usuário..." className="pl-10" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+                  </div>
+                  
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" className="min-w-[200px] justify-start">
+                        <Settings className="h-4 w-4 mr-2" />
+                        {selectedUserAreas.length > 0 ? `${selectedUserAreas.length} área(s) selecionada(s)` : "Filtrar por áreas"}
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56 bg-white">
+                      {areas.map(area => <DropdownMenuCheckboxItem key={area.id} checked={selectedUserAreas.includes(area.id)} onCheckedChange={() => handleUserAreaToggle(area.id)}>
+                          {area.name}
+                        </DropdownMenuCheckboxItem>)}
+                      {selectedUserAreas.length > 0 && <>
+                          <div className="h-px bg-gray-200 my-1" />
+                          <DropdownMenuCheckboxItem checked={false} onCheckedChange={clearUserAreaFilters} className="text-red-600">
+                            Limpar filtros
+                          </DropdownMenuCheckboxItem>
+                        </>}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
                 
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Nome</TableHead>
-                      <TableHead>Departamento</TableHead>
-                      <TableHead>Saldo</TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-gray-50"
+                        onClick={() => handleSort('name')}
+                      >
+                        <div className="flex items-center">
+                          Nome
+                          {renderSortIcon('name')}
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-gray-50"
+                        onClick={() => handleSort('department')}
+                      >
+                        <div className="flex items-center">
+                          Departamento
+                          {renderSortIcon('department')}
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-gray-50"
+                        onClick={() => handleSort('balance')}
+                      >
+                        <div className="flex items-center">
+                          Saldo
+                          {renderSortIcon('balance')}
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-gray-50"
+                        onClick={() => handleSort('totalReceived')}
+                      >
+                        <div className="flex items-center">
+                          Total Recebido
+                          {renderSortIcon('totalReceived')}
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-gray-50"
+                        onClick={() => handleSort('totalSent')}
+                      >
+                        <div className="flex items-center">
+                          Total Enviado
+                          {renderSortIcon('totalSent')}
+                        </div>
+                      </TableHead>
                       <TableHead>Ações</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredUsers.map(user => <TableRow key={user.id}>
+                    {sortedUsers.map(user => <TableRow key={user.id}>
                         <TableCell>{user.name}</TableCell>
                         <TableCell>{user.department}</TableCell>
                         <TableCell>{user.balance} CofCoins</TableCell>
+                        <TableCell>{user.totalReceived} CofCoins</TableCell>
+                        <TableCell>{user.totalSent} CofCoins</TableCell>
                         <TableCell>
                           <div className="flex gap-2">
                             <Button variant="ghost" size="sm" onClick={() => handleEditBalance(user)}>
