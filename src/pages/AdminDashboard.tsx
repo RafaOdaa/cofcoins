@@ -20,19 +20,8 @@ import RewardConfigModal, { RewardItem } from '@/components/RewardConfigModal';
 import { Tooltip as UITooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import EditUserDataDialog from '@/components/EditUserDataDialog';
 import RewardEvaluationDialog from '@/components/RewardEvaluationDialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 // Category data with types and colors for charts - using recognition categories
 const recognitionCategories = [{
@@ -436,18 +425,32 @@ const balanceEditHistory = [{
 }];
 
 // Areas definition for the filter
-const areas = [
-  { id: "tech", name: "Tecnologia" },
-  { id: "marketing", name: "Marketing" },
-  { id: "product", name: "Produto" },
-  { id: "hr", name: "RH" },
-  { id: "sales", name: "Vendas" },
-  { id: "finance", name: "Financeiro" },
-  { id: "ops", name: "Operações" },
-];
-
+const areas = [{
+  id: "tech",
+  name: "Tecnologia"
+}, {
+  id: "marketing",
+  name: "Marketing"
+}, {
+  id: "product",
+  name: "Produto"
+}, {
+  id: "hr",
+  name: "RH"
+}, {
+  id: "sales",
+  name: "Vendas"
+}, {
+  id: "finance",
+  name: "Financeiro"
+}, {
+  id: "ops",
+  name: "Operações"
+}];
 const AdminDashboard = () => {
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const [selectedRecognition, setSelectedRecognition] = useState<Recognition | null>(null);
   const [isRecognitionDetailOpen, setIsRecognitionDetailOpen] = useState(false);
   const [isEditBalanceOpen, setIsEditBalanceOpen] = useState(false);
@@ -460,7 +463,7 @@ const AdminDashboard = () => {
   const [isRewardModalOpen, setIsRewardModalOpen] = useState(false);
   const [editingReward, setEditingReward] = useState<RewardItem | null>(null);
   const [rewardSearchTerm, setRewardSearchTerm] = useState("");
-  
+
   // State for area filter
   const [selectedAreas, setSelectedAreas] = useState<string[]>([]);
 
@@ -509,7 +512,6 @@ const AdminDashboard = () => {
     setSelectedRecognition(recognition);
     setIsRecognitionDetailOpen(true);
   };
-
   const handleApprove = (id: number) => {
     setConfirmDialog({
       open: true,
@@ -517,7 +519,6 @@ const AdminDashboard = () => {
       action: 'approve'
     });
   };
-
   const handleReject = (id: number) => {
     setConfirmDialog({
       open: true,
@@ -525,7 +526,6 @@ const AdminDashboard = () => {
       action: 'reject'
     });
   };
-
   const handleConfirmAction = () => {
     const actionText = confirmDialog.action === 'approve' ? 'aprovado' : 'rejeitado';
     toast({
@@ -533,24 +533,20 @@ const AdminDashboard = () => {
       description: `O reconhecimento #${confirmDialog.id} foi ${actionText} com sucesso.`,
       variant: confirmDialog.action === 'reject' ? 'destructive' : 'default'
     });
-
     setConfirmDialog({
       ...confirmDialog,
       open: false
     });
     setIsRecognitionDetailOpen(false);
   };
-
   const handleEditBalance = (user: typeof userBalances[0]) => {
     setSelectedUser(user);
     setIsEditBalanceOpen(true);
   };
-
   const handleEditUserData = (user: typeof userBalances[0]) => {
     setSelectedUser(user);
     setIsEditUserDataOpen(true);
   };
-
   const handleBalanceEditComplete = () => {
     toast({
       title: "Saldo atualizado",
@@ -558,7 +554,6 @@ const AdminDashboard = () => {
     });
     setIsEditBalanceOpen(false);
   };
-
   const handleUserDataEditComplete = () => {
     toast({
       title: "Dados atualizados",
@@ -566,17 +561,14 @@ const AdminDashboard = () => {
     });
     setIsEditUserDataOpen(false);
   };
-
   const handleAddNewReward = () => {
     setEditingReward(null);
     setIsRewardModalOpen(true);
   };
-
   const handleEditRewardConfig = (reward: RewardItem) => {
     setEditingReward(reward);
     setIsRewardModalOpen(true);
   };
-
   const handleSaveReward = (reward: RewardItem) => {
     if (editingReward) {
       setRewards(rewards.map(r => r.id === reward.id ? reward : r));
@@ -585,7 +577,10 @@ const AdminDashboard = () => {
         description: "A recompensa foi atualizada com sucesso."
       });
     } else {
-      const newReward = { ...reward, id: Math.max(...rewards.map(r => r.id)) + 1 };
+      const newReward = {
+        ...reward,
+        id: Math.max(...rewards.map(r => r.id)) + 1
+      };
       setRewards([...rewards, newReward]);
       toast({
         title: "Recompensa criada",
@@ -595,21 +590,22 @@ const AdminDashboard = () => {
     setIsRewardModalOpen(false);
     setEditingReward(null);
   };
-
   const handleToggleRewardStatus = (id: number, currentStatus: boolean) => {
-    setRewards(rewards.map(reward => 
-      reward.id === id ? { ...reward, active: !currentStatus } : reward
-    ));
+    setRewards(rewards.map(reward => reward.id === id ? {
+      ...reward,
+      active: !currentStatus
+    } : reward));
     toast({
       title: currentStatus ? "Recompensa desativada" : "Recompensa ativada",
       description: `A recompensa foi ${currentStatus ? 'desativada' : 'ativada'} com sucesso.`
     });
   };
-
   const getAreaNames = (areas: string[]) => {
-    const areaMap: { [key: string]: string } = {
+    const areaMap: {
+      [key: string]: string;
+    } = {
       tech: "Tecnologia",
-      marketing: "Marketing", 
+      marketing: "Marketing",
       product: "Produto",
       hr: "RH",
       sales: "Vendas",
@@ -660,25 +656,18 @@ const AdminDashboard = () => {
 
   // Função para confirmar a ação da recompensa - atualizada
   const handleConfirmRewardAction = () => {
-    const actionText = rewardConfirmDialog.action === 'approve' 
-      ? 'aprovada' 
-      : rewardConfirmDialog.action === 'reject' 
-      ? 'recusada' 
-      : 'alterada para pendente';
-
+    const actionText = rewardConfirmDialog.action === 'approve' ? 'aprovada' : rewardConfirmDialog.action === 'reject' ? 'recusada' : 'alterada para pendente';
     toast({
       title: `Recompensa ${actionText}`,
       description: `A solicitação de recompensa #${rewardConfirmDialog.id} foi ${actionText} com sucesso.`,
       variant: rewardConfirmDialog.action === 'reject' ? 'destructive' : 'default'
     });
-
     setRewardConfirmDialog({
       ...rewardConfirmDialog,
       open: false
     });
     setIsRewardEvaluationOpen(false);
   };
-
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case "aprovado":
@@ -693,29 +682,18 @@ const AdminDashboard = () => {
   };
 
   // Filtrar usuários com base no termo de pesquisa
-  const filteredUsers = userBalances.filter(user => 
-    user.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    user.department.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredUsers = userBalances.filter(user => user.name.toLowerCase().includes(searchTerm.toLowerCase()) || user.department.toLowerCase().includes(searchTerm.toLowerCase()));
 
   // Filtrar recompensas com base no termo de pesquisa e áreas selecionadas
   const filteredRewards = rewards.filter(reward => {
-    const matchesSearch = reward.name.toLowerCase().includes(rewardSearchTerm.toLowerCase()) ||
-      reward.description.toLowerCase().includes(rewardSearchTerm.toLowerCase());
-    
-    const matchesArea = selectedAreas.length === 0 || 
-      selectedAreas.some(selectedArea => reward.areas.includes(selectedArea));
-    
+    const matchesSearch = reward.name.toLowerCase().includes(rewardSearchTerm.toLowerCase()) || reward.description.toLowerCase().includes(rewardSearchTerm.toLowerCase());
+    const matchesArea = selectedAreas.length === 0 || selectedAreas.some(selectedArea => reward.areas.includes(selectedArea));
     return matchesSearch && matchesArea;
   });
 
   // Handler for area filter
   const handleAreaToggle = (areaId: string) => {
-    setSelectedAreas(prev => 
-      prev.includes(areaId)
-        ? prev.filter(id => id !== areaId)
-        : [...prev, areaId]
-    );
+    setSelectedAreas(prev => prev.includes(areaId) ? prev.filter(id => id !== areaId) : [...prev, areaId]);
   };
 
   // Clear area filters
@@ -727,9 +705,7 @@ const AdminDashboard = () => {
   const approvedCount = recognitionHistory.filter(record => record.status === "aprovado").length;
   const rejectedCount = recognitionHistory.filter(record => record.status === "reprovado").length;
   const pendingCount = recognitionHistory.filter(record => record.status === "pendente").length;
-
-  return (
-    <div className="min-h-screen bg-gray-50">
+  return <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -847,8 +823,7 @@ const AdminDashboard = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {approvalItems.map(item => (
-                      <TableRow key={item.id}>
+                    {approvalItems.map(item => <TableRow key={item.id}>
                         <TableCell>{item.reporter}</TableCell>
                         <TableCell>{item.recipient}</TableCell>
                         <TableCell>{item.category}</TableCell>
@@ -864,8 +839,7 @@ const AdminDashboard = () => {
                             Avaliar
                           </Button>
                         </TableCell>
-                      </TableRow>
-                    ))}
+                      </TableRow>)}
                   </TableBody>
                 </Table>
               </CardContent>
@@ -934,38 +908,28 @@ const AdminDashboard = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {rewardRequestsData.map(reward => (
-                      <TableRow key={reward.id}>
+                    {rewardRequestsData.map(reward => <TableRow key={reward.id}>
                         <TableCell>{reward.user}</TableCell>
                         <TableCell>{reward.title}</TableCell>
                         <TableCell>{reward.value} CofCoins</TableCell>
                         <TableCell>
                           <Badge variant="outline" className={getStatusColor(reward.status)}>
-                            {reward.status === 'aprovado' 
-                              ? 'Aprovado' 
-                              : reward.status === 'pendente' 
-                              ? 'Pendente' 
-                              : 'Reprovado'}
+                            {reward.status === 'aprovado' ? 'Aprovado' : reward.status === 'pendente' ? 'Pendente' : 'Reprovado'}
                           </Badge>
                         </TableCell>
                         <TableCell>{format(reward.requestDate, 'dd/MM/yyyy')}</TableCell>
                         <TableCell>
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => {
-                              if (reward.status === 'pendente') {
-                                handleEvaluateReward(reward);
-                              } else {
-                                handleEditReward(reward);
-                              }
-                            }}
-                          >
+                          <Button variant="ghost" size="sm" onClick={() => {
+                        if (reward.status === 'pendente') {
+                          handleEvaluateReward(reward);
+                        } else {
+                          handleEditReward(reward);
+                        }
+                      }}>
                             {reward.status === 'pendente' ? 'Avaliar' : 'Editar'}
                           </Button>
                         </TableCell>
-                      </TableRow>
-                    ))}
+                      </TableRow>)}
                   </TableBody>
                 </Table>
               </CardContent>
@@ -986,46 +950,26 @@ const AdminDashboard = () => {
                 <div className="flex gap-4 mb-4">
                   <div className="relative flex-1 max-w-sm">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                    <Input 
-                      placeholder="Buscar recompensa..." 
-                      className="pl-10" 
-                      value={rewardSearchTerm} 
-                      onChange={e => setRewardSearchTerm(e.target.value)} 
-                    />
+                    <Input placeholder="Buscar recompensa..." className="pl-10" value={rewardSearchTerm} onChange={e => setRewardSearchTerm(e.target.value)} />
                   </div>
                   
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="outline" className="min-w-[200px] justify-start">
                         <Settings className="h-4 w-4 mr-2" />
-                        {selectedAreas.length > 0 
-                          ? `${selectedAreas.length} área(s) selecionada(s)`
-                          : "Filtrar por áreas"
-                        }
+                        {selectedAreas.length > 0 ? `${selectedAreas.length} área(s) selecionada(s)` : "Filtrar por áreas"}
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="w-56 bg-white">
-                      {areas.map((area) => (
-                        <DropdownMenuCheckboxItem
-                          key={area.id}
-                          checked={selectedAreas.includes(area.id)}
-                          onCheckedChange={() => handleAreaToggle(area.id)}
-                        >
+                      {areas.map(area => <DropdownMenuCheckboxItem key={area.id} checked={selectedAreas.includes(area.id)} onCheckedChange={() => handleAreaToggle(area.id)}>
                           {area.name}
-                        </DropdownMenuCheckboxItem>
-                      ))}
-                      {selectedAreas.length > 0 && (
-                        <>
+                        </DropdownMenuCheckboxItem>)}
+                      {selectedAreas.length > 0 && <>
                           <div className="h-px bg-gray-200 my-1" />
-                          <DropdownMenuCheckboxItem
-                            checked={false}
-                            onCheckedChange={clearAreaFilters}
-                            className="text-red-600"
-                          >
+                          <DropdownMenuCheckboxItem checked={false} onCheckedChange={clearAreaFilters} className="text-red-600">
                             Limpar filtros
                           </DropdownMenuCheckboxItem>
-                        </>
-                      )}
+                        </>}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
@@ -1044,8 +988,7 @@ const AdminDashboard = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredRewards.map(reward => (
-                        <TableRow key={reward.id}>
+                      {filteredRewards.map(reward => <TableRow key={reward.id}>
                           <TableCell>
                             <UITooltip>
                               <TooltipTrigger asChild>
@@ -1109,8 +1052,7 @@ const AdminDashboard = () => {
                               Editar
                             </Button>
                           </TableCell>
-                        </TableRow>
-                      ))}
+                        </TableRow>)}
                     </TableBody>
                   </Table>
                 </TooltipProvider>
@@ -1218,7 +1160,7 @@ const AdminDashboard = () => {
           <TabsContent value="balances" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Saldos de Usuários</CardTitle>
+                <CardTitle>Usuários</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="relative flex-1 max-w-sm">
@@ -1236,8 +1178,7 @@ const AdminDashboard = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredUsers.map(user => (
-                      <TableRow key={user.id}>
+                    {filteredUsers.map(user => <TableRow key={user.id}>
                         <TableCell>{user.name}</TableCell>
                         <TableCell>{user.department}</TableCell>
                         <TableCell>{user.balance} CofCoins</TableCell>
@@ -1253,8 +1194,7 @@ const AdminDashboard = () => {
                             </Button>
                           </div>
                         </TableCell>
-                      </TableRow>
-                    ))}
+                      </TableRow>)}
                   </TableBody>
                 </Table>
               </CardContent>
@@ -1278,8 +1218,7 @@ const AdminDashboard = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {balanceEditHistory.map(record => (
-                      <TableRow key={record.id}>
+                    {balanceEditHistory.map(record => <TableRow key={record.id}>
                         <TableCell>{format(record.date, 'dd/MM/yyyy HH:mm')}</TableCell>
                         <TableCell>{record.admin}</TableCell>
                         <TableCell>{record.recipient}</TableCell>
@@ -1291,8 +1230,7 @@ const AdminDashboard = () => {
                           </span>
                         </TableCell>
                         <TableCell>{record.reason}</TableCell>
-                      </TableRow>
-                    ))}
+                      </TableRow>)}
                   </TableBody>
                 </Table>
               </CardContent>
@@ -1309,39 +1247,12 @@ const AdminDashboard = () => {
       open
     })} title={confirmDialog.action === 'approve' ? "Aprovar Reconhecimento" : "Rejeitar Reconhecimento"} description={`Tem certeza que deseja ${confirmDialog.action === 'approve' ? 'aprovar' : 'rejeitar'} este reconhecimento?`} onConfirm={handleConfirmAction} />
       
-      <RewardEvaluationDialog 
-        open={isRewardEvaluationOpen} 
-        onOpenChange={setIsRewardEvaluationOpen} 
-        reward={selectedReward} 
-        onApprove={handleApproveReward} 
-        onReject={handleRejectReward} 
-        onPending={handleSetPendingReward}
-        isEditing={selectedReward?.status !== 'pendente'}
-      />
+      <RewardEvaluationDialog open={isRewardEvaluationOpen} onOpenChange={setIsRewardEvaluationOpen} reward={selectedReward} onApprove={handleApproveReward} onReject={handleRejectReward} onPending={handleSetPendingReward} isEditing={selectedReward?.status !== 'pendente'} />
 
-      <ConfirmationDialog 
-        open={rewardConfirmDialog.open} 
-        onOpenChange={open => setRewardConfirmDialog({
-          ...rewardConfirmDialog,
-          open
-        })} 
-        title={
-          rewardConfirmDialog.action === 'approve' 
-            ? "Aprovar Recompensa" 
-            : rewardConfirmDialog.action === 'reject' 
-            ? "Recusar Recompensa"
-            : "Alterar para Pendente"
-        } 
-        description={`Tem certeza que deseja ${
-          rewardConfirmDialog.action === 'approve' 
-            ? 'aprovar' 
-            : rewardConfirmDialog.action === 'reject' 
-            ? 'recusar' 
-            : 'alterar para pendente'
-        } esta solicitação de recompensa?`} 
-        onConfirm={handleConfirmRewardAction}
-        variant={rewardConfirmDialog.action === 'reject' ? 'destructive' : 'default'}
-      />
+      <ConfirmationDialog open={rewardConfirmDialog.open} onOpenChange={open => setRewardConfirmDialog({
+      ...rewardConfirmDialog,
+      open
+    })} title={rewardConfirmDialog.action === 'approve' ? "Aprovar Recompensa" : rewardConfirmDialog.action === 'reject' ? "Recusar Recompensa" : "Alterar para Pendente"} description={`Tem certeza que deseja ${rewardConfirmDialog.action === 'approve' ? 'aprovar' : rewardConfirmDialog.action === 'reject' ? 'recusar' : 'alterar para pendente'} esta solicitação de recompensa?`} onConfirm={handleConfirmRewardAction} variant={rewardConfirmDialog.action === 'reject' ? 'destructive' : 'default'} />
       
       <NewRecognitionDialog open={isNewRecognitionOpen} onOpenChange={setIsNewRecognitionOpen} isAdmin={true} />
       
@@ -1350,8 +1261,6 @@ const AdminDashboard = () => {
       <RewardConfigModal open={isRewardModalOpen} onOpenChange={setIsRewardModalOpen} onSave={handleSaveReward} editingReward={editingReward} />
 
       <EditUserDataDialog open={isEditUserDataOpen} onOpenChange={setIsEditUserDataOpen} user={selectedUser} onSave={handleUserDataEditComplete} />
-    </div>
-  );
+    </div>;
 };
-
 export default AdminDashboard;
