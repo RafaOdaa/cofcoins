@@ -348,10 +348,10 @@ const RewardsPage = () => {
                             <TableCell className="text-right">
                               {request.status === "pendente" && (
                                 <Button
-                                  variant="ghost"
+                                  variant="outline"
                                   size="sm"
                                   onClick={(e) => handleDeleteRequest(request.id, e)}
-                                  className="w-full justify-end text-red-600 hover:text-red-700 hover:bg-red-50"
+                                  className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 hover:border-red-300"
                                 >
                                   Cancelar
                                 </Button>

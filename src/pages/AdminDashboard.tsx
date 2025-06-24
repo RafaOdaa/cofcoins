@@ -481,6 +481,11 @@ const areas = [{
 type SortField = 'name' | 'department' | 'balance' | 'totalReceived' | 'totalSent';
 type SortOrder = 'asc' | 'desc';
 
+// New types for other table sorting
+type ApprovalSortField = 'reporter' | 'recipient' | 'category' | 'amount' | 'date';
+type RewardSortField = 'user' | 'title' | 'value' | 'status' | 'date';
+type HistorySortField = 'date' | 'admin' | 'recipient' | 'previousBalance' | 'newBalance' | 'difference';
+
 const AdminDashboard = () => {
   const {
     toast
@@ -507,6 +512,18 @@ const AdminDashboard = () => {
   // State for user sorting
   const [sortField, setSortField] = useState<SortField>('name');
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
+
+  // State for approval sorting
+  const [approvalSortField, setApprovalSortField] = useState<ApprovalSortField>('date');
+  const [approvalSortOrder, setApprovalSortOrder] = useState<SortOrder>('desc');
+
+  // State for reward sorting
+  const [rewardSortField, setRewardSortField] = useState<RewardSortField>('date');
+  const [rewardSortOrder, setRewardSortOrder] = useState<SortOrder>('desc');
+
+  // State for history sorting
+  const [historySortField, setHistorySortField] = useState<HistorySortField>('date');
+  const [historySortOrder, setHistorySortOrder] = useState<SortOrder>('desc');
 
   // Estado para controle do diálogo de ação (aprovar/rejeitar)
   const [confirmDialog, setConfirmDialog] = useState<{
@@ -595,7 +612,7 @@ const AdminDashboard = () => {
     });
     setIsEditBalanceOpen(false);
   };
-  const handleUserDataEditComplete = () => {
+  const handleUserDataEditComplete = (userId: number, department: string, squad: string, approvalLeaders: string[], weeklyCoins: number) => {
     toast({
       title: "Dados atualizados",
       description: "Os dados do usuário foram atualizados com sucesso."
@@ -772,6 +789,148 @@ const AdminDashboard = () => {
     }
   });
 
+  // Sort approvals
+  const sortedApprovals = [...approvalItems].sort((a, b) => {
+    let aValue: string | number | Date;
+    let bValue: string | number | Date;
+
+    switch (approvalSortField) {
+      case 'reporter':
+        aValue = a.reporter;
+        bValue = b.reporter;
+        break;
+      case 'recipient':
+        aValue = a.recipient;
+        bValue = b.recipient;
+        break;
+      case 'category':
+        aValue = a.category;
+        bValue = b.category;
+        break;
+      case 'amount':
+        aValue = a.amount;
+        bValue = b.amount;
+        break;
+      case 'date':
+        aValue = a.date;
+        bValue = b.date;
+        break;
+      default:
+        aValue = a.date;
+        bValue = b.date;
+    }
+
+    if (aValue instanceof Date && bValue instanceof Date) {
+      return approvalSortOrder === 'asc' 
+        ? aValue.getTime() - bValue.getTime()
+        : bValue.getTime() - aValue.getTime();
+    } else if (typeof aValue === 'string' && typeof bValue === 'string') {
+      return approvalSortOrder === 'asc' 
+        ? aValue.localeCompare(bValue)
+        : bValue.localeCompare(aValue);
+    } else {
+      return approvalSortOrder === 'asc' 
+        ? (aValue as number) - (bValue as number)
+        : (bValue as number) - (aValue as number);
+    }
+  });
+
+  // Sort rewards
+  const sortedRewards = [...rewardRequestsData].sort((a, b) => {
+    let aValue: string | number | Date;
+    let bValue: string | number | Date;
+
+    switch (rewardSortField) {
+      case 'user':
+        aValue = a.user;
+        bValue = b.user;
+        break;
+      case 'title':
+        aValue = a.title;
+        bValue = b.title;
+        break;
+      case 'value':
+        aValue = a.value;
+        bValue = b.value;
+        break;
+      case 'status':
+        aValue = a.status;
+        bValue = b.status;
+        break;
+      case 'date':
+        aValue = a.requestDate;
+        bValue = b.requestDate;
+        break;
+      default:
+        aValue = a.requestDate;
+        bValue = b.requestDate;
+    }
+
+    if (aValue instanceof Date && bValue instanceof Date) {
+      return rewardSortOrder === 'asc' 
+        ? aValue.getTime() - bValue.getTime()
+        : bValue.getTime() - aValue.getTime();
+    } else if (typeof aValue === 'string' && typeof bValue === 'string') {
+      return rewardSortOrder === 'asc' 
+        ? aValue.localeCompare(bValue)
+        : bValue.localeCompare(aValue);
+    } else {
+      return rewardSortOrder === 'asc' 
+        ? (aValue as number) - (bValue as number)
+        : (bValue as number) - (aValue as number);
+    }
+  });
+
+  // Sort balance edit history
+  const sortedHistory = [...balanceEditHistory].sort((a, b) => {
+    let aValue: string | number | Date;
+    let bValue: string | number | Date;
+
+    switch (historySortField) {
+      case 'date':
+        aValue = a.date;
+        bValue = b.date;
+        break;
+      case 'admin':
+        aValue = a.admin;
+        bValue = b.admin;
+        break;
+      case 'recipient':
+        aValue = a.recipient;
+        bValue = b.recipient;
+        break;
+      case 'previousBalance':
+        aValue = a.previousBalance;
+        bValue = b.previousBalance;
+        break;
+      case 'newBalance':
+        aValue = a.newBalance;
+        bValue = b.newBalance;
+        break;
+      case 'difference':
+        aValue = a.difference;
+        bValue = b.difference;
+        break;
+      default:
+        aValue = a.date;
+        bValue = b.date;
+    }
+
+    if (aValue instanceof Date && bValue instanceof Date) {
+      return historySortOrder === 'asc' 
+        ? aValue.getTime() - bValue.getTime()
+        : bValue.getTime() - aValue.getTime();
+    } else if (typeof aValue === 'string' && typeof bValue === 'string') {
+      return historySortOrder === 'asc' 
+        ? aValue.localeCompare(bValue)
+        : bValue.localeCompare(aValue);
+    } else {
+      return historySortOrder === 'asc' 
+        ? (aValue as number) - (bValue as number)
+        : (bValue as number) - (aValue as number);
+    }
+  });
+
   // Filter rewards based on search term and selected areas
   const filteredRewards = rewards.filter(reward => {
     const matchesSearch = reward.name.toLowerCase().includes(rewardSearchTerm.toLowerCase()) || reward.description.toLowerCase().includes(rewardSearchTerm.toLowerCase());
@@ -799,7 +958,7 @@ const AdminDashboard = () => {
     setSelectedUserAreas([]);
   };
 
-  // Handle sorting
+  // Handle sorting for users
   const handleSort = (field: SortField) => {
     if (sortField === field) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
@@ -809,16 +968,65 @@ const AdminDashboard = () => {
     }
   };
 
-  // Render sort icon
+  // Handle sorting for approvals
+  const handleApprovalSort = (field: ApprovalSortField) => {
+    if (approvalSortField === field) {
+      setApprovalSortOrder(approvalSortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setApprovalSortField(field);
+      setApprovalSortOrder('asc');
+    }
+  };
+
+  // Handle sorting for rewards
+  const handleRewardSort = (field: RewardSortField) => {
+    if (rewardSortField === field) {
+      setRewardSortOrder(rewardSortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setRewardSortField(field);
+      setRewardSortOrder('asc');
+    }
+  };
+
+  // Handle sorting for history
+  const handleHistorySort = (field: HistorySortField) => {
+    if (historySortField === field) {
+      setHistorySortOrder(historySortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setHistorySortField(field);
+      setHistorySortOrder('asc');
+    }
+  };
+
+  // Render sort icon for users
   const renderSortIcon = (field: SortField) => {
     if (sortField !== field) return null;
     return sortOrder === 'asc' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />;
+  };
+
+  // Render sort icon for approvals
+  const renderApprovalSortIcon = (field: ApprovalSortField) => {
+    if (approvalSortField !== field) return null;
+    return approvalSortOrder === 'asc' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />;
+  };
+
+  // Render sort icon for rewards
+  const renderRewardSortIcon = (field: RewardSortField) => {
+    if (rewardSortField !== field) return null;
+    return rewardSortOrder === 'asc' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />;
+  };
+
+  // Render sort icon for history
+  const renderHistorySortIcon = (field: HistorySortField) => {
+    if (historySortField !== field) return null;
+    return historySortOrder === 'asc' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />;
   };
 
   // Contar estatísticas para os cards
   const approvedCount = recognitionHistory.filter(record => record.status === "aprovado").length;
   const rejectedCount = recognitionHistory.filter(record => record.status === "reprovado").length;
   const pendingCount = recognitionHistory.filter(record => record.status === "pendente").length;
+  
   return <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white shadow-sm">
@@ -927,17 +1135,57 @@ const AdminDashboard = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Solicitante</TableHead>
-                      <TableHead>Destinatário</TableHead>
-                      <TableHead>Categoria</TableHead>
-                      <TableHead>Valor</TableHead>
-                      <TableHead>Data</TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-gray-50"
+                        onClick={() => handleApprovalSort('reporter')}
+                      >
+                        <div className="flex items-center">
+                          Solicitante
+                          {renderApprovalSortIcon('reporter')}
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-gray-50"
+                        onClick={() => handleApprovalSort('recipient')}
+                      >
+                        <div className="flex items-center">
+                          Destinatário
+                          {renderApprovalSortIcon('recipient')}
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-gray-50"
+                        onClick={() => handleApprovalSort('category')}
+                      >
+                        <div className="flex items-center">
+                          Categoria
+                          {renderApprovalSortIcon('category')}
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-gray-50"
+                        onClick={() => handleApprovalSort('amount')}
+                      >
+                        <div className="flex items-center">
+                          Valor
+                          {renderApprovalSortIcon('amount')}
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-gray-50"
+                        onClick={() => handleApprovalSort('date')}
+                      >
+                        <div className="flex items-center">
+                          Data
+                          {renderApprovalSortIcon('date')}
+                        </div>
+                      </TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead className="text-right">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {approvalItems.map(item => <TableRow key={item.id}>
+                    {sortedApprovals.map(item => <TableRow key={item.id}>
                         <TableCell>{item.reporter}</TableCell>
                         <TableCell>{item.recipient}</TableCell>
                         <TableCell>{item.category}</TableCell>
@@ -1013,16 +1261,56 @@ const AdminDashboard = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Usuário</TableHead>
-                      <TableHead>Recompensa</TableHead>
-                      <TableHead>Valor</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Data</TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-gray-50"
+                        onClick={() => handleRewardSort('user')}
+                      >
+                        <div className="flex items-center">
+                          Usuário
+                          {renderRewardSortIcon('user')}
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-gray-50"
+                        onClick={() => handleRewardSort('title')}
+                      >
+                        <div className="flex items-center">
+                          Recompensa
+                          {renderRewardSortIcon('title')}
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-gray-50"
+                        onClick={() => handleRewardSort('value')}
+                      >
+                        <div className="flex items-center">
+                          Valor
+                          {renderRewardSortIcon('value')}
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-gray-50"
+                        onClick={() => handleRewardSort('status')}
+                      >
+                        <div className="flex items-center">
+                          Status
+                          {renderRewardSortIcon('status')}
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-gray-50"
+                        onClick={() => handleRewardSort('date')}
+                      >
+                        <div className="flex items-center">
+                          Data
+                          {renderRewardSortIcon('date')}
+                        </div>
+                      </TableHead>
                       <TableHead>Ações</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {rewardRequestsData.map(reward => <TableRow key={reward.id}>
+                    {sortedRewards.map(reward => <TableRow key={reward.id}>
                         <TableCell>{reward.user}</TableCell>
                         <TableCell>{reward.title}</TableCell>
                         <TableCell>{reward.value} CofCoins</TableCell>
@@ -1388,17 +1676,65 @@ const AdminDashboard = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Data</TableHead>
-                      <TableHead>Admin</TableHead>
-                      <TableHead>Usuário</TableHead>
-                      <TableHead>Saldo Anterior</TableHead>
-                      <TableHead>Novo Saldo</TableHead>
-                      <TableHead>Diferença</TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-gray-50"
+                        onClick={() => handleHistorySort('date')}
+                      >
+                        <div className="flex items-center">
+                          Data
+                          {renderHistorySortIcon('date')}
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-gray-50"
+                        onClick={() => handleHistorySort('admin')}
+                      >
+                        <div className="flex items-center">
+                          Admin
+                          {renderHistorySortIcon('admin')}
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-gray-50"
+                        onClick={() => handleHistorySort('recipient')}
+                      >
+                        <div className="flex items-center">
+                          Usuário
+                          {renderHistorySortIcon('recipient')}
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-gray-50"
+                        onClick={() => handleHistorySort('previousBalance')}
+                      >
+                        <div className="flex items-center">
+                          Saldo Anterior
+                          {renderHistorySortIcon('previousBalance')}
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-gray-50"
+                        onClick={() => handleHistorySort('newBalance')}
+                      >
+                        <div className="flex items-center">
+                          Novo Saldo
+                          {renderHistorySortIcon('newBalance')}
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer select-none hover:bg-gray-50"
+                        onClick={() => handleHistorySort('difference')}
+                      >
+                        <div className="flex items-center">
+                          Diferença
+                          {renderHistorySortIcon('difference')}
+                        </div>
+                      </TableHead>
                       <TableHead>Motivo</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {balanceEditHistory.map(record => <TableRow key={record.id}>
+                    {sortedHistory.map(record => <TableRow key={record.id}>
                         <TableCell>{format(record.date, 'dd/MM/yyyy HH:mm')}</TableCell>
                         <TableCell>{record.admin}</TableCell>
                         <TableCell>{record.recipient}</TableCell>
