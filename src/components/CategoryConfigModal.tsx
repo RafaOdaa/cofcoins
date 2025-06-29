@@ -9,11 +9,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { 
   Award, Star, CheckCircle, Users, BookOpen, Activity, Gift, Heart, Target, Zap,
   Trophy, Medal, Crown, Gem, Sparkles, Shield, Rocket, Coffee, Cake, Pizza,
-  GameController2, Music, Camera, Palette, Brush, Lightbulb, Brain, Glasses,
-  Headphones, Microphone, Watch, Smartphone, Laptop, Car, Plane, MapPin,
+  Gamepad2, Music, Camera, Palette, Brush, Lightbulb, Brain, Glasses,
+  Headphones, Mic, Watch, Smartphone, Laptop, Car, Plane, MapPin,
   Home, Building, Store, ShoppingCart, CreditCard, DollarSign, TrendingUp,
   Calendar, Clock, Timer, Bell, Flag, Mountain, Sun, Moon, Umbrella,
-  Flower, Tree, Leaf, Apple, Grape, Cherry, IceCream, Donut
+  Flower, Trees, Leaf, Apple, Grape, Cherry, IceCream, Donut
 } from 'lucide-react';
 
 export interface CategoryItem {
@@ -72,11 +72,11 @@ const iconOptions = [
   { value: 'Donut', label: 'Rosquinha', icon: Donut, color: 'text-amber-400' },
 
   // Entertainment & Fun
-  { value: 'GameController2', label: 'Controle', icon: GameController2, color: 'text-indigo-500' },
+  { value: 'Gamepad2', label: 'Controle', icon: Gamepad2, color: 'text-indigo-500' },
   { value: 'Music', label: 'Música', icon: Music, color: 'text-purple-500' },
   { value: 'Camera', label: 'Câmera', icon: Camera, color: 'text-gray-700' },
   { value: 'Headphones', label: 'Fone', icon: Headphones, color: 'text-gray-800' },
-  { value: 'Microphone', label: 'Microfone', icon: Microphone, color: 'text-gray-600' },
+  { value: 'Mic', label: 'Microfone', icon: Mic, color: 'text-gray-600' },
 
   // Creative & Art
   { value: 'Palette', label: 'Paleta', icon: Palette, color: 'text-rainbow' },
@@ -111,7 +111,7 @@ const iconOptions = [
 
   // Nature & Environment
   { value: 'Flower', label: 'Flor', icon: Flower, color: 'text-pink-400' },
-  { value: 'Tree', label: 'Árvore', icon: Tree, color: 'text-green-600' },
+  { value: 'Trees', label: 'Árvore', icon: Trees, color: 'text-green-600' },
   { value: 'Leaf', label: 'Folha', icon: Leaf, color: 'text-green-500' },
 
   // Special & Premium
@@ -135,7 +135,6 @@ const CategoryConfigModal = ({ open, onOpenChange, onSave, editingCategory }: Ca
   const [description, setDescription] = useState("");
   const [selectedIcon, setSelectedIcon] = useState("Award");
   const [selectedAreas, setSelectedAreas] = useState<string[]>([]);
-  const [active, setActive] = useState(true);
   const [showIconSelector, setShowIconSelector] = useState(false);
 
   useEffect(() => {
@@ -144,13 +143,11 @@ const CategoryConfigModal = ({ open, onOpenChange, onSave, editingCategory }: Ca
       setDescription(editingCategory.description);
       setSelectedIcon(editingCategory.icon);
       setSelectedAreas(editingCategory.areas);
-      setActive(editingCategory.active);
     } else {
       setTitle("");
       setDescription("");
       setSelectedIcon("Award");
       setSelectedAreas([]);
-      setActive(true);
     }
   }, [editingCategory, open]);
 
@@ -161,7 +158,7 @@ const CategoryConfigModal = ({ open, onOpenChange, onSave, editingCategory }: Ca
       description,
       icon: selectedIcon,
       areas: selectedAreas,
-      active
+      active: true
     };
     onSave(category);
     onOpenChange(false);
@@ -273,17 +270,6 @@ const CategoryConfigModal = ({ open, onOpenChange, onSave, editingCategory }: Ca
                 </div>
               ))}
             </div>
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="active"
-              checked={active}
-              onCheckedChange={(checked) => setActive(checked as boolean)}
-            />
-            <Label htmlFor="active" className="text-sm font-normal">
-              Categoria ativa
-            </Label>
           </div>
 
           <div className="flex justify-end space-x-2 pt-4">
