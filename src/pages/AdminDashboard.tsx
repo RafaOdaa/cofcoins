@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -35,6 +36,7 @@ import AnimatedCoinBalance from '@/components/AnimatedCoinBalance';
 import EditUserDataDialog from '@/components/EditUserDataDialog';
 import EditUserBalanceDialog from '@/components/EditUserBalanceDialog';
 import RewardConfigModal from '@/components/RewardConfigModal';
+import CategoryConfigModal from '@/components/CategoryConfigModal';
 
 // Mock data for areas
 const areas = [
@@ -57,6 +59,8 @@ const mockUsers = [
     area: "Desenvolvimento",
     coins: 1200,
     isAdmin: false,
+    totalReceived: 2500,
+    totalSent: 1300
   },
   {
     id: 2,
@@ -65,6 +69,8 @@ const mockUsers = [
     area: "Marketing",
     coins: 800,
     isAdmin: true,
+    totalReceived: 1800,
+    totalSent: 1000
   },
   {
     id: 3,
@@ -73,6 +79,8 @@ const mockUsers = [
     area: "Vendas",
     coins: 500,
     isAdmin: false,
+    totalReceived: 1200,
+    totalSent: 700
   }
 ];
 
@@ -157,14 +165,34 @@ const AdminDashboard = () => {
   const [selectedUser, setSelectedUser] = useState<typeof mockUsers[0] | null>(null);
   const [editUserDataOpen, setEditUserDataOpen] = useState(false);
   const [editUserBalanceOpen, setEditUserBalanceOpen] = useState(false);
+  const [userSearchTerm, setUserSearchTerm] = useState('');
+  const [userAreaFilter, setUserAreaFilter] = useState<string[]>([]);
+  const [userSortConfig, setUserSortConfig] = useState<{
+    key: string;
+    direction: 'asc' | 'desc';
+  } | null>(null);
+
+  // Approvals state
+  const [approvalSortConfig, setApprovalSortConfig] = useState<{
+    key: string;
+    direction: 'asc' | 'desc';
+  } | null>(null);
 
   // Rewards state
   const [rewards, setRewards] = useState(mockRewards);
   const [rewardConfigOpen, setRewardConfigOpen] = useState(false);
   const [selectedReward, setSelectedReward] = useState<typeof mockRewards[0] | null>(null);
+  const [rewardSearchTerm, setRewardSearchTerm] = useState('');
+  const [rewardAreaFilter, setRewardAreaFilter] = useState<string[]>([]);
+  const [rewardSortConfig, setRewardSortConfig] = useState<{
+    key: string;
+    direction: 'asc' | 'desc';
+  } | null>(null);
 
   // Categories state
   const [categories, setCategories] = useState(mockCategories);
+  const [categoryConfigOpen, setCategoryConfigOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<typeof mockCategories[0] | null>(null);
   const [categorySearchTerm, setCategorySearchTerm] = useState('');
   const [categoryAreaFilter, setCategoryAreaFilter] = useState<string[]>([]);
   const [categorySortConfig, setCategorySortConfig] = useState<{
@@ -183,6 +211,23 @@ const AdminDashboard = () => {
     setEditUserBalanceOpen(true);
   };
 
+  const handleUserSort = (key: string) => {
+    let direction: 'asc' | 'desc' = 'asc';
+    if (userSortConfig && userSortConfig.key === key && userSortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setUserSortConfig({ key, direction });
+  };
+
+  // Approvals handlers
+  const handleApprovalSort = (key: string) => {
+    let direction: 'asc' | 'desc' = 'asc';
+    if (approvalSortConfig && approvalSortConfig.key === key && approvalSortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setApprovalSortConfig({ key, direction });
+  };
+
   // Rewards tab handlers
   const openRewardConfig = (reward?: typeof mockRewards[0]) => {
     if (reward) {
@@ -193,7 +238,24 @@ const AdminDashboard = () => {
     setRewardConfigOpen(true);
   };
 
+  const handleRewardSort = (key: string) => {
+    let direction: 'asc' | 'desc' = 'asc';
+    if (rewardSortConfig && rewardSortConfig.key === key && rewardSortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setRewardSortConfig({ key, direction });
+  };
+
   // Categories handlers
+  const openCategoryConfig = (category?: typeof mockCategories[0]) => {
+    if (category) {
+      setSelectedCategory(category);
+    } else {
+      setSelectedCategory(null);
+    }
+    setCategoryConfigOpen(true);
+  };
+
   const handleCategorySort = (key: string) => {
     let direction: 'asc' | 'desc' = 'asc';
     if (categorySortConfig && categorySortConfig.key === key && categorySortConfig.direction === 'asc') {
@@ -210,6 +272,94 @@ const AdminDashboard = () => {
       <ArrowUp className="ml-2 h-4 w-4" /> : 
       <ArrowDown className="ml-2 h-4 w-4" />;
   };
+
+  // Filter and sort users
+  const filteredAndSortedUsers = React.useMemo(() => {
+    let filtered = users.filter(user => {
+      const matchesSearch = user.name.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
+                           user.email.toLowerCase().includes(userSearchTerm.toLowerCase());
+      
+      const matchesArea = userAreaFilter.length === 0 || 
+                         userAreaFilter.includes(user.area) || 
+                         userAreaFilter.includes("Todas as áreas");
+      
+      return matchesSearch && matchesArea;
+    });
+
+    if (userSortConfig) {
+      filtered.sort((a, b) => {
+        let aValue = a[userSortConfig.key as keyof typeof a];
+        let bValue = b[userSortConfig.key as keyof typeof b];
+        
+        if (typeof aValue === 'string') aValue = aValue.toLowerCase();
+        if (typeof bValue === 'string') bValue = bValue.toLowerCase();
+        
+        if (aValue < bValue) return userSortConfig.direction === 'asc' ? -1 : 1;
+        if (aValue > bValue) return userSortConfig.direction === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+
+    return filtered;
+  }, [users, userSearchTerm, userAreaFilter, userSortConfig]);
+
+  // Filter and sort approvals
+  const filteredAndSortedApprovals = React.useMemo(() => {
+    let filtered = [...mockApprovals];
+
+    if (approvalSortConfig) {
+      filtered.sort((a, b) => {
+        let aValue = a[approvalSortConfig.key as keyof typeof a];
+        let bValue = b[approvalSortConfig.key as keyof typeof b];
+        
+        if (aValue instanceof Date && bValue instanceof Date) {
+          return approvalSortConfig.direction === 'asc' ? 
+            aValue.getTime() - bValue.getTime() : 
+            bValue.getTime() - aValue.getTime();
+        }
+        
+        if (typeof aValue === 'string') aValue = aValue.toLowerCase();
+        if (typeof bValue === 'string') bValue = bValue.toLowerCase();
+        
+        if (aValue < bValue) return approvalSortConfig.direction === 'asc' ? -1 : 1;
+        if (aValue > bValue) return approvalSortConfig.direction === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+
+    return filtered;
+  }, [approvalSortConfig]);
+
+  // Filter and sort rewards
+  const filteredAndSortedRewards = React.useMemo(() => {
+    let filtered = rewards.filter(reward => {
+      const matchesSearch = reward.title.toLowerCase().includes(rewardSearchTerm.toLowerCase()) ||
+                           reward.description.toLowerCase().includes(rewardSearchTerm.toLowerCase());
+      
+      const matchesArea = rewardAreaFilter.length === 0 || 
+                         rewardAreaFilter.some(area => 
+                           reward.areas.includes(area) || reward.areas.includes("Todas as áreas")
+                         );
+      
+      return matchesSearch && matchesArea;
+    });
+
+    if (rewardSortConfig) {
+      filtered.sort((a, b) => {
+        let aValue = a[rewardSortConfig.key as keyof typeof a];
+        let bValue = b[rewardSortConfig.key as keyof typeof b];
+        
+        if (typeof aValue === 'string') aValue = aValue.toLowerCase();
+        if (typeof bValue === 'string') bValue = bValue.toLowerCase();
+        
+        if (aValue < bValue) return rewardSortConfig.direction === 'asc' ? -1 : 1;
+        if (aValue > bValue) return rewardSortConfig.direction === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+
+    return filtered;
+  }, [rewards, rewardSearchTerm, rewardAreaFilter, rewardSortConfig]);
 
   // Filter and sort categories
   const filteredAndSortedCategories = React.useMemo(() => {
@@ -268,7 +418,6 @@ const AdminDashboard = () => {
                 <span className="hidden sm:inline">Home</span>
               </Button>
               
-              {/* User Menu */}
               <UserMenu userName="Admin" isAdmin={true} />
             </div>
           </div>
@@ -302,25 +451,143 @@ const AdminDashboard = () => {
                 <CardDescription>Gerencie os usuários da plataforma</CardDescription>
               </CardHeader>
               <CardContent>
+                <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                  <div className="flex-1">
+                    <div className="relative">
+                      <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Buscar por nome ou email..."
+                        value={userSearchTerm}
+                        onChange={(e) => setUserSearchTerm(e.target.value)}
+                        className="pl-8"
+                      />
+                    </div>
+                  </div>
+                  
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full sm:w-[200px] justify-between"
+                      >
+                        {userAreaFilter.length === 0
+                          ? "Todas as áreas"
+                          : `${userAreaFilter.length} área(s) selecionada(s)`}
+                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[200px] p-0">
+                      <Command>
+                        <CommandInput placeholder="Buscar área..." />
+                        <CommandList>
+                          <CommandEmpty>Nenhuma área encontrada.</CommandEmpty>
+                          <CommandGroup>
+                            {areas.map((area) => (
+                              <CommandItem
+                                key={area}
+                                onSelect={() => {
+                                  setUserAreaFilter(prev =>
+                                    prev.includes(area)
+                                      ? prev.filter(item => item !== area)
+                                      : [...prev, area]
+                                  );
+                                }}
+                              >
+                                <div className="flex items-center space-x-2">
+                                  <Checkbox
+                                    checked={userAreaFilter.includes(area)}
+                                    onChange={() => {}}
+                                  />
+                                  <span>{area}</span>
+                                </div>
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+
                 <div className="rounded-md border">
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Nome</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Área</TableHead>
-                        <TableHead>Coins</TableHead>
-                        <TableHead>Admin</TableHead>
+                        <TableHead 
+                          className="cursor-pointer hover:bg-gray-50 select-none"
+                          onClick={() => handleUserSort('name')}
+                        >
+                          <div className="flex items-center">
+                            Nome
+                            {getSortIcon('name', userSortConfig)}
+                          </div>
+                        </TableHead>
+                        <TableHead 
+                          className="cursor-pointer hover:bg-gray-50 select-none"
+                          onClick={() => handleUserSort('email')}
+                        >
+                          <div className="flex items-center">
+                            Email
+                            {getSortIcon('email', userSortConfig)}
+                          </div>
+                        </TableHead>
+                        <TableHead 
+                          className="cursor-pointer hover:bg-gray-50 select-none"
+                          onClick={() => handleUserSort('area')}
+                        >
+                          <div className="flex items-center">
+                            Área
+                            {getSortIcon('area', userSortConfig)}
+                          </div>
+                        </TableHead>
+                        <TableHead 
+                          className="cursor-pointer hover:bg-gray-50 select-none"
+                          onClick={() => handleUserSort('coins')}
+                        >
+                          <div className="flex items-center">
+                            Coins
+                            {getSortIcon('coins', userSortConfig)}
+                          </div>
+                        </TableHead>
+                        <TableHead 
+                          className="cursor-pointer hover:bg-gray-50 select-none"
+                          onClick={() => handleUserSort('totalReceived')}
+                        >
+                          <div className="flex items-center">
+                            Total Recebido
+                            {getSortIcon('totalReceived', userSortConfig)}
+                          </div>
+                        </TableHead>
+                        <TableHead 
+                          className="cursor-pointer hover:bg-gray-50 select-none"
+                          onClick={() => handleUserSort('totalSent')}
+                        >
+                          <div className="flex items-center">
+                            Total Enviado
+                            {getSortIcon('totalSent', userSortConfig)}
+                          </div>
+                        </TableHead>
+                        <TableHead 
+                          className="cursor-pointer hover:bg-gray-50 select-none"
+                          onClick={() => handleUserSort('isAdmin')}
+                        >
+                          <div className="flex items-center">
+                            Admin
+                            {getSortIcon('isAdmin', userSortConfig)}
+                          </div>
+                        </TableHead>
                         <TableHead className="text-right">Ações</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {users.map(user => (
+                      {filteredAndSortedUsers.map(user => (
                         <TableRow key={user.id} className="hover:bg-gray-50">
                           <TableCell>{user.name}</TableCell>
                           <TableCell>{user.email}</TableCell>
                           <TableCell>{user.area}</TableCell>
                           <TableCell>{user.coins}</TableCell>
+                          <TableCell>{user.totalReceived}</TableCell>
+                          <TableCell>{user.totalSent}</TableCell>
                           <TableCell>{user.isAdmin ? "Sim" : "Não"}</TableCell>
                           <TableCell className="text-right space-x-2">
                             <Button size="sm" variant="outline" onClick={() => openEditUserData(user)}>Editar</Button>
@@ -347,15 +614,55 @@ const AdminDashboard = () => {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Usuário</TableHead>
-                        <TableHead>Tipo</TableHead>
-                        <TableHead>Descrição</TableHead>
-                        <TableHead>Data</TableHead>
-                        <TableHead>Status</TableHead>
+                        <TableHead 
+                          className="cursor-pointer hover:bg-gray-50 select-none"
+                          onClick={() => handleApprovalSort('user')}
+                        >
+                          <div className="flex items-center">
+                            Usuário
+                            {getSortIcon('user', approvalSortConfig)}
+                          </div>
+                        </TableHead>
+                        <TableHead 
+                          className="cursor-pointer hover:bg-gray-50 select-none"
+                          onClick={() => handleApprovalSort('type')}
+                        >
+                          <div className="flex items-center">
+                            Tipo
+                            {getSortIcon('type', approvalSortConfig)}
+                          </div>
+                        </TableHead>
+                        <TableHead 
+                          className="cursor-pointer hover:bg-gray-50 select-none"
+                          onClick={() => handleApprovalSort('description')}
+                        >
+                          <div className="flex items-center">
+                            Descrição
+                            {getSortIcon('description', approvalSortConfig)}
+                          </div>
+                        </TableHead>
+                        <TableHead 
+                          className="cursor-pointer hover:bg-gray-50 select-none"
+                          onClick={() => handleApprovalSort('date')}
+                        >
+                          <div className="flex items-center">
+                            Data
+                            {getSortIcon('date', approvalSortConfig)}
+                          </div>
+                        </TableHead>
+                        <TableHead 
+                          className="cursor-pointer hover:bg-gray-50 select-none"
+                          onClick={() => handleApprovalSort('status')}
+                        >
+                          <div className="flex items-center">
+                            Status
+                            {getSortIcon('status', approvalSortConfig)}
+                          </div>
+                        </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {mockApprovals.map(approval => (
+                      {filteredAndSortedApprovals.map(approval => (
                         <TableRow key={approval.id} className="hover:bg-gray-50">
                           <TableCell>{approval.user}</TableCell>
                           <TableCell>{approval.type}</TableCell>
@@ -392,19 +699,101 @@ const AdminDashboard = () => {
                 </div>
               </CardHeader>
               <CardContent>
+                <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                  <div className="flex-1">
+                    <div className="relative">
+                      <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Buscar por nome ou descrição..."
+                        value={rewardSearchTerm}
+                        onChange={(e) => setRewardSearchTerm(e.target.value)}
+                        className="pl-8"
+                      />
+                    </div>
+                  </div>
+                  
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full sm:w-[200px] justify-between"
+                      >
+                        {rewardAreaFilter.length === 0
+                          ? "Todas as áreas"
+                          : `${rewardAreaFilter.length} área(s) selecionada(s)`}
+                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[200px] p-0">
+                      <Command>
+                        <CommandInput placeholder="Buscar área..." />
+                        <CommandList>
+                          <CommandEmpty>Nenhuma área encontrada.</CommandEmpty>
+                          <CommandGroup>
+                            {areas.map((area) => (
+                              <CommandItem
+                                key={area}
+                                onSelect={() => {
+                                  setRewardAreaFilter(prev =>
+                                    prev.includes(area)
+                                      ? prev.filter(item => item !== area)
+                                      : [...prev, area]
+                                  );
+                                }}
+                              >
+                                <div className="flex items-center space-x-2">
+                                  <Checkbox
+                                    checked={rewardAreaFilter.includes(area)}
+                                    onChange={() => {}}
+                                  />
+                                  <span>{area}</span>
+                                </div>
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+
                 <div className="rounded-md border">
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Título</TableHead>
-                        <TableHead>Descrição</TableHead>
-                        <TableHead>Valor</TableHead>
+                        <TableHead 
+                          className="cursor-pointer hover:bg-gray-50 select-none"
+                          onClick={() => handleRewardSort('title')}
+                        >
+                          <div className="flex items-center">
+                            Título
+                            {getSortIcon('title', rewardSortConfig)}
+                          </div>
+                        </TableHead>
+                        <TableHead 
+                          className="cursor-pointer hover:bg-gray-50 select-none"
+                          onClick={() => handleRewardSort('description')}
+                        >
+                          <div className="flex items-center">
+                            Descrição
+                            {getSortIcon('description', rewardSortConfig)}
+                          </div>
+                        </TableHead>
+                        <TableHead 
+                          className="cursor-pointer hover:bg-gray-50 select-none"
+                          onClick={() => handleRewardSort('value')}
+                        >
+                          <div className="flex items-center">
+                            Valor
+                            {getSortIcon('value', rewardSortConfig)}
+                          </div>
+                        </TableHead>
                         <TableHead>Áreas</TableHead>
                         <TableHead className="text-right">Ações</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {rewards.map(reward => (
+                      {filteredAndSortedRewards.map(reward => (
                         <TableRow key={reward.id} className="hover:bg-gray-50">
                           <TableCell>{reward.title}</TableCell>
                           <TableCell>{reward.description}</TableCell>
@@ -455,7 +844,7 @@ const AdminDashboard = () => {
                       Gerencie as categorias de reconhecimento disponíveis na plataforma
                     </CardDescription>
                   </div>
-                  <Button className="bg-cofcoin-purple hover:bg-cofcoin-purple-dark">
+                  <Button className="bg-cofcoin-purple hover:bg-cofcoin-purple-dark" onClick={() => openCategoryConfig()}>
                     <Plus className="mr-2 h-4 w-4" />
                     Adicionar Categoria
                   </Button>
@@ -588,7 +977,7 @@ const AdminDashboard = () => {
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end" className="w-40">
-                                  <DropdownMenuItem className="cursor-pointer">
+                                  <DropdownMenuItem className="cursor-pointer" onClick={() => openCategoryConfig(category)}>
                                     <Edit className="mr-2 h-4 w-4" />
                                     Editar
                                   </DropdownMenuItem>
@@ -619,7 +1008,6 @@ const AdminDashboard = () => {
                 <CardDescription>Visualize o histórico de alterações de saldo dos usuários</CardDescription>
               </CardHeader>
               <CardContent>
-                {/* Placeholder content */}
                 <p className="text-gray-600">Em desenvolvimento...</p>
               </CardContent>
             </Card>
@@ -633,7 +1021,6 @@ const AdminDashboard = () => {
                 <CardDescription>Visualize dados e métricas da plataforma</CardDescription>
               </CardHeader>
               <CardContent>
-                {/* Placeholder content */}
                 <p className="text-gray-600">Em desenvolvimento...</p>
               </CardContent>
             </Card>
@@ -647,7 +1034,7 @@ const AdminDashboard = () => {
         user={selectedUser}
         onOpenChange={setEditUserDataOpen}
         onSave={(updatedUser) => {
-          setUsers(prev => prev.map(u => u.id === updatedUser.id ? updatedUser : u));
+          setUsers(prev => prev.map(u => u.id === updatedUser.id ? { ...u, ...updatedUser } : u));
           setEditUserDataOpen(false);
           toast({
             title: "Usuário atualizado",
@@ -662,7 +1049,7 @@ const AdminDashboard = () => {
         user={selectedUser}
         onOpenChange={setEditUserBalanceOpen}
         onSave={(updatedUser) => {
-          setUsers(prev => prev.map(u => u.id === updatedUser.id ? updatedUser : u));
+          setUsers(prev => prev.map(u => u.id === updatedUser.id ? { ...u, ...updatedUser } : u));
           setEditUserBalanceOpen(false);
           toast({
             title: "Saldo atualizado",
@@ -674,11 +1061,10 @@ const AdminDashboard = () => {
       {/* Reward Config Modal */}
       <RewardConfigModal
         open={rewardConfigOpen}
-        reward={selectedReward}
         onOpenChange={setRewardConfigOpen}
         onSave={(updatedReward) => {
           if (updatedReward.id) {
-            setRewards(prev => prev.map(r => r.id === updatedReward.id ? updatedReward : r));
+            setRewards(prev => prev.map(r => r.id === updatedReward.id ? { ...r, ...updatedReward } : r));
           } else {
             const newReward = { ...updatedReward, id: rewards.length > 0 ? Math.max(...rewards.map(r => r.id)) + 1 : 1 };
             setRewards(prev => [...prev, newReward]);
@@ -686,7 +1072,27 @@ const AdminDashboard = () => {
           setRewardConfigOpen(false);
           toast({
             title: "Recompensa salva",
-            description: `Recompensa ${updatedReward.title} foi salva com sucesso.`,
+            description: `Recompensa ${updatedReward.name} foi salva com sucesso.`,
+          });
+        }}
+      />
+
+      {/* Category Config Modal */}
+      <CategoryConfigModal
+        open={categoryConfigOpen}
+        category={selectedCategory}
+        onOpenChange={setCategoryConfigOpen}
+        onSave={(updatedCategory) => {
+          if (updatedCategory.id) {
+            setCategories(prev => prev.map(c => c.id === updatedCategory.id ? { ...c, ...updatedCategory } : c));
+          } else {
+            const newCategory = { ...updatedCategory, id: categories.length > 0 ? Math.max(...categories.map(c => c.id)) + 1 : 1 };
+            setCategories(prev => [...prev, newCategory]);
+          }
+          setCategoryConfigOpen(false);
+          toast({
+            title: "Categoria salva",
+            description: `Categoria ${updatedCategory.title} foi salva com sucesso.`,
           });
         }}
       />
