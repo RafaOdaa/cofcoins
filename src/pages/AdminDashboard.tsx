@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useToast } from "@/hooks/use-toast";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { format } from 'date-fns';
-import { Activity, Award, BookOpen, CheckCircle, Edit, Gift, Home, Plus, Search, Settings, Star, Users, XCircle, ChevronUp, ChevronDown } from 'lucide-react';
+import { Activity, Award, BookOpen, CheckCircle, Edit, Gift, Home, Plus, Search, Settings, Star, Users, XCircle, ChevronUp, ChevronDown, Heart, Target, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Switch } from "@/components/ui/switch";
 import RecognitionDetailDialog, { Recognition } from "@/components/RecognitionDetailDialog";
@@ -17,6 +17,7 @@ import ConfirmationDialog from '@/components/ConfirmationDialog';
 import NewRecognitionDialog from '@/components/NewRecognitionDialog';
 import EditUserBalanceDialog from '@/components/EditUserBalanceDialog';
 import RewardConfigModal, { RewardItem } from '@/components/RewardConfigModal';
+import CategoryConfigModal, { CategoryItem } from '@/components/CategoryConfigModal';
 import { Tooltip as UITooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import EditUserDataDialog from '@/components/EditUserDataDialog';
 import RewardEvaluationDialog from '@/components/RewardEvaluationDialog';
@@ -478,6 +479,58 @@ const areas = [{
   name: "Operações"
 }];
 
+// Initial categories data
+const initialCategories: CategoryItem[] = [
+  {
+    id: 1,
+    title: "Fora da Caixa",
+    description: "Reconhecimento para soluções criativas e inovadoras que fogem do convencional.",
+    icon: "Award",
+    areas: ["tech", "marketing", "product"],
+    active: true
+  },
+  {
+    id: 2,
+    title: "O Quebra Galho",
+    description: "Para quem sempre encontra uma solução rápida e eficaz para os problemas.",
+    icon: "Star",
+    areas: ["tech", "ops", "hr"],
+    active: true
+  },
+  {
+    id: 3,
+    title: "Aqui é MedCof!",
+    description: "Demonstração dos valores e cultura da empresa no dia a dia.",
+    icon: "Heart",
+    areas: ["tech", "marketing", "product", "hr", "sales", "finance", "ops"],
+    active: true
+  },
+  {
+    id: 4,
+    title: "Mestre do Improviso",
+    description: "Capacidade excepcional de adaptação e solução de problemas inesperados.",
+    icon: "Target",
+    areas: ["tech", "ops", "sales"],
+    active: true
+  },
+  {
+    id: 5,
+    title: "Segurador de Rojão",
+    description: "Para quem assume responsabilidades extras e resolve situações críticas.",
+    icon: "CheckCircle",
+    areas: ["tech", "ops", "hr", "finance"],
+    active: false
+  },
+  {
+    id: 6,
+    title: "O Vidente",
+    description: "Capacidade de antecipar problemas e propor soluções preventivas.",
+    icon: "Zap",
+    areas: ["tech", "product", "finance"],
+    active: true
+  }
+];
+
 type SortField = 'name' | 'department' | 'balance' | 'totalReceived' | 'totalSent';
 type SortOrder = 'asc' | 'desc';
 
@@ -485,11 +538,10 @@ type SortOrder = 'asc' | 'desc';
 type ApprovalSortField = 'reporter' | 'recipient' | 'category' | 'amount' | 'date';
 type RewardSortField = 'user' | 'title' | 'value' | 'status' | 'date';
 type HistorySortField = 'date' | 'admin' | 'recipient' | 'previousBalance' | 'newBalance' | 'difference';
+type CategorySortField = 'title' | 'description' | 'areas';
 
 const AdminDashboard = () => {
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
   const [selectedRecognition, setSelectedRecognition] = useState<Recognition | null>(null);
   const [isRecognitionDetailOpen, setIsRecognitionDetailOpen] = useState(false);
   const [isEditBalanceOpen, setIsEditBalanceOpen] = useState(false);
@@ -503,8 +555,17 @@ const AdminDashboard = () => {
   const [editingReward, setEditingReward] = useState<RewardItem | null>(null);
   const [rewardSearchTerm, setRewardSearchTerm] = useState("");
 
+  // State for category configuration
+  const [categories, setCategories] = useState<CategoryItem[]>(initialCategories);
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<CategoryItem | null>(null);
+  const [categorySearchTerm, setCategorySearchTerm] = useState("");
+
   // State for area filter (rewards)
   const [selectedAreas, setSelectedAreas] = useState<string[]>([]);
+
+  // State for category area filter
+  const [selectedCategoryAreas, setSelectedCategoryAreas] = useState<string[]>([]);
 
   // State for user area filter
   const [selectedUserAreas, setSelectedUserAreas] = useState<string[]>([]);
@@ -524,6 +585,10 @@ const AdminDashboard = () => {
   // State for history sorting
   const [historySortField, setHistorySortField] = useState<HistorySortField>('date');
   const [historySortOrder, setHistorySortOrder] = useState<SortOrder>('desc');
+
+  // State for category sorting
+  const [categorySortField, setCategorySortField] = useState<CategorySortField>('title');
+  const [categorySortOrder, setCategorySortOrder] = useState<SortOrder>('asc');
 
   // Estado para controle do diálogo de ação (aprovar/rejeitar)
   const [confirmDialog, setConfirmDialog] = useState<{
@@ -998,6 +1063,114 @@ const AdminDashboard = () => {
     }
   };
 
+  // Category handlers
+  const handleAddNewCategory = () => {
+    setEditingCategory(null);
+    setIsCategoryModalOpen(true);
+  };
+
+  const handleEditCategoryConfig = (category: CategoryItem) => {
+    setEditingCategory(category);
+    setIsCategoryModalOpen(true);
+  };
+
+  const handleSaveCategory = (category: CategoryItem) => {
+    if (editingCategory) {
+      setCategories(categories.map(c => c.id === category.id ? category : c));
+      toast({
+        title: "Categoria atualizada",
+        description: "A categoria foi atualizada com sucesso."
+      });
+    } else {
+      const newCategory = {
+        ...category,
+        id: Math.max(...categories.map(c => c.id)) + 1
+      };
+      setCategories([...categories, newCategory]);
+      toast({
+        title: "Categoria criada",
+        description: "A nova categoria foi criada com sucesso."
+      });
+    }
+    setIsCategoryModalOpen(false);
+    setEditingCategory(null);
+  };
+
+  const handleToggleCategoryStatus = (id: number, currentStatus: boolean) => {
+    setCategories(categories.map(category => 
+      category.id === id ? { ...category, active: !currentStatus } : category
+    ));
+    toast({
+      title: currentStatus ? "Categoria desativada" : "Categoria ativada",
+      description: `A categoria foi ${currentStatus ? 'desativada' : 'ativada'} com sucesso.`
+    });
+  };
+
+  // Filter categories based on search term and selected areas
+  const filteredCategories = categories.filter(category => {
+    const matchesSearch = category.title.toLowerCase().includes(categorySearchTerm.toLowerCase()) || 
+                         category.description.toLowerCase().includes(categorySearchTerm.toLowerCase());
+    const matchesArea = selectedCategoryAreas.length === 0 || 
+                       selectedCategoryAreas.some(selectedArea => category.areas.includes(selectedArea));
+    return matchesSearch && matchesArea;
+  });
+
+  // Sort categories
+  const sortedCategories = [...filteredCategories].sort((a, b) => {
+    let aValue: string | number;
+    let bValue: string | number;
+
+    switch (categorySortField) {
+      case 'title':
+        aValue = a.title;
+        bValue = b.title;
+        break;
+      case 'description':
+        aValue = a.description;
+        bValue = b.description;
+        break;
+      case 'areas':
+        aValue = a.areas.length;
+        bValue = b.areas.length;
+        break;
+      default:
+        aValue = a.title;
+        bValue = b.title;
+    }
+
+    if (typeof aValue === 'string' && typeof bValue === 'string') {
+      return categorySortOrder === 'asc' 
+        ? aValue.localeCompare(bValue)
+        : bValue.localeCompare(aValue);
+    } else {
+      return categorySortOrder === 'asc' 
+        ? (aValue as number) - (bValue as number)
+        : (bValue as number) - (aValue as number);
+    }
+  });
+
+  // Handler for category area filter
+  const handleCategoryAreaToggle = (areaId: string) => {
+    setSelectedCategoryAreas(prev => 
+      prev.includes(areaId) ? prev.filter(id => id !== areaId) : [...prev, areaId]
+    );
+  };
+
+  // Clear category area filters
+  const clearCategoryAreaFilters = () => {
+    setSelectedCategoryAreas([]);
+  };
+
+  // Handle sorting for categories
+  const handleCategorySort = (field: CategorySortField) => {
+    if (categorySortField === field) {
+      setCategorySortOrder(categorySortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setCategorySortField(field);
+      setCategorySortOrder('asc');
+    }
+  };
+
   // Render sort icon for users
   const renderSortIcon = (field: SortField) => {
     if (sortField !== field) return null;
@@ -1022,12 +1195,26 @@ const AdminDashboard = () => {
     return historySortOrder === 'asc' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />;
   };
 
+  // Render sort icon for categories
+  const renderCategorySortIcon = (field: CategorySortField) => {
+    if (categorySortField !== field) return null;
+    return categorySortOrder === 'asc' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />;
+  };
+
+  const getIconComponent = (iconName: string) => {
+    const iconMap: { [key: string]: React.ComponentType<any> } = {
+      Award, Star, CheckCircle, Users, BookOpen, Activity, Gift, Heart, Target, Zap
+    };
+    return iconMap[iconName] || Award;
+  };
+
   // Contar estatísticas para os cards
   const approvedCount = recognitionHistory.filter(record => record.status === "aprovado").length;
   const rejectedCount = recognitionHistory.filter(record => record.status === "reprovado").length;
   const pendingCount = recognitionHistory.filter(record => record.status === "pendente").length;
   
-  return <div className="min-h-screen bg-gray-50">
+  return (
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -1083,6 +1270,9 @@ const AdminDashboard = () => {
             </TabsTrigger>
             <TabsTrigger value="rewardsConfig" className="px-3">
               Configurar Recompensas
+            </TabsTrigger>
+            <TabsTrigger value="categoriesConfig" className="px-3">
+              Configurar Categorias
             </TabsTrigger>
             <TabsTrigger value="ranking" className="px-3">
               Ranking
@@ -1462,6 +1652,162 @@ const AdminDashboard = () => {
             </Card>
           </TabsContent>
           
+          {/* Categories Configuration Tab */}
+          <TabsContent value="categoriesConfig">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Configuração de Categorias</CardTitle>
+                <Button onClick={handleAddNewCategory} className="bg-cofcoin-purple hover:bg-cofcoin-purple-dark">
+                  <Plus className="h-4 w-4 mr-1" />
+                  Nova Categoria
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <div className="flex gap-4 mb-4">
+                  <div className="relative flex-1 max-w-sm">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Input 
+                      placeholder="Buscar categoria..." 
+                      className="pl-10" 
+                      value={categorySearchTerm} 
+                      onChange={e => setCategorySearchTerm(e.target.value)} 
+                    />
+                  </div>
+                  
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" className="min-w-[200px] justify-start">
+                        <Settings className="h-4 w-4 mr-2" />
+                        {selectedCategoryAreas.length > 0 ? `${selectedCategoryAreas.length} área(s) selecionada(s)` : "Filtrar por áreas"}
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56 bg-white">
+                      {areas.map(area => (
+                        <DropdownMenuCheckboxItem 
+                          key={area.id} 
+                          checked={selectedCategoryAreas.includes(area.id)} 
+                          onCheckedChange={() => handleCategoryAreaToggle(area.id)}
+                        >
+                          {area.name}
+                        </DropdownMenuCheckboxItem>
+                      ))}
+                      {selectedCategoryAreas.length > 0 && (
+                        <>
+                          <div className="h-px bg-gray-200 my-1" />
+                          <DropdownMenuCheckboxItem 
+                            checked={false} 
+                            onCheckedChange={clearCategoryAreaFilters} 
+                            className="text-red-600"
+                          >
+                            Limpar filtros
+                          </DropdownMenuCheckboxItem>
+                        </>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+                
+                <TooltipProvider>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Ícone</TableHead>
+                        <TableHead 
+                          className="cursor-pointer select-none hover:bg-gray-50"
+                          onClick={() => handleCategorySort('title')}
+                        >
+                          <div className="flex items-center">
+                            Título
+                            {renderCategorySortIcon('title')}
+                          </div>
+                        </TableHead>
+                        <TableHead 
+                          className="cursor-pointer select-none hover:bg-gray-50"
+                          onClick={() => handleCategorySort('description')}
+                        >
+                          <div className="flex items-center">
+                            Descrição
+                            {renderCategorySortIcon('description')}
+                          </div>
+                        </TableHead>
+                        <TableHead 
+                          className="cursor-pointer select-none hover:bg-gray-50"
+                          onClick={() => handleCategorySort('areas')}
+                        >
+                          <div className="flex items-center">
+                            Áreas
+                            {renderCategorySortIcon('areas')}
+                          </div>
+                        </TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Ações</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {sortedCategories.map(category => {
+                        const IconComponent = getIconComponent(category.icon);
+                        return (
+                          <TableRow key={category.id}>
+                            <TableCell>
+                              <IconComponent className="h-5 w-5 text-cofcoin-purple" />
+                            </TableCell>
+                            <TableCell>
+                              <UITooltip>
+                                <TooltipTrigger asChild>
+                                  <span className="cursor-help">{category.title}</span>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>{category.title}</p>
+                                </TooltipContent>
+                              </UITooltip>
+                            </TableCell>
+                            <TableCell>
+                              <UITooltip>
+                                <TooltipTrigger asChild>
+                                  <span className="cursor-help truncate max-w-[300px] inline-block">
+                                    {category.description}
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>{category.description}</p>
+                                </TooltipContent>
+                              </UITooltip>
+                            </TableCell>
+                            <TableCell>
+                              <UITooltip>
+                                <TooltipTrigger asChild>
+                                  <span className="cursor-help truncate max-w-[150px] inline-block">
+                                    {getAreaNames(category.areas)}
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>{getAreaNames(category.areas)}</p>
+                                </TooltipContent>
+                              </UITooltip>
+                            </TableCell>
+                            <TableCell>
+                              <Switch 
+                                checked={category.active} 
+                                onCheckedChange={() => handleToggleCategoryStatus(category.id, category.active)} 
+                                className="data-[state=checked]:bg-cofcoin-purple" 
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <Button variant="ghost" size="sm" onClick={() => handleEditCategoryConfig(category)}>
+                                <Edit className="h-4 w-4 mr-1" />
+                                Editar
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </TooltipProvider>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
           {/* Ranking Tab */}
           <TabsContent value="ranking" className="space-y-4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -1777,6 +2123,15 @@ const AdminDashboard = () => {
       <RewardConfigModal open={isRewardModalOpen} onOpenChange={setIsRewardModalOpen} onSave={handleSaveReward} editingReward={editingReward} />
 
       <EditUserDataDialog open={isEditUserDataOpen} onOpenChange={setIsEditUserDataOpen} user={selectedUser} onSave={handleUserDataEditComplete} />
-    </div>;
+
+      <CategoryConfigModal 
+        open={isCategoryModalOpen} 
+        onOpenChange={setIsCategoryModalOpen} 
+        onSave={handleSaveCategory} 
+        editingCategory={editingCategory} 
+      />
+    </div>
+  );
 };
+
 export default AdminDashboard;
